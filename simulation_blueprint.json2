@@ -1,8 +1,8 @@
 {
   "nodes_blueprint": {
-    "node_count": "10",
-    "node_prefix": "Node",
-    "node_ui_width": "70",
+    "node_count": "6",
+    "node_prefix": "node",
+    "node_ui_width": "100",
     "node_ui_height": "50"
   },
   "frame_blueprint": {
