@@ -80,6 +80,7 @@ public abstract class jicnsNode {
      */
 
     public abstract void onAddedToCache();
+
     /***
      * A node implementable function
      * It symbolizes what to do by the server when new data is added into the cache?
@@ -89,6 +90,7 @@ public abstract class jicnsNode {
      */
 
     public abstract void onRemovedFromCache();
+
     /***
      * A node implementable function
      * It symbolizes what to do by the server when new data is removed into the cache?
@@ -106,18 +108,22 @@ public abstract class jicnsNode {
      * It symbolizes what to do by the server when new data is eggressed
      * Some Implementable ideas:
      *      Since my previous nodes dont have acess to this data, should i tell my immidite lower nodes to cahce it if he has good cache size left
-     *      Decide which direction to pass info. return the answer? or forward request?
+     *      Decide which direction to pass info. return the answer? or forward request? any other strategy?
+     *      Decide if to broadcast next paretnts? or send one by one? or any other strategy?
+     *      whom to forward? shall I decide based on latency? shall I decide on Hops? or battery consumption? or more strategy?
      */
 
     /**
      * What to do when data is recving from the node who knows the data
      */
     public abstract void onRespIncomingData();
+
     public abstract void onRespOutGoingData();
 
     public void onCacheHit() {
         hits++;
     }
+
     /**
      * What to do when cacheHitHappens?
      */
