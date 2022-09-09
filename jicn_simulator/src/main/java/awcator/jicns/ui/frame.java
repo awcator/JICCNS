@@ -1,5 +1,7 @@
 package awcator.jicns.ui;
 
+import awcator.jicns.alg.SimpleNode;
+import awcator.jicns.alg.jicnsNodeImpl;
 import awcator.jicns.meta;
 import org.json.JSONObject;
 
@@ -19,6 +21,7 @@ public class frame extends JFrame implements ActionListener {
     public static RightPanel rightpanel;
     //Nodes
     private static JButton[] nodes;
+    private static jicnsNodeImpl[] jicnsnodes;
     JButton reset; //reset Button
     JButton randomize_nodes; //node positons randomizer
     JTextField searchNodes;// A simple textbox to search nodes in UI
@@ -90,14 +93,26 @@ public class frame extends JFrame implements ActionListener {
         int node_count = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_count"));
         int node_UI_width = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_ui_width"));
         int node_UI_height = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_ui_height"));
-        if (!reset_ui_positons) nodes = new JButton[node_count];
+        if (!reset_ui_positons) {
+            nodes = new JButton[node_count];
+            jicnsnodes = new jicnsNodeImpl[node_count];
+        }
         dragListener mia = null;
         if (!reset_ui_positons) mia = new dragListener(centerpanel);
         popupMenu menu = new popupMenu();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
-            if (!reset_ui_positons)
-                nodes[i] = new JButton(jsondata.getJSONObject("nodes_blueprint").get("node_prefix") + "" + i);
+            if (!reset_ui_positons) {
+                String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
+                nodes[i] = new JButton(prefix + i);
+                if (jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
+                    // TODO: 9/9/22
+                } else {
+                    int egressSize=jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
+                    jicnsnodes[i] = new SimpleNode(i,egressSize);
+                    System.out.println();
+                }
+            }
             nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 100), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
             if (!reset_ui_positons) centerpanel.add(nodes[i]);
             if (!reset_ui_positons) {
@@ -113,7 +128,6 @@ public class frame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         try {
-            System.out.println("adssadsda");
             if (actionEvent.getSource() == searchNodes) {
                 String x = searchNodes.getText();
                 System.out.println("Searching " + x);

@@ -1,8 +1,7 @@
 package awcator.jicns.alg;
 
-public abstract interface jicnsNodeImpl {
-
-
+public abstract class jicnsNodeImpl {
+    public int egress[][];
     public abstract void onIncomingReqData();
 
     /***

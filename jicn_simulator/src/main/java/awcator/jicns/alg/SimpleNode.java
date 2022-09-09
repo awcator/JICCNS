@@ -2,7 +2,7 @@ package awcator.jicns.alg;
 
 import javax.swing.*;
 
-public class SimpleNode extends JButton implements jicnsNodeImpl {
+public class SimpleNode extends jicnsNodeImpl {
     /**
      * Number of times data existed in cache.
      * DummyImplementation: if(data.exisitIN(cache)) then hits++
@@ -43,7 +43,12 @@ public class SimpleNode extends JButton implements jicnsNodeImpl {
      * In Reality: This will the superfast access memory type which is RAM.
      */
     String[] cacheMemory = new String[cacheMemorySize];
+    int id = 0;
 
+    public SimpleNode(int nodeid,int egressSize) {
+        id = nodeid;
+        egress=new int[egressSize][1];
+    }
 
     @Override
     public void onIncomingReqData() {
@@ -88,6 +93,7 @@ public class SimpleNode extends JButton implements jicnsNodeImpl {
     @Override
     public void onCacheHit() {
         hits = hits + 1;
+        System.out.println("fcuk youcxcxzcx");
     }
 
     @Override
