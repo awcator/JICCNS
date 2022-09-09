@@ -15,14 +15,13 @@ import java.util.Random;
 public class frame extends JFrame implements ActionListener {
     //Current higligheted Node by the user
     public static int NODE_POSITION = 0;
-    JButton reset; //reset Button
-    JButton randomize_nodes; //node positons randomizer
     public static JPanel centerPanel;
     public static RightPanel rightpanel;
-
-    JTextField searchNodes;// A simple textbox to search nodes in UI
     //Nodes
-    private static JButton nodes[];
+    private static JButton[] nodes;
+    JButton reset; //reset Button
+    JButton randomize_nodes; //node positons randomizer
+    JTextField searchNodes;// A simple textbox to search nodes in UI
 
     public frame() {
 
@@ -58,7 +57,7 @@ public class frame extends JFrame implements ActionListener {
         southpanel.add(randomize_nodes);
         southpanel.add(searchNodes);
         southpanel.setBackground(Color.darkGray);
-        add(southpanel, bl.SOUTH);
+        add(southpanel, BorderLayout.SOUTH);
 
         /**
          * SetUP CenterPanel: Nodes UI
@@ -66,69 +65,21 @@ public class frame extends JFrame implements ActionListener {
          */
         centerPanel = new freePanel();
         centerPanel.setLayout(null);
-        this.loadNodesUI(centerPanel, getWidth(), getHeight(), false);
-        add(centerPanel, bl.CENTER);
+        loadNodesUI(centerPanel, getWidth(), getHeight(), false);
+        add(centerPanel, BorderLayout.CENTER);
 
         /**
          * SetUP Right Panel: Node Proeprteis
          *
          */
         rightpanel = new RightPanel();
-        add(rightpanel, bl.EAST);
+        add(rightpanel, BorderLayout.EAST);
         /**
          * Back to Main frame container UI
          */
         setVisible(true);
         //SystemExit on frame close
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    }
-
-    @Override
-    public void actionPerformed(ActionEvent actionEvent) {
-        try {
-            System.out.println("adssadsda");
-            if (actionEvent.getSource() == searchNodes) {
-                String x = searchNodes.getText();
-                System.out.println("Searching " + x);
-                Component component[] = centerPanel.getComponents();
-                for (Component comp : component) {
-                    if (comp.getClass().equals(JButton.class)) {
-                        JButton but = (JButton) comp;
-                        if (comp.getName().toLowerCase().contains(x.toLowerCase()) || comp.toString().toLowerCase().contains(x.toLowerCase())) {
-                            comp.setBackground(Color.RED);
-                            Timer blinkTimer = new Timer(500, new ActionListener() {
-                                private int count = 0;
-                                private int maxCount = 4;
-                                private boolean on = false;
-
-                                public void actionPerformed(ActionEvent e) {
-                                    if (count >= maxCount) {
-                                        comp.setBackground(new JButton().getBackground());
-                                        ((Timer) e.getSource()).stop();
-                                    } else {
-                                        comp.setBackground(on ? Color.YELLOW : Color.RED);
-                                        on = !on;
-                                        count++;
-                                    }
-                                }
-                            });
-                            blinkTimer.start();
-                        }
-                    }
-                }
-            }
-            if (actionEvent.getSource() == reset) {
-                System.out.println("Reset button clicked");
-                // TODO: 9/9/22
-            }
-            if (actionEvent.getSource() == randomize_nodes) {
-                System.out.println("Randomzing the nodes");
-                loadNodesUI(centerPanel, getWidth(), getHeight(), true);
-                // TODO: 9/9/22
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private static void loadNodesUI(JPanel centerpanel, int SCREEN_WIDTH, int SCREEN_HEIGHT, boolean reset_ui_positons) {
@@ -159,37 +110,51 @@ public class frame extends JFrame implements ActionListener {
         System.out.println("\tDone");
     }
 
-    class freePanel extends JPanel {
-        public boolean showLines = true;
+    @Override
+    public void actionPerformed(ActionEvent actionEvent) {
+        try {
+            System.out.println("adssadsda");
+            if (actionEvent.getSource() == searchNodes) {
+                String x = searchNodes.getText();
+                System.out.println("Searching " + x);
+                Component[] component = centerPanel.getComponents();
+                for (Component comp : component) {
+                    if (comp.getClass().equals(JButton.class)) {
+                        JButton but = (JButton) comp;
+                        if (comp.getName().toLowerCase().contains(x.toLowerCase()) || comp.toString().toLowerCase().contains(x.toLowerCase())) {
+                            comp.setBackground(Color.RED);
+                            Timer blinkTimer = new Timer(500, new ActionListener() {
+                                private final int maxCount = 4;
+                                private int count = 0;
+                                private boolean on = false;
 
-        public freePanel() {
-            setBackground(Color.white);
-        }
-
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            Graphics2D g2 = (Graphics2D) g;
-            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-                    RenderingHints.VALUE_ANTIALIAS_ON);
-            if (showLines)
-                drawConnectors(g2);
-        }
-
-        private void drawConnectors(Graphics2D g2) {
-            Rectangle r1, r2;
-            double x1, y1, x2, y2;
-            Component[] c = getComponents();
-            for (int i = 0; i < c.length; i++) {
-                r1 = c[i].getBounds();
-                x1 = r1.getCenterX();
-                y1 = r1.getCenterY();
-                for (int j = i + 1; j < c.length; j++) {
-                    r2 = c[j].getBounds();
-                    x2 = r2.getCenterX();
-                    y2 = r2.getCenterY();
-                    g2.draw(new Line2D.Double(x1, y1, x2, y2));
+                                public void actionPerformed(ActionEvent e) {
+                                    if (count >= maxCount) {
+                                        comp.setBackground(new JButton().getBackground());
+                                        ((Timer) e.getSource()).stop();
+                                    } else {
+                                        comp.setBackground(on ? Color.YELLOW : Color.RED);
+                                        on = !on;
+                                        count++;
+                                    }
+                                }
+                            });
+                            blinkTimer.start();
+                        }
+                    }
                 }
             }
+            if (actionEvent.getSource() == reset) {
+                System.out.println("Reset button clicked");
+                // TODO: 9/9/22
+            }
+            if (actionEvent.getSource() == randomize_nodes) {
+                System.out.println("Randomzing the nodes");
+                loadNodesUI(centerPanel, getWidth(), getHeight(), true);
+                // TODO: 9/9/22
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -234,8 +199,8 @@ public class frame extends JFrame implements ActionListener {
         public void actionPerformed(ActionEvent actionEvent) {
             JPopupMenu jp = (JPopupMenu) ((JMenuItem) actionEvent.getSource()).getParent();
             JButton node = (JButton) jp.getInvoker();
-            NODE_POSITION=Integer.parseInt(node.getName());
-            frame.rightpanel.applayChanges();
+            NODE_POSITION = Integer.parseInt(node.getName());
+            RightPanel.applayChanges();
             System.out.println("Presed " + node.getName() + " " + node.getText() + " ");
             // TODO: 9/9/22
         }
@@ -258,6 +223,61 @@ public class frame extends JFrame implements ActionListener {
         public static void applayChanges() {
             title.setText(Integer.toString(NODE_POSITION));
             // TODO: 9/9/22
+        }
+    }
+
+    class freePanel extends JPanel {
+        public boolean showLines = true;
+
+        public freePanel() {
+            setBackground(Color.white);
+        }
+
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            if (showLines) drawConnectors(g2);
+        }
+
+        private void drawConnectors(Graphics2D g2) {
+            Rectangle r1, r2;
+            double x1, y1, x2, y2;
+            Component[] c = getComponents();
+            for (int i = 0; i < c.length; i++) {
+                r1 = c[i].getBounds();
+                x1 = r1.getCenterX();
+                y1 = r1.getCenterY();
+                for (int j = 0; j < c.length; j++) {
+                    if (j == i) continue;
+                    r2 = c[j].getBounds();
+                    x2 = r2.getCenterX();
+                    y2 = r2.getCenterY();
+                    g2.draw(new Line2D.Double(x1, y1, x2, y2));
+                    drawArrow(g2, (int) x1, (int) y1, (int) (x2 + x1) / 2, (int) (y2 + y1) / 2, 20, 20);
+                }
+            }
+        }
+
+        private void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2, int d, int h) {
+            int dx = x2 - x1, dy = y2 - y1;
+            double D = Math.sqrt(dx * dx + dy * dy);
+            double xm = D - d, xn = xm, ym = h, yn = -h, x;
+            double sin = dy / D, cos = dx / D;
+
+            x = xm * cos - ym * sin + x1;
+            ym = xm * sin + ym * cos + y1;
+            xm = x;
+
+            x = xn * cos - yn * sin + x1;
+            yn = xn * sin + yn * cos + y1;
+            xn = x;
+
+            int[] xpoints = {x2, (int) xm, (int) xn};
+            int[] ypoints = {y2, (int) ym, (int) yn};
+
+            //g.drawLine(x1, y1, x2, y2);
+            g.fillPolygon(xpoints, ypoints, 3);
         }
     }
 }

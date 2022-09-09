@@ -1,49 +1,7 @@
 package awcator.jicns.alg;
 
-public abstract class jicnsNode {
-    public int powerConsumption = 0;
-    /**
-     * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
-     * PowerConsumption completely depends on IO operations/CPU cycle
-     */
+public abstract interface jicnsNodeImpl {
 
-    public int hits = 0;
-    /**
-     * Number of times data existed in cache.
-     * DummyImplementation: if(data.exisitIN(cache)) then hits++
-     */
-
-    public int misses = 0; //Number of times data wsnt exsisted in cache
-    /**
-     * Number of times data were not existed in cache.
-     * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
-     */
-
-    public int LocalMemorySize = 100;
-    /**
-     * Number of items node can keep in its memory
-     * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
-     */
-
-    public int cacheMemorySize = 10;
-    /**
-     * Number of cahcable items node can keep in its memory
-     * A rule to keep data or to remove data
-     * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
-     */
-
-    String localMemory[] = new String[LocalMemorySize];
-    /**
-     * This varible contains NodeServer's localMemory contents
-     * In Reality: This represent Nodes HardDisk
-     */
-
-    String cacheMemory[] = new String[cacheMemorySize];
-
-    /***
-     * This varible contains NodeServer's InMemory cache contents
-     * In Reality: This will the superfast access memory type which is RAM.
-     */
 
     public abstract void onIncomingReqData();
 
@@ -55,7 +13,7 @@ public abstract class jicnsNode {
      *      I own this Data, Should I have to make any change to Cahce? By thinking of improtance in future
      */
 
-    public abstract void cacheLookUp();
+    abstract public void cacheLookUp();
 
     /***
      * A node implementable function
@@ -120,17 +78,13 @@ public abstract class jicnsNode {
 
     public abstract void onRespOutGoingData();
 
-    public void onCacheHit() {
-        hits++;
-    }
+    abstract public void onCacheHit();
 
     /**
      * What to do when cacheHitHappens?
      */
 
-    public void onCacheMiss() {
-        misses++;
-    }
+    abstract public void onCacheMiss();
     /**
      * What to do when Cache MissHappens?
      */
