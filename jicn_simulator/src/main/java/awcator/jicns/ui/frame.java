@@ -13,9 +13,12 @@ import java.awt.geom.Line2D;
 import java.util.Random;
 
 public class frame extends JFrame implements ActionListener {
+    //Current higligheted Node by the user
+    public static int NODE_POSITION = 0;
     JButton reset; //reset Button
     JButton randomize_nodes; //node positons randomizer
     public static JPanel centerPanel;
+    public static RightPanel rightpanel;
 
     JTextField searchNodes;// A simple textbox to search nodes in UI
     //Nodes
@@ -67,6 +70,12 @@ public class frame extends JFrame implements ActionListener {
         add(centerPanel, bl.CENTER);
 
         /**
+         * SetUP Right Panel: Node Proeprteis
+         *
+         */
+        rightpanel = new RightPanel();
+        add(rightpanel, bl.EAST);
+        /**
          * Back to Main frame container UI
          */
         setVisible(true);
@@ -77,7 +86,6 @@ public class frame extends JFrame implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
         try {
-
             System.out.println("adssadsda");
             if (actionEvent.getSource() == searchNodes) {
                 String x = searchNodes.getText();
@@ -98,7 +106,7 @@ public class frame extends JFrame implements ActionListener {
                                         comp.setBackground(new JButton().getBackground());
                                         ((Timer) e.getSource()).stop();
                                     } else {
-                                        comp.setBackground( on ? Color.YELLOW : Color.RED);
+                                        comp.setBackground(on ? Color.YELLOW : Color.RED);
                                         on = !on;
                                         count++;
                                     }
@@ -118,8 +126,7 @@ public class frame extends JFrame implements ActionListener {
                 loadNodesUI(centerPanel, getWidth(), getHeight(), true);
                 // TODO: 9/9/22
             }
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -135,7 +142,7 @@ public class frame extends JFrame implements ActionListener {
         if (!reset_ui_positons) nodes = new JButton[node_count];
         dragListener mia = null;
         if (!reset_ui_positons) mia = new dragListener(centerpanel);
-        popupMenu menu=new popupMenu();
+        popupMenu menu = new popupMenu();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons)
@@ -200,6 +207,7 @@ public class frame extends JFrame implements ActionListener {
             Window window = SwingUtilities.windowForComponent(me.getComponent());
             location = window.getLocation();
             System.out.println("Pressed");
+
         }
 
         public void mouseDragged(MouseEvent me) {
@@ -213,22 +221,43 @@ public class frame extends JFrame implements ActionListener {
             mypanel.repaint();
         }
     }
-    static  class popupMenu extends JPopupMenu implements ActionListener{
-        public popupMenu(){
+
+    static class popupMenu extends JPopupMenu implements ActionListener {
+        public popupMenu() {
             setName("Fuck");
-            JMenuItem nodeProperties=new JMenuItem("Show NodeProperties");
+            JMenuItem nodeProperties = new JMenuItem("Show NodeProperties");
             add(nodeProperties);
             add(new JSeparator());
             add(nodeProperties);
             nodeProperties.addActionListener(this);
         }
+
         @Override
         public void actionPerformed(ActionEvent actionEvent) {
-            JPopupMenu jp=(JPopupMenu)((JMenuItem)actionEvent.getSource()).getParent();
-            JButton node=(JButton)jp.getInvoker();
-
-            System.out.println("Presed "+node.getName()+ " "+ node.getText()+" ");
+            JPopupMenu jp = (JPopupMenu) ((JMenuItem) actionEvent.getSource()).getParent();
+            JButton node = (JButton) jp.getInvoker();
+            NODE_POSITION=Integer.parseInt(node.getName());
+            frame.rightpanel.applayChanges();
+            System.out.println("Presed " + node.getName() + " " + node.getText() + " ");
             // TODO: 9/9/22
+        }
+    }
+
+    static class RightPanel extends JPanel {
+        static JLabel title;
+        static JButton apply;
+
+        public RightPanel() {
+            GridLayout layout = new GridLayout(3, 1);
+            setLayout(layout);
+            title = new JLabel();
+            add(title);
+            add(new JLabel("Asd"));
+            add(new JButton("xcz"));
+        }
+
+        public static void applayChanges() {
+            title.setText(Integer.toString(NODE_POSITION));
         }
     }
 }
