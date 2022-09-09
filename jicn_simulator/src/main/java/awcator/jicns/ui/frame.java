@@ -16,6 +16,8 @@ public class frame extends JFrame implements ActionListener {
     JButton reset; //reset Button
     JButton randomize_nodes; //node positons randomizer
     public static JPanel centerPanel;
+
+    JTextField searchNodes;// A simple textbox to search nodes in UI
     //Nodes
     private static JButton nodes[];
 
@@ -45,9 +47,13 @@ public class frame extends JFrame implements ActionListener {
          * set size of 10% height and width as parent
          */
         JPanel southpanel = new JPanel();
-        southpanel.setSize(getWidth(), (int) screenSize.getHeight() / 20);
+
+        searchNodes = new JTextField("search Nodes");
+        searchNodes.addActionListener(this);
+        southpanel.setPreferredSize(new Dimension(getWidth(), (int) screenSize.getHeight() / 20));
         southpanel.add(reset);
         southpanel.add(randomize_nodes);
+        southpanel.add(searchNodes);
         southpanel.setBackground(Color.darkGray);
         add(southpanel, bl.SOUTH);
 
@@ -55,7 +61,7 @@ public class frame extends JFrame implements ActionListener {
          * SetUP CenterPanel: Nodes UI
          * Force the panel to free layout
          */
-        JPanel centerPanel = new freePanel();
+        centerPanel = new freePanel();
         centerPanel.setLayout(null);
         this.loadNodesUI(centerPanel, getWidth(), getHeight(), false);
         add(centerPanel, bl.CENTER);
@@ -70,14 +76,51 @@ public class frame extends JFrame implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent actionEvent) {
-        if (actionEvent.getSource() == reset) {
-            System.out.println("Reset button clicked");
-            // TODO: 9/9/22
+        try {
+
+            System.out.println("adssadsda");
+            if (actionEvent.getSource() == searchNodes) {
+                String x = searchNodes.getText();
+                System.out.println("Searching " + x);
+                Component component[] = centerPanel.getComponents();
+                for (Component comp : component) {
+                    if (comp.getClass().equals(JButton.class)) {
+                        JButton but = (JButton) comp;
+                        if (comp.getName().toLowerCase().contains(x.toLowerCase()) || comp.toString().toLowerCase().contains(x.toLowerCase())) {
+                            comp.setBackground(Color.RED);
+                            Timer blinkTimer = new Timer(500, new ActionListener() {
+                                private int count = 0;
+                                private int maxCount = 4;
+                                private boolean on = false;
+
+                                public void actionPerformed(ActionEvent e) {
+                                    if (count >= maxCount) {
+                                        comp.setBackground(new JButton().getBackground());
+                                        ((Timer) e.getSource()).stop();
+                                    } else {
+                                        comp.setBackground( on ? Color.YELLOW : Color.RED);
+                                        on = !on;
+                                        count++;
+                                    }
+                                }
+                            });
+                            blinkTimer.start();
+                        }
+                    }
+                }
+            }
+            if (actionEvent.getSource() == reset) {
+                System.out.println("Reset button clicked");
+                // TODO: 9/9/22
+            }
+            if (actionEvent.getSource() == randomize_nodes) {
+                System.out.println("Randomzing the nodes");
+                loadNodesUI(centerPanel, getWidth(), getHeight(), true);
+                // TODO: 9/9/22
+            }
         }
-        if (actionEvent.getSource() == randomize_nodes) {
-            System.out.println("Randomzing the nodes");
-            loadNodesUI(centerPanel, getWidth(), getHeight(), true);
-            // TODO: 9/9/22
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 
@@ -92,7 +135,7 @@ public class frame extends JFrame implements ActionListener {
         if (!reset_ui_positons) nodes = new JButton[node_count];
         dragListener mia = null;
         if (!reset_ui_positons) mia = new dragListener(centerpanel);
-
+        popupMenu menu=new popupMenu();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons)
@@ -102,6 +145,8 @@ public class frame extends JFrame implements ActionListener {
             if (!reset_ui_positons) {
                 nodes[i].addMouseListener(mia);
                 nodes[i].addMouseMotionListener(mia);
+                nodes[i].setComponentPopupMenu(menu);
+                nodes[i].setName(Integer.toString(i));
             }
         }
         System.out.println("\tDone");
@@ -112,7 +157,6 @@ public class frame extends JFrame implements ActionListener {
 
         public freePanel() {
             setBackground(Color.white);
-
         }
 
         protected void paintComponent(Graphics g) {
@@ -155,10 +199,11 @@ public class frame extends JFrame implements ActionListener {
             pressed = me.getLocationOnScreen();
             Window window = SwingUtilities.windowForComponent(me.getComponent());
             location = window.getLocation();
+            System.out.println("Pressed");
         }
 
         public void mouseDragged(MouseEvent me) {
-            System.out.println("Dragiingin");
+
             Point dragged = me.getLocationOnScreen();
             /**
              * int x = (int)(location.x + dragged.getX() - pressed.getX());
@@ -166,6 +211,24 @@ public class frame extends JFrame implements ActionListener {
              */
             me.getComponent().setLocation((int) dragged.getX(), (int) dragged.getY());
             mypanel.repaint();
+        }
+    }
+    static  class popupMenu extends JPopupMenu implements ActionListener{
+        public popupMenu(){
+            setName("Fuck");
+            JMenuItem nodeProperties=new JMenuItem("Show NodeProperties");
+            add(nodeProperties);
+            add(new JSeparator());
+            add(nodeProperties);
+            nodeProperties.addActionListener(this);
+        }
+        @Override
+        public void actionPerformed(ActionEvent actionEvent) {
+            JPopupMenu jp=(JPopupMenu)((JMenuItem)actionEvent.getSource()).getParent();
+            JButton node=(JButton)jp.getInvoker();
+
+            System.out.println("Presed "+node.getName()+ " "+ node.getText()+" ");
+            // TODO: 9/9/22
         }
     }
 }
