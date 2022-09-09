@@ -207,7 +207,6 @@ public class frame extends JFrame implements ActionListener {
             Window window = SwingUtilities.windowForComponent(me.getComponent());
             location = window.getLocation();
             System.out.println("Pressed");
-
         }
 
         public void mouseDragged(MouseEvent me) {
@@ -224,7 +223,6 @@ public class frame extends JFrame implements ActionListener {
 
     static class popupMenu extends JPopupMenu implements ActionListener {
         public popupMenu() {
-            setName("Fuck");
             JMenuItem nodeProperties = new JMenuItem("Show NodeProperties");
             add(nodeProperties);
             add(new JSeparator());
@@ -254,10 +252,12 @@ public class frame extends JFrame implements ActionListener {
             add(title);
             add(new JLabel("Asd"));
             add(new JButton("xcz"));
+            // TODO: 9/9/22
         }
 
         public static void applayChanges() {
             title.setText(Integer.toString(NODE_POSITION));
+            // TODO: 9/9/22
         }
     }
 }
