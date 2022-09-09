@@ -1,7 +1,5 @@
 package awcator.jicns.alg;
 
-import javax.swing.*;
-
 public class SimpleNode extends jicnsNodeImpl {
     /**
      * Number of times data existed in cache.
@@ -45,9 +43,9 @@ public class SimpleNode extends jicnsNodeImpl {
     String[] cacheMemory = new String[cacheMemorySize];
     int id = 0;
 
-    public SimpleNode(int nodeid,int egressSize) {
+    public SimpleNode(int nodeid, int egressSize) {
         id = nodeid;
-        egress=new int[egressSize][1];
+        egress = new int[egressSize][2];
     }
 
     @Override

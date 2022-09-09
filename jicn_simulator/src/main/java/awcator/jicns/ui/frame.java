@@ -12,6 +12,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.util.Iterator;
 import java.util.Random;
 
 public class frame extends JFrame implements ActionListener {
@@ -20,7 +21,7 @@ public class frame extends JFrame implements ActionListener {
     public static JPanel centerPanel;
     public static RightPanel rightpanel;
     //Nodes
-    private static JButton[] nodes;
+    private static NodeUI[] nodes;
     private static jicnsNodeImpl[] jicnsnodes;
     JButton reset; //reset Button
     JButton randomize_nodes; //node positons randomizer
@@ -85,7 +86,7 @@ public class frame extends JFrame implements ActionListener {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
-    private static void loadNodesUI(JPanel centerpanel, int SCREEN_WIDTH, int SCREEN_HEIGHT, boolean reset_ui_positons) {
+    private void loadNodesUI(JPanel centerpanel, int SCREEN_WIDTH, int SCREEN_HEIGHT, boolean reset_ui_positons) {
         if (reset_ui_positons) System.out.println("ReLoading Nodes UI");
         else System.out.println("Loading Nodes UI");
 
@@ -94,7 +95,7 @@ public class frame extends JFrame implements ActionListener {
         int node_UI_width = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_ui_width"));
         int node_UI_height = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_ui_height"));
         if (!reset_ui_positons) {
-            nodes = new JButton[node_count];
+            nodes = new NodeUI[node_count];
             jicnsnodes = new jicnsNodeImpl[node_count];
         }
         dragListener mia = null;
@@ -104,13 +105,23 @@ public class frame extends JFrame implements ActionListener {
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons) {
                 String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
-                nodes[i] = new JButton(prefix + i);
+
                 if (jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
-                    int egressSize=jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
-                    jicnsnodes[i] = new SimpleNode(i,egressSize);
-                    System.out.println();
+                    int egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
+                    jicnsnodes[i] = new SimpleNode(i, egressSize);
+
+                    int k = 0;
+                    for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
+                        String str = it.next();
+                        int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
+                        jicnsnodes[i].egress[k][0] = Integer.parseInt(str.replace(prefix, ""));
+                        jicnsnodes[i].egress[k][1] = latency;
+
+                        k++;
+                    }
+                    nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
                 }
             }
             nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 100), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
@@ -133,8 +144,8 @@ public class frame extends JFrame implements ActionListener {
                 System.out.println("Searching " + x);
                 Component[] component = centerPanel.getComponents();
                 for (Component comp : component) {
-                    if (comp.getClass().equals(JButton.class)) {
-                        JButton but = (JButton) comp;
+                    if (comp.getClass().equals(NodeUI.class)) {
+                        NodeUI but = (NodeUI) comp;
                         if (comp.getName().toLowerCase().contains(x.toLowerCase()) || comp.toString().toLowerCase().contains(x.toLowerCase())) {
                             comp.setBackground(Color.RED);
                             Timer blinkTimer = new Timer(500, new ActionListener() {
@@ -185,7 +196,6 @@ public class frame extends JFrame implements ActionListener {
             pressed = me.getLocationOnScreen();
             Window window = SwingUtilities.windowForComponent(me.getComponent());
             location = window.getLocation();
-            System.out.println("Pressed");
         }
 
         public void mouseDragged(MouseEvent me) {
@@ -257,14 +267,14 @@ public class frame extends JFrame implements ActionListener {
         private void drawConnectors(Graphics2D g2) {
             Rectangle r1, r2;
             double x1, y1, x2, y2;
-            Component[] c = getComponents();
+            //Component[] c = getComponents();
+            NodeUI[] c = nodes;
             for (int i = 0; i < c.length; i++) {
                 r1 = c[i].getBounds();
                 x1 = r1.getCenterX();
                 y1 = r1.getCenterY();
-                for (int j = 0; j < c.length; j++) {
-                    if (j == i) continue;
-                    r2 = c[j].getBounds();
+                for (int j = 0; j < c[i].jicnsNode.egress.length; j++) {
+                    r2 = c[c[i].jicnsNode.egress[j][0]].getBounds();
                     x2 = r2.getCenterX();
                     y2 = r2.getCenterY();
                     g2.draw(new Line2D.Double(x1, y1, x2, y2));
@@ -292,6 +302,15 @@ public class frame extends JFrame implements ActionListener {
 
             //g.drawLine(x1, y1, x2, y2);
             g.fillPolygon(xpoints, ypoints, 3);
+        }
+    }
+
+    class NodeUI extends JButton {
+        jicnsNodeImpl jicnsNode;
+
+        public NodeUI(String x, jicnsNodeImpl jicnsNode) {
+            this.jicnsNode = jicnsNode;
+            setText(x);
         }
     }
 }
