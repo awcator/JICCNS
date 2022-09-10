@@ -283,8 +283,6 @@ public class frame extends JFrame implements ActionListener {
             JButton node = (JButton) jp.getInvoker();
             NODE_POSITION = Integer.parseInt(node.getName());
             RightPanel.applayChanges();
-            System.out.println("Presed " + node.getName() + " " + node.getText() + " ");
-            // TODO: 9/9/22
         }
     }
 
@@ -325,8 +323,6 @@ public class frame extends JFrame implements ActionListener {
             add(scrollPane2);
             add(new JButton("dsada"));
             add(scrollPane1);
-            //setPreferredSize(new Dimension(frame.getWidth()/4,getHeight()));
-            // TODO: 9/9/22
         }
 
         public static void applayChanges() {
@@ -352,7 +348,6 @@ public class frame extends JFrame implements ActionListener {
             System.gc();
             x = null;
             System.gc();
-            // TODO: 9/9/22
         }
     }
 
