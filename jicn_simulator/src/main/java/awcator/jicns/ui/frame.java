@@ -78,6 +78,7 @@ public class frame extends JFrame implements ActionListener {
          */
         rightpanel = new RightPanel();
         add(rightpanel, BorderLayout.EAST);
+
         /**
          * Back to Main frame container UI
          */
@@ -105,21 +106,32 @@ public class frame extends JFrame implements ActionListener {
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons) {
                 String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
-
-                if (jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
+                System.out.println(jsondata.isNull(prefix + i));
+                if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
-                    int egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
+                    int egressSize=0;
+                    if(jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")){
+                        System.out.println("Found no egres etry for "+prefix+i);
+                        egressSize=0;
+                    }
+                    else{
+                        egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
+                    }
                     jicnsnodes[i] = new SimpleNode(i, egressSize);
+                    if(jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")){
 
-                    int k = 0;
-                    for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
-                        String str = it.next();
-                        int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
-                        jicnsnodes[i].egress[k][0] = Integer.parseInt(str.replace(prefix, ""));
-                        jicnsnodes[i].egress[k][1] = latency;
+                    }
+                    else {
+                        int k = 0;
+                        for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
+                            String str = it.next();
+                            int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
+                            jicnsnodes[i].egress[k][0] = Integer.parseInt(str.replace(prefix, ""));
+                            jicnsnodes[i].egress[k][1] = latency;
 
-                        k++;
+                            k++;
+                        }
                     }
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
                 }
