@@ -1,11 +1,17 @@
 package awcator.jicns.alg;
 
 public abstract class jicnsNodeImpl {
+    /**
+     * Egress rules:
+     * egress[4][0]=5 implies, there exist a 4th route from curennt node to node5
+     * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
+     */
     public int[][] egress;
 
     /**
      * Number of items node can keep in its memory
      * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
+     * Override if requrred to set appropirate size
      */
     public int LocalMemorySize = 100;
 

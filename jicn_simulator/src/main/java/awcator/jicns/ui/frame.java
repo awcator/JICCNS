@@ -143,6 +143,13 @@ public class frame extends JFrame implements ActionListener {
                     if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
                         jicnsnodes[i].LocalMemorySize=Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
                     }
+                    /**
+                     * Load up node memory from blueprint if specified
+                     */
+                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("payload")){
+
+                    }
+
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
                 }
             }
@@ -170,6 +177,9 @@ public class frame extends JFrame implements ActionListener {
                         NodeUI but = (NodeUI) comp;
                         if (comp.getName().toLowerCase().contains(x.toLowerCase()) || comp.toString().toLowerCase().contains(x.toLowerCase())) {
                             comp.setBackground(Color.RED);
+                            /**
+                             * Timer search animation to blink buttons
+                             */
                             Timer blinkTimer = new Timer(500, new ActionListener() {
                                 private final int maxCount = 4;
                                 private int count = 0;
@@ -177,6 +187,9 @@ public class frame extends JFrame implements ActionListener {
 
                                 public void actionPerformed(ActionEvent e) {
                                     if (count >= maxCount) {
+                                        /**
+                                         * After animation completes stop timer and setback buttons default background
+                                         */
                                         comp.setBackground(new JButton().getBackground());
                                         ((Timer) e.getSource()).stop();
                                     } else {
