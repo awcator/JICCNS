@@ -10,8 +10,8 @@
     "height": "2000"
   },
   "node0": {
-    "max_cache_size": "10",
-    "max_payload_size": "100",
+    "max_cache_size": "5",
+    "max_payload_size": "10",
     "payload": {
       "temprature_at_bangalore": "25c",
       "pm": "modi",
@@ -28,8 +28,8 @@
     }
   },
   "node1": {
-    "max_cache_size": "10",
-    "max_payload_size": "100",
+    "max_cache_size": "4",
+    "max_payload_size": "10",
     "type": "simplenode",
     "egress": {
       "node4": "2ms"

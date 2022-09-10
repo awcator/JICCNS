@@ -2,6 +2,23 @@ package awcator.jicns.alg;
 
 public abstract class jicnsNodeImpl {
     /**
+     * Number of times data existed in cache.
+     * DummyImplementation: if(data.exisitIN(cache)) then hits++
+     */
+    public static int hits = 0;
+    /**
+     * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
+     * PowerConsumption completely depends on IO operations/CPU cycle
+     */
+    public float powerConsumption = 0;
+    /**
+     * Number of times data were not existed in cache.
+     * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
+     */
+    public int misses = 0;
+
+
+    /**
      * Egress rules:
      * egress[4][0]=5 implies, there exist a 4th route from curennt node to node5
      * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
@@ -13,7 +30,7 @@ public abstract class jicnsNodeImpl {
      * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
      * Override if requrred to set appropirate size
      */
-    public int LocalMemorySize = 100;
+    public int LocalPayloadSize = 100;
 
     /**
      * Number of cahcable items node can keep in its memory
@@ -21,6 +38,7 @@ public abstract class jicnsNodeImpl {
      * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
      */
     public int cacheMemorySize = 10;
+
     public abstract void onIncomingReqData();
 
     /***
@@ -103,7 +121,26 @@ public abstract class jicnsNodeImpl {
      */
 
     abstract public void onCacheMiss();
+
     /**
      * What to do when Cache MissHappens?
      */
+    abstract public void addToPayloadMemory(String key, String value);
+
+    abstract public void allocatePayloadMemorySize();
+
+    abstract public int getMaxLocalPayloadSize();
+
+    abstract public void changePowerConsumptionBy(float changeBy);
+
+    abstract public String[][] getPayloadContents();
+
+    abstract public void addToCacheMemory(String key, String value);
+
+    abstract public void allocateCacheMemorySize();
+
+    abstract public int getMaxLocaCacheSize();
+
+    abstract public String[][] getCacheContents();
+
 }

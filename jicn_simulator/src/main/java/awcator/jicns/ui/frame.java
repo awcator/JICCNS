@@ -7,6 +7,7 @@ import org.json.JSONObject;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
+import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -109,22 +110,20 @@ public class frame extends JFrame implements ActionListener {
                 if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
-                    int egressSize=0;
-                    if(jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")){
-                        System.out.println("Found no egres etry for "+prefix+i);
-                        egressSize=0;
-                    }
-                    else{
+                    int egressSize = 0;
+                    if (jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")) {
+                        System.out.println("Found no egres etry for " + prefix + i);
+                        egressSize = 0;
+                    } else {
                         egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
                     }
                     jicnsnodes[i] = new SimpleNode(i, egressSize);
                     /**
                      * Egress Rules
                      */
-                    if(jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")){
+                    if (jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")) {
                         // TODO: 9/10/22
-                    }
-                    else {
+                    } else {
                         int k = 0;
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
                             String str = it.next();
@@ -137,23 +136,43 @@ public class frame extends JFrame implements ActionListener {
                     /**
                      * node memory settings
                      */
-                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_cache_size")) {
-                        jicnsnodes[i].cacheMemorySize=Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
+                    if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_cache_size")) {
+                        jicnsnodes[i].cacheMemorySize = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
+                        jicnsnodes[i].allocateCacheMemorySize();
+                    } else {
+                        //allocate default size
+                        jicnsnodes[i].allocateCacheMemorySize();
                     }
-                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
-                        jicnsnodes[i].LocalMemorySize=Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
+                    if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
+                        jicnsnodes[i].LocalPayloadSize = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
+                        jicnsnodes[i].allocatePayloadMemorySize();
+                    } else {
+                        //allocate default size
+                        jicnsnodes[i].allocatePayloadMemorySize();
                     }
                     /**
                      * Load up node memory from blueprint if specified
                      */
-                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("payload")){
-
+                    if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("payload")) {
+                        for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("payload").keys(); it.hasNext(); ) {
+                            String str = it.next();
+                            jicnsnodes[i].addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str));
+                        }
                     }
-
+                    /**
+                     * Load up node cachememory from blueprint if specified
+                     */
+                    if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("cached")) {
+                        for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("cached").keys(); it.hasNext(); ) {
+                            String str = it.next();
+                            System.out.println(str + " <-----This entry should be added to cache");
+                            jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str));
+                        }
+                    }
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
                 }
             }
-            nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 100), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
+            nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
             if (!reset_ui_positons) centerpanel.add(nodes[i]);
             if (!reset_ui_positons) {
                 nodes[i].addMouseListener(mia);
@@ -272,19 +291,67 @@ public class frame extends JFrame implements ActionListener {
     static class RightPanel extends JPanel {
         static JLabel title;
         static JButton apply;
+        static JTable table, table2;
+        static DefaultTableModel payloadTableModel;
+        static DefaultTableModel cacheTableModel;
 
         public RightPanel() {
-            GridLayout layout = new GridLayout(3, 1);
+            GridLayout layout = new GridLayout(2, 2);
             setLayout(layout);
             title = new JLabel();
+            payloadTableModel = new DefaultTableModel();
+            payloadTableModel.addColumn("#");
+            payloadTableModel.addColumn("Key");
+            payloadTableModel.addColumn("value");
+            payloadTableModel.addRow(new String[]{"This is", "Payload", "contents"});
+
+            cacheTableModel = new DefaultTableModel();
+            cacheTableModel.addColumn("#");
+            cacheTableModel.addColumn("Key");
+            cacheTableModel.addColumn("value");
+            cacheTableModel.addRow(new String[]{"This is", "Cached", "contents"});
+
+            table = new JTable(payloadTableModel);
+            table2 = new JTable(cacheTableModel);
+
+            table.getTableHeader().setBackground(new JButton().getBackground());
+            table2.getTableHeader().setBackground(new JButton().getBackground());
+
+            JScrollPane scrollPane1 = new JScrollPane(table);
+            JScrollPane scrollPane2 = new JScrollPane(table2);
+            scrollPane1.setPreferredSize(new Dimension(150, 200));
+            scrollPane2.setPreferredSize(new Dimension(150, 200));
             add(title);
-            add(new JLabel("Asd"));
-            add(new JButton("xcz"));
+            add(scrollPane2);
+            add(new JButton("dsada"));
+            add(scrollPane1);
+            //setPreferredSize(new Dimension(frame.getWidth()/4,getHeight()));
             // TODO: 9/9/22
         }
 
         public static void applayChanges() {
             title.setText(Integer.toString(NODE_POSITION));
+            payloadTableModel.setRowCount(0);
+
+            String[][] x = jicnsnodes[NODE_POSITION].getPayloadContents();
+            if (x != null) {
+                for (int i = 0; i < x.length; i++) {
+                    payloadTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
+                }
+            }
+
+            cacheTableModel.setRowCount(0);
+
+            x = jicnsnodes[NODE_POSITION].getCacheContents();
+            if (x != null) {
+                for (int i = 0; i < x.length; i++) {
+                    cacheTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
+                }
+            }
+
+            System.gc();
+            x = null;
+            System.gc();
             // TODO: 9/9/22
         }
     }

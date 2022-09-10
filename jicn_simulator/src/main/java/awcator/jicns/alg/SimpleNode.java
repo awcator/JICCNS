@@ -1,35 +1,27 @@
 package awcator.jicns.alg;
 
+import java.util.Arrays;
+
+/**
+ * Node Summary:
+ * Payload Storage type: Arrays[][]
+ * Payload add type: Linear additon to array
+ */
+
 public class SimpleNode extends jicnsNodeImpl {
-    /**
-     * Number of times data existed in cache.
-     * DummyImplementation: if(data.exisitIN(cache)) then hits++
-     */
-    public static int hits = 0;
-    /**
-     * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
-     * PowerConsumption completely depends on IO operations/CPU cycle
-     */
-    public int powerConsumption = 0;
-    /**
-     * Number of times data were not existed in cache.
-     * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
-     */
-    public int misses = 0;
-
-
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
      */
-    String[] localMemory = new String[LocalMemorySize];
-
+    String[][] localMemory;
     /***
      * This varible contains NodeServer's InMemory cache contents
      * In Reality: This will the superfast access memory type which is RAM.
      */
-    String[] cacheMemory = new String[cacheMemorySize];
+    String[][] cacheMemory;
     int id = 0;
+    private int localMemory_seekPointer = 0;
+    private int localcache_seekPointer = 0;
 
     public SimpleNode(int nodeid, int egressSize) {
         id = nodeid;
@@ -87,7 +79,55 @@ public class SimpleNode extends jicnsNodeImpl {
         misses = misses + 1;
     }
 
-    public void loadNodeFromBluePrint() {
+    @Override
+    public void addToPayloadMemory(String key, String value) {
+        localMemory[localMemory_seekPointer][0] = key;
+        localMemory[localMemory_seekPointer][1] = value;
+        localMemory_seekPointer++;
+        changePowerConsumptionBy(1);
+    }
 
+    @Override
+    public void allocatePayloadMemorySize() {
+        localMemory = new String[getMaxLocalPayloadSize()][2];
+    }
+
+    @Override
+    public int getMaxLocalPayloadSize() {
+        return LocalPayloadSize;
+    }
+
+    @Override
+    public void changePowerConsumptionBy(float changeBy) {
+        powerConsumption += changeBy;
+    }
+
+    @Override
+    public String[][] getPayloadContents() {
+        return (localMemory == null) ? null : Arrays.copyOfRange(localMemory, 0, localMemory_seekPointer);
+    }
+
+    @Override
+    public void addToCacheMemory(String key, String value) {
+        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocaCacheSize());
+        cacheMemory[localcache_seekPointer][0] = key;
+        cacheMemory[localcache_seekPointer][1] = value;
+        localcache_seekPointer++;
+        changePowerConsumptionBy(1);
+    }
+
+    @Override
+    public void allocateCacheMemorySize() {
+        cacheMemory = new String[getMaxLocaCacheSize()][2];
+    }
+
+    @Override
+    public int getMaxLocaCacheSize() {
+        return cacheMemorySize;
+    }
+
+    @Override
+    public String[][] getCacheContents() {
+        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, localcache_seekPointer);
     }
 }
