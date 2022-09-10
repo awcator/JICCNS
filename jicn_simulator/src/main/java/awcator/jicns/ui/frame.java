@@ -106,7 +106,6 @@ public class frame extends JFrame implements ActionListener {
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons) {
                 String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
-                System.out.println(jsondata.isNull(prefix + i));
                 if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
@@ -119,8 +118,11 @@ public class frame extends JFrame implements ActionListener {
                         egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
                     }
                     jicnsnodes[i] = new SimpleNode(i, egressSize);
+                    /**
+                     * Egress Rules
+                     */
                     if(jsondata.isNull(prefix + i) || jsondata.getJSONObject(prefix + i).isNull("egress")){
-
+                        // TODO: 9/10/22
                     }
                     else {
                         int k = 0;
@@ -129,9 +131,17 @@ public class frame extends JFrame implements ActionListener {
                             int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
                             jicnsnodes[i].egress[k][0] = Integer.parseInt(str.replace(prefix, ""));
                             jicnsnodes[i].egress[k][1] = latency;
-
                             k++;
                         }
+                    }
+                    /**
+                     * node memory settings
+                     */
+                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_cache_size")) {
+                        jicnsnodes[i].cacheMemorySize=Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
+                    }
+                    if(!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
+                        jicnsnodes[i].LocalMemorySize=Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
                     }
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
                 }
@@ -219,6 +229,10 @@ public class frame extends JFrame implements ActionListener {
              */
             me.getComponent().setLocation((int) dragged.getX(), (int) dragged.getY());
             mypanel.repaint();
+            /**
+             * // TODO: 9/10/22
+             * More speedup animation can be done by animating only focused nodes arrows
+             */
         }
     }
 

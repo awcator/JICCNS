@@ -17,18 +17,6 @@ public class SimpleNode extends jicnsNodeImpl {
      */
     public int misses = 0;
 
-    /**
-     * Number of items node can keep in its memory
-     * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
-     */
-    public int LocalMemorySize = 100;
-
-    /**
-     * Number of cahcable items node can keep in its memory
-     * A rule to keep data or to remove data
-     * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
-     */
-    public int cacheMemorySize = 10;
 
     /**
      * This varible contains NodeServer's localMemory contents
