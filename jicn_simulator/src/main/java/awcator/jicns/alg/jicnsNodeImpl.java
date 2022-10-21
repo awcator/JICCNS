@@ -143,4 +143,17 @@ public abstract class jicnsNodeImpl {
 
     abstract public String[][] getCacheContents();
 
+    /**
+     * It checks if node B is neibhour of current node
+     * @param nodeNumber This is the ID of node B
+     * @return true if Node B is immidiate neibhour of A/curernt Node. else false
+     */
+    abstract public boolean isMyNeibhour(int nodeNumber);
+
+    /**
+     * It returns latency required to reach node B from current node if path exsist
+     * @param nodeNumber This is the ID of node B
+     * @return int in ms if Node B is immidiate neibhour of A/curernt Node. else -1 indicating no latency info because path dsnt exsit
+     */
+    abstract public int getMsToReachNode(int nodeNumber);
 }

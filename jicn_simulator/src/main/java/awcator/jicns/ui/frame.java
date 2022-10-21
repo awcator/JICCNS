@@ -13,8 +13,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.util.Comparator;
 import java.util.Iterator;
+import java.util.PriorityQueue;
 import java.util.Random;
+
+import static java.lang.Thread.sleep;
 
 public class frame extends JFrame implements ActionListener {
     //Current higligheted Node by the user
@@ -25,6 +29,7 @@ public class frame extends JFrame implements ActionListener {
     private static NodeUI[] nodes;
     private static jicnsNodeImpl[] jicnsnodes;
     JButton reset; //reset Button
+    JButton broadCastTo;//Dummy button for testing broadcasting
     JButton randomize_nodes; //node positons randomizer
     JTextField searchNodes;// A simple textbox to search nodes in UI
 
@@ -41,9 +46,11 @@ public class frame extends JFrame implements ActionListener {
         //load up buttons
         reset = new JButton("reset");
         randomize_nodes = new JButton("randomize_nodes");
+        broadCastTo = new JButton("broadCastTo to Destination");
 
         reset.addActionListener(this);
         randomize_nodes.addActionListener(this);
+        broadCastTo.addActionListener(this);
 
         //Borderlayout to place buttons
         BorderLayout bl = new BorderLayout();
@@ -61,6 +68,7 @@ public class frame extends JFrame implements ActionListener {
         southpanel.add(reset);
         southpanel.add(randomize_nodes);
         southpanel.add(searchNodes);
+        southpanel.add(broadCastTo);
         southpanel.setBackground(Color.darkGray);
         add(southpanel, BorderLayout.SOUTH);
 
@@ -86,6 +94,11 @@ public class frame extends JFrame implements ActionListener {
         setVisible(true);
         //SystemExit on frame close
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    public static Color getRandomColor() {
+        Random r = new Random();
+        return new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
     }
 
     private void loadNodesUI(JPanel centerpanel, int SCREEN_WIDTH, int SCREEN_HEIGHT, boolean reset_ui_positons) {
@@ -230,7 +243,69 @@ public class frame extends JFrame implements ActionListener {
             if (actionEvent.getSource() == randomize_nodes) {
                 System.out.println("Randomzing the nodes");
                 loadNodesUI(centerPanel, getWidth(), getHeight(), true);
-                // TODO: 9/9/22
+            }
+
+            if (actionEvent.getSource() == broadCastTo) {
+                //((freePanel) centerPanel).drawLineBetween(Color.RED, 3, 5);
+
+
+                //((freePanel)centerPanel).showLines=false;
+                //((freePanel)centerPanel).repaint();
+                System.out.println("Broadcasting from node 0 to 5");
+                path rootparent = new path("node3", 0, null, 3,getRandomColor()); //start from node4 with inital timeout of 4ms
+                class path_sorter implements Comparator<path> {
+                    @Override
+                    public int compare(path s1, path s2) {
+                        if (s1.ms > s2.ms) return 1;
+                        else if (s1.ms < s2.ms) return -1;
+                        return 0;
+                    }
+                }
+                PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
+                path temppath = rootparent;
+                pq.add(temppath);
+
+                int previous_ms=temppath.ms;
+                boolean expectNewMs=false;
+                boolean check_previous_ms=true;
+                while (!pq.isEmpty()) {
+                    //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
+                    //System.out.println("SiZE "+pq.size());
+
+                    temppath = pq.poll();
+                    if(check_previous_ms ){
+                        if(temppath.ms==previous_ms){
+                            //dontsleep
+                        }
+                        else {
+                            Thread.sleep(2000);
+                            System.out.println();
+                            previous_ms= temppath.ms;
+                        }
+                    }
+                    //prints time digaram
+                    System.out.println(temppath.ms + " " + temppath);
+                    int foucusedNode = temppath.focusedNode;
+                    if(temppath.parent!=null)
+                        ((freePanel)centerPanel).drawLineBetween(temppath.parent.pathColor,temppath.parent.focusedNode,foucusedNode);
+
+
+                    if (foucusedNode == 5) {
+                        System.out.print(" -----END---\n");
+                        continue;
+                    } else {
+                        for (int i = 0; i < nodes.length; i++) {
+                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)  && !temppath.pa.contains("node"+i)) {
+                                path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i,getRandomColor());
+                                pq.add(newpath);
+                            }
+                        }
+                    }
+                    if(check_previous_ms){
+                        previous_ms= temppath.ms;
+                    }
+                }
+
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -351,6 +426,28 @@ public class frame extends JFrame implements ActionListener {
         }
     }
 
+    static class path {
+        public String pa;
+        public path parent;
+        public int ms;
+        public int focusedNode = 0;
+
+        Color pathColor;
+
+        public path(String p, int mss, path par, int fc, Color c) {
+            pa = p;
+            ms = mss;
+            parent = par;
+            focusedNode = fc;
+            pathColor = c;
+        }
+
+        @Override
+        public String toString() {
+            return pa;
+        }
+    }
+
     class freePanel extends JPanel {
         public boolean showLines = true;
 
@@ -362,6 +459,7 @@ public class frame extends JFrame implements ActionListener {
             super.paintComponent(g);
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            //drawLineBetween(Color.RED,0,1);
             if (showLines) drawConnectors(g2);
         }
 
@@ -382,6 +480,57 @@ public class frame extends JFrame implements ActionListener {
                     drawArrow(g2, (int) x1, (int) y1, (int) (x2 + x1) / 2, (int) (y2 + y1) / 2, 20, 20);
                 }
             }
+        }
+
+        /**
+         * // TODO: 10/21/22  i hvae to remove this drawLine funcntion and make drawArraow fucntion dynamic with colors
+         *
+         * @param node1 Draw from node1
+         * @param node2 Draw to node 2
+         */
+        public void drawLineBetween(Color z, int node1, int node2) {
+            Graphics2D g2 = (Graphics2D) getGraphics();
+                        try {
+                            /**
+                             * // TODO: 10/21/22 SEND THIS THREAD inside brodcast functtion
+                             * // // TODO: 10/21/22  because its better to have single thread for all paths route. easy to handle.
+                             * 
+                             */
+                Thread rlMF = new Thread(new Runnable() {
+
+                    public void run() {
+                        double x1, y1, x2, y2;
+                        Rectangle r1 = nodes[node1].getBounds();
+                        Rectangle r2 = nodes[node2].getBounds();
+                        x1 = r1.getCenterX();
+                        y1 = r1.getCenterY();
+                        x2 = r2.getCenterX();
+                        y2 = r2.getCenterY();
+                        //g2.setPaintMode();
+
+                        //g2.draw(new Line2D.Double(x1, y1, x2, y2));
+                        double MaxX = x1 > x2 ? x1 : x2;
+                        double minX = x1 < x2 ? x1 : x2;
+                        try {
+                            for (int i = (int) minX; i <= MaxX; i = i + 10) {
+                                g2.setColor(z);
+                                g2.fillOval(i, (int) ((y2 - y1) / (x2 - x1) * (i - x1) + y1)-10, 20, 20);
+                                sleep(80);
+                                repaint();
+                            }
+                        }
+                        catch (Exception e){
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                rlMF.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //showLines=false;
+            //freePanel.this.repaint();
         }
 
         private void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2, int d, int h) {
@@ -415,3 +564,9 @@ public class frame extends JFrame implements ActionListener {
         }
     }
 }
+
+/**
+ * // TODO: 10/21/22 Need imporve animation speed by skipping unwanteed node animations if it is out of screen
+ * // Need to implement https://gist.github.com/cmcfarlen/7ca5cbb3f228c6996233
+ * // Time Based Frame animation for good animation speed
+ */

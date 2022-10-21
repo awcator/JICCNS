@@ -32,7 +32,8 @@
   "max_payload_size": "100",
   "type": "simplenode",
   "egress": {
-   "node4": "2ms"
+   "node4": "2ms",
+   "node5": "4ms"
   },
   "payload": {
    "pm": "modi",
