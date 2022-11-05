@@ -7,6 +7,7 @@ import java.util.Arrays;
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
  *
+ * CacheStrategy: Nope
  */
 
 public class SimpleNode extends jicnsNodeImpl {

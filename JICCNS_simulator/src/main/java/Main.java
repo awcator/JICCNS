@@ -23,14 +23,15 @@ public class Main {
 }
 /**
  * // TODO: 11/5/22  Features
- * Save Architecture and reload option
- * LRU NODE
- * MaxEgressAwareness Node
- * LinkedList cache/queue cache/hashmap cache
- * FX GUI for graphs generate
- * ML based apprchNode
- * Summary generator on throughput/hitsration and etc
- * Compartor with other type of nodes
+ * Broadcast reverse path ---PRIORITY HIGH
+ * Save Architecture and reload option ---PRIORITY LOWEST
+ * LRU NODE  PRIORITY Medium
+ * MaxEgressAwareness Node PRIORITY LOW
+ * LinkedList cache/queue cache/hashmap cache PRIORITY LOW
+ * FX GUI for graphs generate PRIORITY LOW
+ * ML based apprch Node PRIORITY HIGH
+ * Summary generator on throughput/hitsration and etc PRIORITY LOW
+ * Compartor with other type of nodes PRIORITY LOW
  *
  * __________________________________________________________________________
  *

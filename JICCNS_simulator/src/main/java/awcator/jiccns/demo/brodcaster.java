@@ -8,7 +8,6 @@ public class brodcaster {
      * This test program is itended to demonste the broadcasting messages
      */
 
-
     public static void main(String[] args)throws Exception {
         int[][] a = {
                 //{0,1, 2, 3, 4, 5}
