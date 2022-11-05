@@ -23,6 +23,7 @@ public class Main {
 }
 /**
  * // TODO: 11/5/22  Features
+ * Save Architecture and reload option
  * FX GUI for graphs generate
  * Summary generator on throughput/hitsration and etc
  * Compartor with other type of nodes
@@ -36,5 +37,7 @@ public class Main {
  *     c    Implimentation BUG: if data sent by A and B reaches at C at same time what should be done? curreny two broadcast msgs from c to node D (Inefficent)
  *     |
  *     D
+ *
+ *  Currently brodcast is happening from source node 3 to destiantion node 5 (HARDCODED) need to be fixed
  */
 

@@ -145,6 +145,7 @@ public abstract class jicnsNodeImpl {
 
     /**
      * It checks if node B is neibhour of current node
+     *
      * @param nodeNumber This is the ID of node B
      * @return true if Node B is immidiate neibhour of A/curernt Node. else false
      */
@@ -152,6 +153,7 @@ public abstract class jicnsNodeImpl {
 
     /**
      * It returns latency required to reach node B from current node if path exsist
+     *
      * @param nodeNumber This is the ID of node B
      * @return int in ms if Node B is immidiate neibhour of A/curernt Node. else -1 indicating no latency info because path dsnt exsit
      */
@@ -160,7 +162,15 @@ public abstract class jicnsNodeImpl {
     /**
      * if you want your route to pass through a node that was alredy visited return true; else false
      * suppose you are broadcasting from node A to z it passes through A->B->C now Assume C node has egress to node B. this is called cycle here.
+     *
      * @return true
      */
     abstract public boolean allowCycles();
+
+    /**
+     * This will return the Node ID of the particular node
+     *
+     * @return id
+     */
+    abstract public int getNodeID();
 }

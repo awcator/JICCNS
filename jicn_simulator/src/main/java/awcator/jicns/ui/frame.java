@@ -299,12 +299,14 @@ public class frame extends JFrame implements ActionListener {
                                             displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
                                             if (displayPath.currentDataPointY <= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
+                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
                                             }
                                         } else {
                                             displayPath.currentDataPointY += dataPointSpeed;
                                             displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
                                             if (displayPath.currentDataPointY >= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
+                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
                                             }
                                         }
                                     } else {
@@ -317,12 +319,14 @@ public class frame extends JFrame implements ActionListener {
                                             displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
                                             if (displayPath.currentDataPointX <= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
+                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
                                             }
                                         } else {
                                             displayPath.currentDataPointX += dataPointSpeed;
                                             displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
                                             if (displayPath.currentDataPointX >= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
+                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
                                             }
                                         }
                                     }
