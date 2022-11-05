@@ -24,6 +24,9 @@ public class Main {
 /**
  * // TODO: 11/5/22  Features
  * Save Architecture and reload option
+ * LRU NODE
+ * MaxEgressAwareness Node
+ * LinkedList cache/queue cache/hashmap cache
  * FX GUI for graphs generate
  * Summary generator on throughput/hitsration and etc
  * Compartor with other type of nodes
