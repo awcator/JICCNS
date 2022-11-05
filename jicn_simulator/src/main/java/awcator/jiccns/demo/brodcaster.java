@@ -1,4 +1,4 @@
-package awcator.jicns.demo;
+package awcator.jiccns.demo;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;

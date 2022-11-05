@@ -1,4 +1,4 @@
-package awcator.jicns.alg;
+package awcator.jiccns.alg;
 
 import java.util.Arrays;
 

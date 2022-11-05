@@ -1,8 +1,8 @@
-package awcator.jicns.ui;
+package awcator.jiccns.ui;
 
-import awcator.jicns.alg.SimpleNode;
-import awcator.jicns.alg.jicnsNodeImpl;
-import awcator.jicns.meta;
+import awcator.jiccns.alg.SimpleNode;
+import awcator.jiccns.alg.jicnsNodeImpl;
+import awcator.jiccns.meta;
 import org.json.JSONObject;
 
 import javax.swing.Timer;

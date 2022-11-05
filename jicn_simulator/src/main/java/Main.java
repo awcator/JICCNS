@@ -1,5 +1,5 @@
-import awcator.jicns.meta;
-import awcator.jicns.ui.frame;
+import awcator.jiccns.meta;
+import awcator.jiccns.ui.frame;
 
 public class Main {
     public static final String version = "JICNCS_202209";
