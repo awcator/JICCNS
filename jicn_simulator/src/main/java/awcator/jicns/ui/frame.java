@@ -265,8 +265,8 @@ public class frame extends JFrame implements ActionListener {
                                 sourceY = r1.getCenterY();
                                 destinationX = r2.getCenterX();
                                 destinationY = r2.getCenterY();
-                                double distance=Math.sqrt(Math.pow(destinationX-sourceX,2)+Math.pow(destinationY-sourceY,2));
-                                dataPointSpeed=distance/30;
+                                double distance = Math.sqrt(Math.pow(destinationX - sourceX, 2) + Math.pow(destinationY - sourceY, 2));
+                                dataPointSpeed = distance / 30;
                                 boolean moveInYdirection = false; //data point to move animation, if false datapoint to be moved in X diff
                                 double diffX = destinationX - sourceX;
                                 if (diffX == 0)
@@ -275,6 +275,11 @@ public class frame extends JFrame implements ActionListener {
                                 if (diffY == 0)
                                     diffY = 1;
                                 double slope = diffY / diffX;
+                                if (Math.abs(diffY) > Math.abs(diffX)) {
+                                    moveInYdirection = true;
+                                } else {
+                                    moveInYdirection = false;
+                                }
                                 //moveInYdirection = true;
                                 try {
                                     if (displayPath.currentDataPointX == -1 && displayPath.currentDataPointY == -1) { //default case . It symbolises data point is abouut to move from node to node
@@ -286,7 +291,7 @@ public class frame extends JFrame implements ActionListener {
                                     if (moveInYdirection) {
                                         // TODO: 11/5/22  Again this can be improved using single calcation without using many if loops.  
                                         //x=(y-y1)/m+x1
-                                        g2.fillOval((int) displayPath.currentDataPointX, (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY), 10, 10);
+                                        g2.fillOval((int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX), (int) displayPath.currentDataPointY, 10, 10);
                                         if (sourceY > destinationY) {
                                             displayPath.currentDataPointY -= dataPointSpeed;
                                             //dont recalc to speedUp animation
