@@ -1,2 +1,2 @@
-# JICN
-Java Information-centric networking Simulator
+# JICCNS
+Java Information-centric Cache Network Simulator
