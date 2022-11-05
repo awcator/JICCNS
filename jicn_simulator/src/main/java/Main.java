@@ -21,4 +21,22 @@ public class Main {
         frame app = new frame();
     }
 }
+/**
+ * // TODO: 11/5/22  Features
+ * FX GUI for graphs generate
+ * Summary generator on throughput/hitsration and etc
+ * Compartor with other type of nodes
+ *
+ * __________________________________________________________________________
+ *
+ *  // TODO: 11/5/22  KNOWN BUGS TO BE FIX
+ *  A------B--c Animation BUG: (datapacket from c reaches to B quicker in Aniamtion than A. They are suppoosed to same if they have same latency irrespective of physical distance) But data is procesed as if it reached in parllel.
+ *
+ *
+ *  A     B
+ *   \   /
+ *     c    Implimentation BUG: if data sent by A and B reaches at C at same time what should be done? curreny two broadcast msgs from c to node D (Inefficent)
+ *     |
+ *     D
+ */
 

@@ -249,6 +249,8 @@ public class frame extends JFrame implements ActionListener {
                 //((freePanel)centerPanel).repaint();
 
                 Thread rlMF = new Thread(new Runnable() {
+                    double dataPointSpeed = 40;
+
                     public void drawMultiDataPaths(java.util.List<path> pathsToDsiplayAtAtime, Graphics2D g2) throws Exception {
                         while (!pathsToDsiplayAtAtime.isEmpty()) {
                             //Incremnt all the nodes X axsis datapoint travel by 30 points and repaint the graphics after ploting
@@ -257,33 +259,76 @@ public class frame extends JFrame implements ActionListener {
                                 path displayPath = pathsToDsiplayAtAtime.get(i);
                                 double sourceX, sourceY, destinationX, destinationY;
 
-                                Rectangle r1 = nodes[displayPath.focusedNode].getBounds();
-                                Rectangle r2 = nodes[displayPath.parent.focusedNode].getBounds();
+                                Rectangle r1 = nodes[displayPath.parent.focusedNode].getBounds();
+                                Rectangle r2 = nodes[displayPath.focusedNode].getBounds();
                                 sourceX = r1.getCenterX();
                                 sourceY = r1.getCenterY();
                                 destinationX = r2.getCenterX();
                                 destinationY = r2.getCenterY();
-
-                                double MaxX = sourceX > destinationX ? sourceX : destinationX;
-                                double minX = sourceX < destinationX ? sourceX : destinationX;
+                                double distance=Math.sqrt(Math.pow(destinationX-sourceX,2)+Math.pow(destinationY-sourceY,2));
+                                dataPointSpeed=distance/30;
+                                boolean moveInYdirection = false; //data point to move animation, if false datapoint to be moved in X diff
+                                double diffX = destinationX - sourceX;
+                                if (diffX == 0)
+                                    diffX = 1; //just to avoid slope tending to infity, we will avoid inifiy error by teling there is gap of 1 unit space between two points
+                                double diffY = destinationY - sourceY;
+                                if (diffY == 0)
+                                    diffY = 1;
+                                double slope = diffY / diffX;
+                                //moveInYdirection = true;
                                 try {
-                                    if (displayPath.currentDataPointX == -1) {
-                                        displayPath.currentDataPointX = minX;
+                                    if (displayPath.currentDataPointX == -1 && displayPath.currentDataPointY == -1) { //default case . It symbolises data point is abouut to move from node to node
+                                        displayPath.currentDataPointX = sourceX; //so set datapoints animation location to source datapoint co-ordinates
+                                        displayPath.currentDataPointY = sourceY;
                                     }
                                     //for (int i = (int) minX; i <= MaxX; i = i + 30) {
                                     g2.setColor(displayPath.pathColor);
-                                    g2.fillOval((int) displayPath.currentDataPointX, (int) ((destinationY - sourceY) / (destinationX - sourceX) * (displayPath.currentDataPointX - sourceX) + sourceY) - 10, 10, 10);
-                                    //}
-                                    displayPath.currentDataPointX += 30;
-                                    if (displayPath.currentDataPointX >= MaxX) {
-                                        //data point reached destination so remove from animation loop
-                                        pathsToDsiplayAtAtime.remove(i);
+                                    if (moveInYdirection) {
+                                        // TODO: 11/5/22  Again this can be improved using single calcation without using many if loops.  
+                                        //x=(y-y1)/m+x1
+                                        g2.fillOval((int) displayPath.currentDataPointX, (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY), 10, 10);
+                                        if (sourceY > destinationY) {
+                                            displayPath.currentDataPointY -= dataPointSpeed;
+                                            //dont recalc to speedUp animation
+                                            // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
+                                            displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
+                                            if (displayPath.currentDataPointY <= destinationY) {
+                                                pathsToDsiplayAtAtime.remove(i);
+                                            }
+                                        } else {
+                                            displayPath.currentDataPointY += dataPointSpeed;
+                                            displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
+                                            if (displayPath.currentDataPointY >= destinationY) {
+                                                pathsToDsiplayAtAtime.remove(i);
+                                            }
+                                        }
+                                    } else {
+                                        //y=m(x-x1)+y1
+                                        g2.fillOval((int) displayPath.currentDataPointX, (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY), 10, 10);
+                                        if (sourceX > destinationX) {
+                                            displayPath.currentDataPointX -= dataPointSpeed;
+                                            //dont recalc to speedUp animation
+                                            // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
+                                            displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
+                                            if (displayPath.currentDataPointX <= destinationX) {
+                                                pathsToDsiplayAtAtime.remove(i);
+                                            }
+                                        } else {
+                                            displayPath.currentDataPointX += dataPointSpeed;
+                                            displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
+                                            if (displayPath.currentDataPointX >= destinationX) {
+                                                pathsToDsiplayAtAtime.remove(i);
+                                            }
+                                        }
                                     }
+                                    //}
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
                             }
-                            sleep(70);
+                            sleep(100);
+                            //keep traces? remove repaint line
+                            ((freePanel) centerPanel).repaint();
                         }
                     }
 
@@ -349,14 +394,11 @@ public class frame extends JFrame implements ActionListener {
                                 } else {
                                     for (int i = 0; i < nodes.length; i++) {
                                         if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
-                                            if(nodes[foucusedNode].jicnsNode.allowCycles()) {
-                                                System.out.println("Allowed");
+                                            if (nodes[foucusedNode].jicnsNode.allowCycles()) {
                                                 path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
                                                 pq.add(newpath);
-                                            }
-                                            else{
-                                                if(!temppath.pa.contains("node" + i)){
-                                                    System.out.println("NOTAllowed");
+                                            } else {
+                                                if (!temppath.pa.contains("node" + i)) {
                                                     path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
                                                     pq.add(newpath);
                                                 }
