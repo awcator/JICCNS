@@ -28,6 +28,7 @@ public class Main {
  * MaxEgressAwareness Node
  * LinkedList cache/queue cache/hashmap cache
  * FX GUI for graphs generate
+ * ML based apprchNode
  * Summary generator on throughput/hitsration and etc
  * Compartor with other type of nodes
  *
