@@ -30,8 +30,6 @@ public class Main {
  * __________________________________________________________________________
  *
  *  // TODO: 11/5/22  KNOWN BUGS TO BE FIX
- *  A------B--c Animation BUG: (datapacket from c reaches to B quicker in Aniamtion than A. They are suppoosed to same if they have same latency irrespective of physical distance) But data is procesed as if it reached in parllel.
- *
  *
  *  A     B
  *   \   /
