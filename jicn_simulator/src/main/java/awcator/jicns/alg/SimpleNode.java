@@ -133,18 +133,23 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public boolean isMyNeibhour(int nodeNumber) {
-        for(int i=0;i<egress.length;i++){
-            if(egress[i][0]==nodeNumber)return true;
+        for (int i = 0; i < egress.length; i++) {
+            if (egress[i][0] == nodeNumber) return true;
         }
         return false;
     }
 
     @Override
     public int getMsToReachNode(int nodeNumber) {
-        for(int i=0;i<egress.length;i++){
-            if(egress[i][0]==nodeNumber)return egress[i][1];
+        for (int i = 0; i < egress.length; i++) {
+            if (egress[i][0] == nodeNumber) return egress[i][1];
             // refer egress datastructre for more info , how values  are stored
         }
         return -1;
+    }
+
+    @Override
+    public boolean allowCycles() {
+        return false;
     }
 }

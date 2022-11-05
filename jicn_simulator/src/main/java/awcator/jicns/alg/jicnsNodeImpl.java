@@ -156,4 +156,11 @@ public abstract class jicnsNodeImpl {
      * @return int in ms if Node B is immidiate neibhour of A/curernt Node. else -1 indicating no latency info because path dsnt exsit
      */
     abstract public int getMsToReachNode(int nodeNumber);
+
+    /**
+     * if you want your route to pass through a node that was alredy visited return true; else false
+     * suppose you are broadcasting from node A to z it passes through A->B->C now Assume C node has egress to node B. this is called cycle here.
+     * @return true
+     */
+    abstract public boolean allowCycles();
 }

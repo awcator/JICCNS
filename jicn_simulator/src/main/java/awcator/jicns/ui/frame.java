@@ -5,6 +5,7 @@ import awcator.jicns.alg.jicnsNodeImpl;
 import awcator.jicns.meta;
 import org.json.JSONObject;
 
+import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import javax.swing.table.DefaultTableModel;
@@ -13,10 +14,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.PriorityQueue;
-import java.util.Random;
+import java.util.*;
 
 import static java.lang.Thread.sleep;
 
@@ -247,65 +245,148 @@ public class frame extends JFrame implements ActionListener {
 
             if (actionEvent.getSource() == broadCastTo) {
                 //((freePanel) centerPanel).drawLineBetween(Color.RED, 3, 5);
-
-
                 //((freePanel)centerPanel).showLines=false;
                 //((freePanel)centerPanel).repaint();
-                System.out.println("Broadcasting from node 0 to 5");
-                path rootparent = new path("node3", 0, null, 3,getRandomColor()); //start from node4 with inital timeout of 4ms
-                class path_sorter implements Comparator<path> {
-                    @Override
-                    public int compare(path s1, path s2) {
-                        if (s1.ms > s2.ms) return 1;
-                        else if (s1.ms < s2.ms) return -1;
-                        return 0;
-                    }
-                }
-                PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
-                path temppath = rootparent;
-                pq.add(temppath);
 
-                int previous_ms=temppath.ms;
-                boolean expectNewMs=false;
-                boolean check_previous_ms=true;
-                while (!pq.isEmpty()) {
-                    //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
-                    //System.out.println("SiZE "+pq.size());
+                Thread rlMF = new Thread(new Runnable() {
+                    public void drawMultiDataPaths(java.util.List<path> pathsToDsiplayAtAtime, Graphics2D g2) throws Exception {
+                        while (!pathsToDsiplayAtAtime.isEmpty()) {
+                            //Incremnt all the nodes X axsis datapoint travel by 30 points and repaint the graphics after ploting
+                            //and then remove the datapoint from storageMermory once it reaches destination
+                            for (int i = 0; i < pathsToDsiplayAtAtime.size(); i++) {
+                                path displayPath = pathsToDsiplayAtAtime.get(i);
+                                double sourceX, sourceY, destinationX, destinationY;
 
-                    temppath = pq.poll();
-                    if(check_previous_ms ){
-                        if(temppath.ms==previous_ms){
-                            //dontsleep
-                        }
-                        else {
-                            Thread.sleep(2000);
-                            System.out.println();
-                            previous_ms= temppath.ms;
-                        }
-                    }
-                    //prints time digaram
-                    System.out.println(temppath.ms + " " + temppath);
-                    int foucusedNode = temppath.focusedNode;
-                    if(temppath.parent!=null)
-                        ((freePanel)centerPanel).drawLineBetween(temppath.parent.pathColor,temppath.parent.focusedNode,foucusedNode);
+                                Rectangle r1 = nodes[displayPath.focusedNode].getBounds();
+                                Rectangle r2 = nodes[displayPath.parent.focusedNode].getBounds();
+                                sourceX = r1.getCenterX();
+                                sourceY = r1.getCenterY();
+                                destinationX = r2.getCenterX();
+                                destinationY = r2.getCenterY();
 
-
-                    if (foucusedNode == 5) {
-                        System.out.print(" -----END---\n");
-                        continue;
-                    } else {
-                        for (int i = 0; i < nodes.length; i++) {
-                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)  && !temppath.pa.contains("node"+i)) {
-                                path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i,getRandomColor());
-                                pq.add(newpath);
+                                double MaxX = sourceX > destinationX ? sourceX : destinationX;
+                                double minX = sourceX < destinationX ? sourceX : destinationX;
+                                try {
+                                    if (displayPath.currentDataPointX == -1) {
+                                        displayPath.currentDataPointX = minX;
+                                    }
+                                    //for (int i = (int) minX; i <= MaxX; i = i + 30) {
+                                    g2.setColor(displayPath.pathColor);
+                                    g2.fillOval((int) displayPath.currentDataPointX, (int) ((destinationY - sourceY) / (destinationX - sourceX) * (displayPath.currentDataPointX - sourceX) + sourceY) - 10, 10, 10);
+                                    //}
+                                    displayPath.currentDataPointX += 30;
+                                    if (displayPath.currentDataPointX >= MaxX) {
+                                        //data point reached destination so remove from animation loop
+                                        pathsToDsiplayAtAtime.remove(i);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
                             }
+                            sleep(70);
                         }
                     }
-                    if(check_previous_ms){
-                        previous_ms= temppath.ms;
-                    }
-                }
 
+                    public void run() {
+                        try {
+                            Graphics2D g2 = (Graphics2D) centerPanel.getGraphics();
+                            System.out.println("Broadcasting from node 3 to 5");
+                            path rootparent = new path("node3", 0, null, 3, getRandomColor()); //start from node4 with inital timeout of 4ms
+                            class path_sorter implements Comparator<path> {
+                                @Override
+                                public int compare(path s1, path s2) {
+                                    if (s1.ms > s2.ms) return 1;
+                                    else if (s1.ms < s2.ms) return -1;
+                                    return 0;
+                                }
+                            }
+                            PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
+                            path temppath = rootparent;
+                            pq.add(temppath);
+                            int previous_ms = temppath.ms;
+                            boolean expectNewMs = false;
+                            boolean check_previous_ms = true;
+                            java.util.List<path> pathsToDsiplayAtAtime = new ArrayList<path>();
+                            boolean drawAnime = false;
+                            boolean parallelPaths = false;
+                            while (!pq.isEmpty()) {
+                                //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
+                                //System.out.println("SiZE "+pq.size());
+                                temppath = pq.poll();
+                                //prints time digaram
+                                System.out.print("\n" + temppath.ms + " " + temppath);
+                                int foucusedNode = temppath.focusedNode;
+
+                                if (check_previous_ms) {
+                                    if (temppath.ms == previous_ms) {
+                                        //dontsleep
+                                        pathsToDsiplayAtAtime.add(temppath);
+                                        parallelPaths = true;
+                                    } else {
+                                        if (drawAnime && parallelPaths != false) {
+                                            //System.out.println("parallel> " + pathsToDsiplayAtAtime);
+                                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                                        } else if (drawAnime) {
+                                            //System.out.println("Single> " + pathsToDsiplayAtAtime);
+                                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                                        }
+                                        //Thread.sleep(0);
+                                        //((freePanel) centerPanel).repaint();
+                                        //System.out.println();
+                                        previous_ms = temppath.ms;
+                                        //Clear Parllel movemnts info array
+                                        // and add an path
+                                        //System.out.println(pathsToDsiplayAtAtime);
+                                        pathsToDsiplayAtAtime.clear();
+                                        pathsToDsiplayAtAtime.add(temppath);
+                                        drawAnime = true;
+                                        parallelPaths = false;
+                                    }
+                                }
+                                if (foucusedNode == 5) {
+                                    System.out.print("[END]");
+                                    continue;
+                                } else {
+                                    for (int i = 0; i < nodes.length; i++) {
+                                        if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
+                                            if(nodes[foucusedNode].jicnsNode.allowCycles()) {
+                                                System.out.println("Allowed");
+                                                path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
+                                                pq.add(newpath);
+                                            }
+                                            else{
+                                                if(!temppath.pa.contains("node" + i)){
+                                                    System.out.println("NOTAllowed");
+                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
+                                                    pq.add(newpath);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                if (check_previous_ms) {
+                                    previous_ms = temppath.ms;
+                                }
+                            }
+                            if (!pathsToDsiplayAtAtime.isEmpty()) {
+                                if (pathsToDsiplayAtAtime.size() >= 2) {
+                                    //System.out.println("parallel> " + pathsToDsiplayAtAtime);
+                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                                    pathsToDsiplayAtAtime.clear();
+                                } else {
+                                    //System.out.println("Single> " + pathsToDsiplayAtAtime);
+                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                                    pathsToDsiplayAtAtime.clear();
+                                }
+                            } else {
+                                //All data points are reached to the destination.
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+                rlMF.start();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -410,16 +491,13 @@ public class frame extends JFrame implements ActionListener {
                     payloadTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
                 }
             }
-
             cacheTableModel.setRowCount(0);
-
             x = jicnsnodes[NODE_POSITION].getCacheContents();
             if (x != null) {
                 for (int i = 0; i < x.length; i++) {
                     cacheTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
                 }
             }
-
             System.gc();
             x = null;
             System.gc();
@@ -432,6 +510,14 @@ public class frame extends JFrame implements ActionListener {
         public int ms;
         public int focusedNode = 0;
 
+        /**
+         * currentDataPointX=-1 symbolizes data point (in Animation) is not set or it is about to travel from parent towards focusNode
+         * currentDataPointX=80 symbolizes data point currently at Xaxsis 80 and it is moving towards focusNode from parent Node
+         * <p>
+         * Similarly for Yaxsis
+         */
+        double currentDataPointX = -1;
+        double currentDataPointY = -1;
         Color pathColor;
 
         public path(String p, int mss, path par, int fc, Color c) {
@@ -450,6 +536,7 @@ public class frame extends JFrame implements ActionListener {
 
     class freePanel extends JPanel {
         public boolean showLines = true;
+        public Graphics2D mygraphics;
 
         public freePanel() {
             setBackground(Color.white);
@@ -482,57 +569,6 @@ public class frame extends JFrame implements ActionListener {
             }
         }
 
-        /**
-         * // TODO: 10/21/22  i hvae to remove this drawLine funcntion and make drawArraow fucntion dynamic with colors
-         *
-         * @param node1 Draw from node1
-         * @param node2 Draw to node 2
-         */
-        public void drawLineBetween(Color z, int node1, int node2) {
-            Graphics2D g2 = (Graphics2D) getGraphics();
-                        try {
-                            /**
-                             * // TODO: 10/21/22 SEND THIS THREAD inside brodcast functtion
-                             * // // TODO: 10/21/22  because its better to have single thread for all paths route. easy to handle.
-                             * 
-                             */
-                Thread rlMF = new Thread(new Runnable() {
-
-                    public void run() {
-                        double x1, y1, x2, y2;
-                        Rectangle r1 = nodes[node1].getBounds();
-                        Rectangle r2 = nodes[node2].getBounds();
-                        x1 = r1.getCenterX();
-                        y1 = r1.getCenterY();
-                        x2 = r2.getCenterX();
-                        y2 = r2.getCenterY();
-                        //g2.setPaintMode();
-
-                        //g2.draw(new Line2D.Double(x1, y1, x2, y2));
-                        double MaxX = x1 > x2 ? x1 : x2;
-                        double minX = x1 < x2 ? x1 : x2;
-                        try {
-                            for (int i = (int) minX; i <= MaxX; i = i + 10) {
-                                g2.setColor(z);
-                                g2.fillOval(i, (int) ((y2 - y1) / (x2 - x1) * (i - x1) + y1)-10, 20, 20);
-                                sleep(80);
-                                repaint();
-                            }
-                        }
-                        catch (Exception e){
-                            e.printStackTrace();
-                        }
-                    }
-                });
-                rlMF.start();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            //showLines=false;
-            //freePanel.this.repaint();
-        }
-
         private void drawArrow(Graphics2D g, int x1, int y1, int x2, int y2, int d, int h) {
             int dx = x2 - x1, dy = y2 - y1;
             double D = Math.sqrt(dx * dx + dy * dy);
@@ -552,6 +588,10 @@ public class frame extends JFrame implements ActionListener {
 
             //g.drawLine(x1, y1, x2, y2);
             g.fillPolygon(xpoints, ypoints, 3);
+        }
+
+        public Graphics2D getFreePanelGraphis() {
+            return mygraphics;
         }
     }
 
