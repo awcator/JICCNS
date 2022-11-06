@@ -28,8 +28,8 @@ public class brodcaster {
                 {1, -1, -1, -1} //3
         };
         int endNode = 0;
-        int sourceNode=3;
-        path rootparent = new path("node"+sourceNode, 0, null, sourceNode, endNode,null,true); //start from node0 with inital timeout of 0ms
+        int sourceNode = 3;
+        path rootparent = new path("node" + sourceNode, 0, null, sourceNode, endNode, null, true); //start from node0 with inital timeout of 0ms
         class path_sorter implements Comparator<path> {
             @Override
             public int compare(path s1, path s2) {
@@ -62,13 +62,12 @@ public class brodcaster {
             System.out.print("\n" + temppath.ms + " " + temppath);
             int foucusedNode = temppath.focusedNode;
             if (foucusedNode == temppath.destinationNode) {
-                if(temppath.forward==true) {
+                if (temppath.forward == true) {
                     path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, sourceNode, temppath.pa, false);
                     pq.add(newpath);
                     System.out.print("[FEND]");
                     continue;
-                }
-                else {
+                } else {
                     System.out.print("[BEND]");
                     continue;
                 }
@@ -77,17 +76,17 @@ public class brodcaster {
                     //Broadcast to neibhour nodes
                     for (int i = 0; i < a.length; i++) {
                         if (i != foucusedNode && a[foucusedNode][i] != -1 && !temppath.pa.contains("node" + i)) {
-                            path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + a[foucusedNode][i], temppath, i, temppath.parent == null ? endNode : temppath.parent.destinationNode,null,true);
+                            path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + a[foucusedNode][i], temppath, i, temppath.parent == null ? endNode : temppath.parent.destinationNode, null, true);
                             pq.add(newpath);
                         }
                     }
                 } else {
                     //use backtrak return back
-                    String PATH=temppath.backtrack;
-                    String newPATHwithoutLastNode=PATH.substring(0,PATH.lastIndexOf("-->")==-1?0:PATH.lastIndexOf("-->"));
-                    String last_node_onPATH=newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->")==-1?0:newPATHwithoutLastNode.lastIndexOf("-->")+3);
-                    int nodeIDfromNode=Integer.parseInt(last_node_onPATH.replace("node",""));
-                    path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + a[nodeIDfromNode][foucusedNode], temppath, nodeIDfromNode, sourceNode,newPATHwithoutLastNode,false);
+                    String PATH = temppath.backtrack;
+                    String newPATHwithoutLastNode = PATH.substring(0, PATH.lastIndexOf("-->") == -1 ? 0 : PATH.lastIndexOf("-->"));
+                    String last_node_onPATH = newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->") == -1 ? 0 : newPATHwithoutLastNode.lastIndexOf("-->") + 3);
+                    int nodeIDfromNode = Integer.parseInt(last_node_onPATH.replace("node", ""));
+                    path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + a[nodeIDfromNode][foucusedNode], temppath, nodeIDfromNode, sourceNode, newPATHwithoutLastNode, false);
                     pq.add(newpath);
                 }
             }
@@ -105,16 +104,16 @@ public class brodcaster {
 
         public int destinationNode = -1;
         boolean forward = true;
-        String backtrack="";
+        String backtrack = "";
 
-        public path(String p, int mss, path par, int fc, int des,String tracePath,boolean isForward) {
+        public path(String p, int mss, path par, int fc, int des, String tracePath, boolean isForward) {
             pa = p;
             ms = mss;
             parent = par;
             focusedNode = fc;
             destinationNode = des;
-            backtrack=tracePath;
-            forward=isForward;
+            backtrack = tracePath;
+            forward = isForward;
         }
 
         @Override

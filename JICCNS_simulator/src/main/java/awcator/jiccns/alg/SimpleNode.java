@@ -6,7 +6,7 @@ import java.util.Arrays;
  * Node Summary:
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
- *
+ * <p>
  * CacheStrategy: Nope
  */
 
@@ -144,7 +144,8 @@ public class SimpleNode extends jicnsNodeImpl {
     @Override
     public int getMsToReachNode(int nodeNumber) {
         for (int i = 0; i < egress.length; i++) {
-            if (egress[i][0] == nodeNumber) return egress[i][1]; // refer egress datastructre for more info , how values  are stored
+            if (egress[i][0] == nodeNumber)
+                return egress[i][1]; // refer egress datastructre for more info , how values  are stored
         }
         return -1;
     }
