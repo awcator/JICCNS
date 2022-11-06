@@ -41,6 +41,11 @@ public class Main {
  * |
  * D
  *
- * 
+ * Notedown average time requred to process the query and grph it
+ * Total network packets moved
+ *
+ * // TODO: 11/6/22 Algorithm validation
+ * run 2 times with unkown data query
+ * query from all node with random query
  */
 

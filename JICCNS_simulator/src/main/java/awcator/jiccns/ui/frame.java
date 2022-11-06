@@ -417,6 +417,27 @@ public class frame extends JFrame implements ActionListener {
                                 }
                                 if ((temppath.destinationNode == -1 && (nodes[temppath.focusedNode].jicnsNode.cacheLookUp(destNodeTextArea.getText()) != null || nodes[temppath.focusedNode].jicnsNode.hddLookUp(destNodeTextArea.getText()) != null)) || (foucusedNode == temppath.destinationNode)) {
                                     query_answered = true;
+                                    Timer blinkTimer = new Timer(500, new ActionListener() {
+                                        private final int maxCount = 4;
+                                        private int count = 0;
+                                        private boolean on = false;
+
+                                        public void actionPerformed(ActionEvent e) {
+                                            if (count >= maxCount) {
+                                                /**
+                                                 * After animation completes stop timer and setback buttons default background
+                                                 */
+                                                nodes[foucusedNode].setBackground(new JButton().getBackground());
+                                                ((Timer) e.getSource()).stop();
+                                            } else {
+                                                nodes[foucusedNode].setBackground(on ? Color.GREEN : Color.YELLOW);
+                                                on = !on;
+                                                count++;
+                                            }
+                                        }
+                                    });
+                                    blinkTimer.start();
+
                                     //System.out.println("Query Answered BY Node " + foucusedNode);
                                     if (temppath.forward) {
                                         path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, getRandomColor(), sourceNode, temppath.pa, false);
