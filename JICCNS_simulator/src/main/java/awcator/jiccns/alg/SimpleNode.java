@@ -32,7 +32,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onIncomingReqData() {
-        System.out.println("Reached Node" + getNodeID());
+        //System.out.println("Reached Node" + getNodeID());
     }
 
     @Override

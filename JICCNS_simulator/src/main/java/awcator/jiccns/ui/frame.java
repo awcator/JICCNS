@@ -2,6 +2,7 @@ package awcator.jiccns.ui;
 
 import awcator.jiccns.alg.SimpleNode;
 import awcator.jiccns.alg.jicnsNodeImpl;
+import awcator.jiccns.demo.brodcaster;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
 
@@ -258,7 +259,11 @@ public class frame extends JFrame implements ActionListener {
                             for (int i = 0; i < pathsToDsiplayAtAtime.size(); i++) {
                                 path displayPath = pathsToDsiplayAtAtime.get(i);
                                 double sourceX, sourceY, destinationX, destinationY;
-
+                                if(displayPath.parent==null){
+                                    //node has no parent then dont draw graphics
+                                    pathsToDsiplayAtAtime.remove(i);
+                                    continue;
+                                }
                                 Rectangle r1 = nodes[displayPath.parent.focusedNode].getBounds();
                                 Rectangle r2 = nodes[displayPath.focusedNode].getBounds();
                                 sourceX = r1.getCenterX();
@@ -299,14 +304,20 @@ public class frame extends JFrame implements ActionListener {
                                             displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
                                             if (displayPath.currentDataPointY <= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
-                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                if(displayPath.forward)
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                else
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         } else {
                                             displayPath.currentDataPointY += dataPointSpeed;
                                             displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
                                             if (displayPath.currentDataPointY >= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
-                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                if(displayPath.forward)
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                else
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         }
                                     } else {
@@ -319,14 +330,20 @@ public class frame extends JFrame implements ActionListener {
                                             displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
                                             if (displayPath.currentDataPointX <= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
-                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                if(displayPath.forward)
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                else
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         } else {
                                             displayPath.currentDataPointX += dataPointSpeed;
                                             displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
                                             if (displayPath.currentDataPointX >= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
-                                                nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                if(displayPath.forward)
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
+                                                else
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         }
                                     }
@@ -345,7 +362,10 @@ public class frame extends JFrame implements ActionListener {
                         try {
                             Graphics2D g2 = (Graphics2D) centerPanel.getGraphics();
                             System.out.println("Broadcasting from node 3 to 5");
-                            path rootparent = new path("node3", 0, null, 3, getRandomColor()); //start from node4 with inital timeout of 4ms
+                            int sourceNode=3;
+                            int endNode=0;
+
+                            path rootparent = new path("node"+sourceNode, 0, null, sourceNode, getRandomColor(),endNode,null,true); //start from sourcenOde with inital timeout of 0ms
                             class path_sorter implements Comparator<path> {
                                 @Override
                                 public int compare(path s1, path s2) {
@@ -397,22 +417,40 @@ public class frame extends JFrame implements ActionListener {
                                         parallelPaths = false;
                                     }
                                 }
-                                if (foucusedNode == 5) {
-                                    System.out.print("[END]");
-                                    continue;
+                                if (foucusedNode == temppath.destinationNode) {
+                                    if(temppath.forward==true) {
+                                        path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode,getRandomColor(), sourceNode, temppath.pa, false);
+                                        pq.add(newpath);
+                                        System.out.print("[FEND]");
+                                        continue;
+                                    }
+                                    else {
+                                        System.out.print("[BEND]");
+                                        continue;
+                                    }
                                 } else {
-                                    for (int i = 0; i < nodes.length; i++) {
-                                        if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
-                                            if (nodes[foucusedNode].jicnsNode.allowCycles()) {
-                                                path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
-                                                pq.add(newpath);
-                                            } else {
-                                                if (!temppath.pa.contains("node" + i)) {
-                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor());
+                                    if(temppath.forward) {
+                                        for (int i = 0; i < nodes.length; i++) {
+                                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
+                                                if (nodes[foucusedNode].jicnsNode.allowCycles()) {
+                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? endNode : temppath.parent.destinationNode, null, true);
                                                     pq.add(newpath);
+                                                } else {
+                                                    if (!temppath.pa.contains("node" + i)) {
+                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? endNode : temppath.parent.destinationNode, null, true);
+                                                        pq.add(newpath);
+                                                    }
                                                 }
                                             }
                                         }
+                                    }
+                                    else{
+                                        String PATH=temppath.backtrack;
+                                        String newPATHwithoutLastNode=PATH.substring(0,PATH.lastIndexOf("-->")==-1?0:PATH.lastIndexOf("-->"));
+                                        String last_node_onPATH=newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->")==-1?0:newPATHwithoutLastNode.lastIndexOf("-->")+3);
+                                        int nodeIDfromNode=Integer.parseInt(last_node_onPATH.replace("node",""));
+                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode), temppath, nodeIDfromNode, temppath.parent==null?getRandomColor():temppath.parent.pathColor,temppath.parent==null?sourceNode:temppath.parent.destinationNode,newPATHwithoutLastNode,false);
+                                        pq.add(newpath);
                                     }
                                 }
                                 if (check_previous_ms) {
@@ -570,13 +608,18 @@ public class frame extends JFrame implements ActionListener {
         double currentDataPointX = -1;
         double currentDataPointY = -1;
         Color pathColor;
-
-        public path(String p, int mss, path par, int fc, Color c) {
+        public int destinationNode = -1;
+        boolean forward = true;
+        String backtrack="";
+        public path(String p, int mss, path par, int fc, Color c, int des,String tracePath,boolean isForward) {
             pa = p;
             ms = mss;
             parent = par;
             focusedNode = fc;
             pathColor = c;
+            destinationNode = des;
+            backtrack=tracePath;
+            forward=isForward;
         }
 
         @Override

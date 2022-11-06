@@ -23,7 +23,6 @@ public class Main {
 }
 /**
  * // TODO: 11/5/22  Features
- * Broadcast reverse path ---PRIORITY HIGH
  * Save Architecture and reload option ---PRIORITY LOWEST
  * LRU NODE  PRIORITY Medium
  * MaxEgressAwareness Node PRIORITY LOW
