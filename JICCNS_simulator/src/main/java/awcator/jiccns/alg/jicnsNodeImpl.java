@@ -49,7 +49,7 @@ public abstract class jicnsNodeImpl {
      *      I own this Data, Should I have to make any change to Cahce? By thinking of improtance in future
      */
 
-    abstract public void cacheLookUp();
+    abstract public String cacheLookUp(String query_key);
 
     /***
      * A node implementable function

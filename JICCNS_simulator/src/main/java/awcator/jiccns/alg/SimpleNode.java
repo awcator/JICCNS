@@ -36,8 +36,15 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public void cacheLookUp() {
-
+    public String  cacheLookUp(String queryKey) {
+        for(int i=0;i<localcache_seekPointer && i<cacheMemorySize;i++){
+            if(cacheMemory[i][0].equalsIgnoreCase(queryKey)){
+                onCacheHit();
+                return cacheMemory[i][1];
+            }
+        }
+        onCacheMiss();
+        return null;
     }
 
     @Override
@@ -73,11 +80,12 @@ public class SimpleNode extends jicnsNodeImpl {
     @Override
     public void onCacheHit() {
         hits = hits + 1;
-        System.out.println("fcuk youcxcxzcx");
+        //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
     public void onCacheMiss() {
+        //System.out.println("node"+ getNodeID()+" : Cache MISS");
         misses = misses + 1;
     }
 

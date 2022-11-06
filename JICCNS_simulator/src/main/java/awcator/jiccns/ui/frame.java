@@ -362,7 +362,7 @@ public class frame extends JFrame implements ActionListener {
                             System.out.println("Broadcasting from node " + sourceNodeTextArea.getText());
                             int sourceNode = Integer.parseInt(sourceNodeTextArea.getText());
                             int endNode = 0;
-                            path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), endNode, null, true); //start from sourcenOde with inital timeout of 0ms
+                            path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), -1, null, true); //start from sourcenOde with inital timeout of 0ms
                             class path_sorter implements Comparator<path> {
                                 @Override
                                 public int compare(path s1, path s2) {
@@ -414,8 +414,9 @@ public class frame extends JFrame implements ActionListener {
                                         parallelPaths = false;
                                     }
                                 }
-                                if (foucusedNode == temppath.destinationNode) {
-                                    if (temppath.forward == true) {
+                                if ((temppath.destinationNode == -1 && nodes[temppath.focusedNode].jicnsNode.cacheLookUp(destNodeTextArea.getText()) != null) || (foucusedNode == temppath.destinationNode)) {
+                                    //System.out.println("Query Answered BY Node " + foucusedNode);
+                                    if (temppath.forward) {
                                         path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, getRandomColor(), sourceNode, temppath.pa, false);
                                         pq.add(newpath);
                                         System.out.print("[FEND]");
@@ -429,11 +430,11 @@ public class frame extends JFrame implements ActionListener {
                                         for (int i = 0; i < nodes.length; i++) {
                                             if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
                                                 if (nodes[foucusedNode].jicnsNode.allowCycles()) {
-                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? endNode : temppath.parent.destinationNode, null, true);
+                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true);
                                                     pq.add(newpath);
                                                 } else {
                                                     if (!temppath.pa.contains("node" + i)) {
-                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? endNode : temppath.parent.destinationNode, null, true);
+                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true);
                                                         pq.add(newpath);
                                                     }
                                                 }
