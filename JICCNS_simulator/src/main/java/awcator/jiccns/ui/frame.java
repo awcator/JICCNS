@@ -31,6 +31,8 @@ public class frame extends JFrame implements ActionListener {
     JButton randomize_nodes; //node positons randomizer
     JTextField searchNodes;// A simple textbox to search nodes in UI
 
+    JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
+
     public frame() {
 
         /**
@@ -44,7 +46,11 @@ public class frame extends JFrame implements ActionListener {
         //load up buttons
         reset = new JButton("reset");
         randomize_nodes = new JButton("randomize_nodes");
-        broadCastTo = new JButton("broadCastTo to Destination");
+        sourceNodeTextArea = new JTextArea();
+        sourceNodeTextArea.setText("Enter the Node Number (int) to query from");
+        destNodeTextArea = new JTextArea();
+        destNodeTextArea.setText("What do you query?");
+        broadCastTo = new JButton("Query");
 
         reset.addActionListener(this);
         randomize_nodes.addActionListener(this);
@@ -66,6 +72,8 @@ public class frame extends JFrame implements ActionListener {
         southpanel.add(reset);
         southpanel.add(randomize_nodes);
         southpanel.add(searchNodes);
+        southpanel.add(sourceNodeTextArea);
+        southpanel.add(destNodeTextArea);
         southpanel.add(broadCastTo);
         southpanel.setBackground(Color.darkGray);
         add(southpanel, BorderLayout.SOUTH);
@@ -351,10 +359,9 @@ public class frame extends JFrame implements ActionListener {
                     public void run() {
                         try {
                             Graphics2D g2 = (Graphics2D) centerPanel.getGraphics();
-                            System.out.println("Broadcasting from node 3 to 5");
-                            int sourceNode = 3;
+                            System.out.println("Broadcasting from node " + sourceNodeTextArea.getText());
+                            int sourceNode = Integer.parseInt(sourceNodeTextArea.getText());
                             int endNode = 0;
-
                             path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), endNode, null, true); //start from sourcenOde with inital timeout of 0ms
                             class path_sorter implements Comparator<path> {
                                 @Override

@@ -35,13 +35,12 @@ public class Main {
  * __________________________________________________________________________
  * <p>
  * // TODO: 11/5/22  KNOWN BUGS TO BE FIX
- * <p>
  * A     B
  * \   /
  * c    Implimentation BUG: if data sent by A and B reaches at C at same time what should be done? curreny two broadcast msgs from c to node D (Inefficent)
  * |
  * D
- * <p>
- * Currently brodcast is happening from source node 3 to destiantion node 5 (HARDCODED) need to be fixed
+ *
+ * 
  */
 
