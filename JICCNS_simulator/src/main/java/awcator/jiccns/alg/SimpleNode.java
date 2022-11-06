@@ -40,10 +40,12 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
+                changePowerConsumptionBy(i+1);
                 return cacheMemory[i][1];
             }
         }
         onCacheMiss();
+        changePowerConsumptionBy(localcache_seekPointer);
         return null;
     }
 
@@ -52,9 +54,11 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 onHDDHit();
+                changePowerConsumptionBy(i+1);
                 return localMemory[i][1];
             }
         }
+        changePowerConsumptionBy(localMemory_seekPointer);
         onHDDMiss();
         return null;
     }
