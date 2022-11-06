@@ -32,18 +32,30 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onIncomingReqData() {
-        //System.out.println("Reached Node" + getNodeID());
+        //System.out.println("Packet Reached Node" + getNodeID());
     }
 
     @Override
-    public String  cacheLookUp(String queryKey) {
-        for(int i=0;i<localcache_seekPointer && i<cacheMemorySize;i++){
-            if(cacheMemory[i][0].equalsIgnoreCase(queryKey)){
+    public String cacheLookUp(String queryKey) {
+        for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
+            if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
                 return cacheMemory[i][1];
             }
         }
         onCacheMiss();
+        return null;
+    }
+
+    @Override
+    public String hddLookUp(String query_key) {
+        for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
+            if (localMemory[i][0].equalsIgnoreCase(query_key)) {
+                onHDDHit();
+                return localMemory[i][1];
+            }
+        }
+        onHDDMiss();
         return null;
     }
 
@@ -54,7 +66,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onAddedToCache() {
-
+        changePowerConsumptionBy(1);
     }
 
     @Override
@@ -79,14 +91,24 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onCacheHit() {
-        hits = hits + 1;
+        cache_hits = cache_hits + 1;
         //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
+    public void onHDDHit() {
+        System.out.println("HDD HIT");
+        hdd_hits++;
+    }
+
+    @Override
     public void onCacheMiss() {
-        //System.out.println("node"+ getNodeID()+" : Cache MISS");
-        misses = misses + 1;
+        cache_misses = cache_misses + 1;
+    }
+
+    @Override
+    public void onHDDMiss() {
+        hdd_misses++;
     }
 
     @Override
@@ -123,7 +145,7 @@ public class SimpleNode extends jicnsNodeImpl {
         cacheMemory[localcache_seekPointer][0] = key;
         cacheMemory[localcache_seekPointer][1] = value;
         localcache_seekPointer++;
-        changePowerConsumptionBy(1);
+        onAddedToCache();
     }
 
     @Override

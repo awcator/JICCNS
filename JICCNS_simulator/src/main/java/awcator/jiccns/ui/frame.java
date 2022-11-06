@@ -371,6 +371,7 @@ public class frame extends JFrame implements ActionListener {
                                     return 0;
                                 }
                             }
+                            boolean query_answered = false;
                             PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
                             path temppath = rootparent;
                             pq.add(temppath);
@@ -414,7 +415,8 @@ public class frame extends JFrame implements ActionListener {
                                         parallelPaths = false;
                                     }
                                 }
-                                if ((temppath.destinationNode == -1 && nodes[temppath.focusedNode].jicnsNode.cacheLookUp(destNodeTextArea.getText()) != null) || (foucusedNode == temppath.destinationNode)) {
+                                if ((temppath.destinationNode == -1 && (nodes[temppath.focusedNode].jicnsNode.cacheLookUp(destNodeTextArea.getText()) != null || nodes[temppath.focusedNode].jicnsNode.hddLookUp(destNodeTextArea.getText()) != null)) || (foucusedNode == temppath.destinationNode)) {
+                                    query_answered = true;
                                     //System.out.println("Query Answered BY Node " + foucusedNode);
                                     if (temppath.forward) {
                                         path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, getRandomColor(), sourceNode, temppath.pa, false);
@@ -465,6 +467,11 @@ public class frame extends JFrame implements ActionListener {
                                 }
                             } else {
                                 //All data points are reached to the destination.
+                            }
+                            if (query_answered) {
+                                System.out.println("---Done--Query Answered");
+                            } else {
+                                System.out.println("---Failed--- No node cant handle request");
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

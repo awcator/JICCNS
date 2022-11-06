@@ -5,7 +5,12 @@ public abstract class jicnsNodeImpl {
      * Number of times data existed in cache.
      * DummyImplementation: if(data.exisitIN(cache)) then hits++
      */
-    public static int hits = 0;
+    public static int cache_hits = 0;
+    /**
+     * Number of times data existed in HDD (internal storage/payload).
+     * DummyImplementation: if(data.exisitIN(HDD)) then hits++
+     */
+    public static int hdd_hits = 0;
     /**
      * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
      * PowerConsumption completely depends on IO operations/CPU cycle
@@ -15,8 +20,13 @@ public abstract class jicnsNodeImpl {
      * Number of times data were not existed in cache.
      * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
      */
-    public int misses = 0;
+    public int cache_misses = 0;
 
+    /**
+     * Number of times data were not existed in HDD. NOTE LOOKUP first happens in Cache then HDD
+     * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
+     */
+    public int hdd_misses = 0;
 
     /**
      * Egress rules:
@@ -39,8 +49,6 @@ public abstract class jicnsNodeImpl {
      */
     public int cacheMemorySize = 10;
 
-    public abstract void onIncomingReqData();
-
     /***
      * A node implementable fucntion
      * It symbolizes what to be done when you recive incomming data request
@@ -48,8 +56,7 @@ public abstract class jicnsNodeImpl {
      *      I dont own this data, i'll forward to others
      *      I own this Data, Should I have to make any change to Cahce? By thinking of improtance in future
      */
-
-    abstract public String cacheLookUp(String query_key);
+    public abstract void onIncomingReqData();
 
     /***
      * A node implementable function
@@ -58,9 +65,13 @@ public abstract class jicnsNodeImpl {
      *      How to lookup in cache? Should I have to lookup linearly or byIndexOf or recentFirst or Search from old data?
      *      Make sure to increses operationcount by modifiing powerConsumption varaible. To get more accury of the algorithm which node was implemted with
      */
+    abstract public String cacheLookUp(String query_key);
 
-
-    public abstract void shouldICacheOrNot();
+    /***
+     * A node implementable function
+     * It symbolizes what to be done to lookUp data in its internal Memory
+     */
+    abstract public String hddLookUp(String query_key);
 
     /***
      * A node implementable function
@@ -72,8 +83,7 @@ public abstract class jicnsNodeImpl {
      *      if decided yes. Whoam Should i remove from the cache if cache is full?
      *      if cache is not full, what order should i put it? timeOrder? frequency? populatirity? OldFirst? recently used First? BigSize data first?
      */
-
-    public abstract void onAddedToCache();
+    public abstract void shouldICacheOrNot();
 
     /***
      * A node implementable function
@@ -82,8 +92,7 @@ public abstract class jicnsNodeImpl {
      * Which data from cahce should I remvoe to add keep this data?
      * Should I have to forward the same data to others even If i have the same data?
      */
-
-    public abstract void onRemovedFromCache();
+    public abstract void onAddedToCache();
 
     /***
      * A node implementable function
@@ -95,17 +104,19 @@ public abstract class jicnsNodeImpl {
      * Or should I have to ask others to stop caching this, since I alredy cached it?
      * Or since I know this is least impornt data. should i tell others to stop cachec this data?
      */
+    public abstract void onRemovedFromCache();
 
-    public abstract void onReqOutGoingData();
     /**
      * A node implementable function
      * It symbolizes what to do by the server when new data is eggressed
      * Some Implementable ideas:
-     *      Since my previous nodes dont have acess to this data, should i tell my immidite lower nodes to cahce it if he has good cache size left
-     *      Decide which direction to pass info. return the answer? or forward request? any other strategy?
-     *      Decide if to broadcast next paretnts? or send one by one? or any other strategy?
-     *      whom to forward? shall I decide based on latency? shall I decide on Hops? or battery consumption? or more strategy?
+     * Since my previous nodes dont have acess to this data, should i tell my immidite lower nodes to cahce it if he has good cache size left
+     * Decide which direction to pass info. return the answer? or forward request? any other strategy?
+     * Decide if to broadcast next paretnts? or send one by one? or any other strategy?
+     * whom to forward? shall I decide based on latency? shall I decide on Hops? or battery consumption? or more strategy?
      */
+
+    public abstract void onReqOutGoingData();
 
     /**
      * What to do when data is recving from the node who knows the data
@@ -115,13 +126,14 @@ public abstract class jicnsNodeImpl {
     public abstract void onRespOutGoingData();
 
     abstract public void onCacheHit();
+    abstract public void onHDDHit();
 
     /**
      * What to do when cacheHitHappens?
      */
 
     abstract public void onCacheMiss();
-
+    abstract public void onHDDMiss();
     /**
      * What to do when Cache MissHappens?
      */
