@@ -276,14 +276,9 @@ public class frame extends JFrame implements ActionListener {
                                 if (diffX == 0)
                                     diffX = 1; //just to avoid slope tending to infity, we will avoid inifiy error by teling there is gap of 1 unit space between two points
                                 double diffY = destinationY - sourceY;
-                                if (diffY == 0)
-                                    diffY = 1;
+                                if (diffY == 0) diffY = 1;
                                 double slope = diffY / diffX;
-                                if (Math.abs(diffY) > Math.abs(diffX)) {
-                                    moveInYdirection = true;
-                                } else {
-                                    moveInYdirection = false;
-                                }
+                                moveInYdirection = Math.abs(diffY) > Math.abs(diffX);
                                 //moveInYdirection = true;
                                 try {
                                     if (displayPath.currentDataPointX == -1 && displayPath.currentDataPointY == -1) { //default case . It symbolises data point is abouut to move from node to node
@@ -305,8 +300,7 @@ public class frame extends JFrame implements ActionListener {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
+                                                else nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         } else {
                                             displayPath.currentDataPointY += dataPointSpeed;
@@ -315,8 +309,7 @@ public class frame extends JFrame implements ActionListener {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
+                                                else nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         }
                                     } else {
@@ -331,8 +324,7 @@ public class frame extends JFrame implements ActionListener {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
+                                                else nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         } else {
                                             displayPath.currentDataPointX += dataPointSpeed;
@@ -341,8 +333,7 @@ public class frame extends JFrame implements ActionListener {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData();
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
+                                                else nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData();
                                             }
                                         }
                                     }
@@ -353,7 +344,7 @@ public class frame extends JFrame implements ActionListener {
                             }
                             sleep(100);
                             //keep traces? remove repaint line
-                            ((freePanel) centerPanel).repaint();
+                            centerPanel.repaint();
                         }
                     }
 
