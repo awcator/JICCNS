@@ -147,7 +147,7 @@ public abstract class jicnsNodeImpl {
 
     abstract public String[][] getPayloadContents();
 
-    abstract public void addToCacheMemory(String key, String value);
+    abstract public boolean addToCacheMemory(String key, String value);
 
     abstract public void allocateCacheMemorySize();
 
@@ -185,4 +185,10 @@ public abstract class jicnsNodeImpl {
      * @return id
      */
     abstract public int getNodeID();
+
+    /**
+     * It will return what kind of node it is
+     * @return must return somehing , not null
+     */
+    abstract public String nodeType();
 }

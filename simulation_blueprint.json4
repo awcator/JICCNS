@@ -13,7 +13,6 @@
   "max_cache_size": "10",
   "max_payload_size": "100",
   "payload": {
-   "temprature_at_bangalore": "25c",
    "pm": "modi",
    "cm": "bommai",
    "avenger": "hulk"
@@ -21,18 +20,20 @@
   "cached": {
    "fastestcar": "koinseg agera"
   },
-  "type": "lru_cache_node",
+  "type": "simplenode",
+  "device_type":"source",
   "egress": {
    "node1": "5ms",
-   "node2": "1ms"
   }
  },
  "node1": {
   "max_cache_size": "10",
   "max_payload_size": "100",
   "type": "simplenode",
+  "device_type": "edge",
   "egress": {
-   "node3": "1ms"
+   "node3": "1ms",
+   "node2": "5ms"
   },
   "payload": {
    "pm": "modi",
@@ -45,18 +46,13 @@
  },
  "node3": {
   "type": "simplenode",
-  "egress": {
-    "node0" : "1ms"
-  }
+  "device_type": "producer",
  },
  "node2": {
+  "device_type": "producer",
   "cached": {
    "health_of_node5": "85/100"
   },
   "type": "simplenode",
-  "egress": {
-   "node3": "3ms",
-   "node1": "7ms"
-  }
  }
 }

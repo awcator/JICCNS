@@ -10,7 +10,7 @@ import java.util.Arrays;
  * CacheStrategy: Nope
  */
 
-public class SimpleNode extends jicnsNodeImpl {
+public class tfidf_node extends jicnsNodeImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -25,7 +25,7 @@ public class SimpleNode extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public SimpleNode(int nodeid, int egressSize) {
+    public tfidf_node(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
     }
@@ -40,7 +40,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
-                changePowerConsumptionBy(i+1);
+                changePowerConsumptionBy(i + 1);
                 return cacheMemory[i][1];
             }
         }
@@ -54,7 +54,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 onHDDHit();
-                changePowerConsumptionBy(i+1);
+                changePowerConsumptionBy(i + 1);
                 return localMemory[i][1];
             }
         }
@@ -96,12 +96,10 @@ public class SimpleNode extends jicnsNodeImpl {
     @Override
     public void onCacheHit() {
         cache_hits = cache_hits + 1;
-        //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
     public void onHDDHit() {
-        System.out.println("HDD HIT");
         hdd_hits++;
     }
 
@@ -152,8 +150,7 @@ public class SimpleNode extends jicnsNodeImpl {
             localcache_seekPointer++;
             onAddedToCache();
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

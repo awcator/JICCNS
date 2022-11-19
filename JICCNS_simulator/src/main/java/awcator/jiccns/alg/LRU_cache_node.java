@@ -1,16 +1,19 @@
 package awcator.jiccns.alg;
 
 import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.Queue;
 
 /**
  * Node Summary:
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
  * <p>
- * CacheStrategy: Nope
+ * CacheStrategy: LRU
+ * Cache StorageType: Queue
  */
 
-public class SimpleNode extends jicnsNodeImpl {
+public class LRU_cache_node extends jicnsNodeImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -20,12 +23,11 @@ public class SimpleNode extends jicnsNodeImpl {
      * This varible contains NodeServer's InMemory cache contents
      * In Reality: This will the superfast access memory type which is RAM.
      */
-    String[][] cacheMemory;
+    Queue<queueImplemtion> cacheMemory;
     int id = 0;
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
-
-    public SimpleNode(int nodeid, int egressSize) {
+    public LRU_cache_node(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
     }
@@ -37,12 +39,13 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public String cacheLookUp(String queryKey) {
-        for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
-            if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
+        int i = 0;
+        for (queueImplemtion keyValue : cacheMemory) {
+            if (keyValue.key.equalsIgnoreCase(queryKey)) {
                 onCacheHit();
-                changePowerConsumptionBy(i+1);
-                return cacheMemory[i][1];
+                changePowerConsumptionBy(i + 1);
             }
+            i++;
         }
         onCacheMiss();
         changePowerConsumptionBy(localcache_seekPointer);
@@ -54,7 +57,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 onHDDHit();
-                changePowerConsumptionBy(i+1);
+                changePowerConsumptionBy(i + 1);
                 return localMemory[i][1];
             }
         }
@@ -145,15 +148,13 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public boolean addToCacheMemory(String key, String value) {
-        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocaCacheSize());
         try {
-            cacheMemory[localcache_seekPointer][0] = key;
-            cacheMemory[localcache_seekPointer][1] = value;
+            System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocaCacheSize());
+            cacheMemory.add(new queueImplemtion(key, value));
             localcache_seekPointer++;
             onAddedToCache();
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -161,7 +162,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void allocateCacheMemorySize() {
-        cacheMemory = new String[getMaxLocaCacheSize()][2];
+        cacheMemory = new LinkedList<>();
     }
 
     @Override
@@ -171,7 +172,14 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public String[][] getCacheContents() {
-        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, localcache_seekPointer);
+        String x[][] = new String[cacheMemory.size()][2];
+        int i = 0;
+        for (queueImplemtion kv : cacheMemory) {
+            x[i][0] = kv.key;
+            x[i][1] = kv.value;
+            i++;
+        }
+        return x;
     }
 
     @Override
@@ -203,6 +211,21 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public String nodeType() {
-        return "SimpleNode";
+        return "LRU_cache_node";
+    }
+
+    class queueImplemtion {
+        String key;
+        String value;
+
+        public queueImplemtion(String k, String v) {
+            key = k;
+            value = v;
+        }
+
+        @Override
+        public String toString() {
+            return key + ":" + value;
+        }
     }
 }

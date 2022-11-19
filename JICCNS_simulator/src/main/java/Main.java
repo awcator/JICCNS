@@ -25,6 +25,7 @@ public class Main {
  * // TODO: 11/5/22  Features
  * Save Architecture and reload option ---PRIORITY LOWEST
  * LRU NODE  PRIORITY Medium
+ * Harddisk cache read write speed -MEDIUM
  * MaxEgressAwareness Node PRIORITY LOW
  * LinkedList cache/queue cache/hashmap cache PRIORITY LOW
  * FX GUI for graphs generate PRIORITY LOW

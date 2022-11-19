@@ -1,10 +1,12 @@
 package awcator.jiccns.ui;
 
+import awcator.jiccns.alg.LRU_cache_node;
 import awcator.jiccns.alg.SimpleNode;
 import awcator.jiccns.alg.jicnsNodeImpl;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
 
+import javax.imageio.ImageIO;
 import javax.swing.Timer;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
@@ -14,6 +16,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
+import java.io.File;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -136,7 +139,13 @@ public class frame extends JFrame implements ActionListener {
                     } else {
                         egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
                     }
-                    jicnsnodes[i] = new SimpleNode(i, egressSize);
+                    String NODE_TYPE = jsondata.getJSONObject(prefix + i).get("type").toString();
+                    if (NODE_TYPE.equalsIgnoreCase("LRU_cache_node")) {
+                        jicnsnodes[i] = new LRU_cache_node(i, egressSize);
+                    } else {
+                        jicnsnodes[i] = new SimpleNode(i, egressSize);
+                    }
+
                     /**
                      * Egress Rules
                      */
@@ -185,10 +194,33 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("cached").keys(); it.hasNext(); ) {
                             String str = it.next();
                             System.out.println(str + " <-----This entry should be added to cache");
-                            jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str));
+                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str))) {
+                                System.err.println("Failed to add into cache ");
+                            }
                         }
                     }
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
+                    /**
+                     * Background color based on EDGE Server
+                     */
+                    try {
+                        String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
+                        if (DEVICE_TYPE != null) {
+                            nodes[i].setOpaque(false);
+                            nodes[i].setContentAreaFilled(false);
+                            nodes[i].setBorderPainted(false);
+                            if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
+                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/edge_64.png"))));
+                            } else if (DEVICE_TYPE.equalsIgnoreCase("source")) {
+                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/source_100.png"))));
+                            } else if (DEVICE_TYPE.equalsIgnoreCase("producer")) {
+                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/producer_100.png"))));
+                            }
+                        }
+                    } catch (Exception e) {
+                        //e.printStackTrace();
+                        System.err.println("Skipping Graphics Icon, unkown device_type");
+                    }
                 }
             }
             nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
@@ -556,7 +588,7 @@ public class frame extends JFrame implements ActionListener {
     }
 
     static class RightPanel extends JPanel {
-        static JLabel title;
+        static JTextArea title;
         static JButton apply;
         static JTable table, table2;
         static DefaultTableModel payloadTableModel;
@@ -565,7 +597,8 @@ public class frame extends JFrame implements ActionListener {
         public RightPanel() {
             GridLayout layout = new GridLayout(2, 2);
             setLayout(layout);
-            title = new JLabel();
+            title = new JTextArea();
+            title.setEditable(false);
             payloadTableModel = new DefaultTableModel();
             payloadTableModel.addColumn("#");
             payloadTableModel.addColumn("Key");
@@ -588,14 +621,15 @@ public class frame extends JFrame implements ActionListener {
             JScrollPane scrollPane2 = new JScrollPane(table2);
             scrollPane1.setPreferredSize(new Dimension(150, 200));
             scrollPane2.setPreferredSize(new Dimension(150, 200));
-            add(title);
+            add(new JScrollPane(title));
             add(scrollPane2);
             add(new JButton("dsada"));
             add(scrollPane1);
         }
 
         public static void applayChanges() {
-            title.setText(Integer.toString(NODE_POSITION));
+            title.setText("Node ID : " + NODE_POSITION);
+            title.setText(title.getText() + "\nNodeType: " + jicnsnodes[NODE_POSITION].nodeType());
             payloadTableModel.setRowCount(0);
 
             String[][] x = jicnsnodes[NODE_POSITION].getPayloadContents();
