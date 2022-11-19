@@ -126,6 +126,7 @@ public abstract class jicnsNodeImpl {
     public abstract void onRespOutGoingData();
 
     abstract public void onCacheHit();
+
     abstract public void onHDDHit();
 
     /**
@@ -133,11 +134,13 @@ public abstract class jicnsNodeImpl {
      */
 
     abstract public void onCacheMiss();
+
     abstract public void onHDDMiss();
+
     /**
      * What to do when Cache MissHappens?
      */
-    abstract public void addToPayloadMemory(String key, String value);
+    abstract public boolean addToPayloadMemory(String key, String value);
 
     abstract public void allocatePayloadMemorySize();
 
@@ -188,6 +191,7 @@ public abstract class jicnsNodeImpl {
 
     /**
      * It will return what kind of node it is
+     *
      * @return must return somehing , not null
      */
     abstract public String nodeType();

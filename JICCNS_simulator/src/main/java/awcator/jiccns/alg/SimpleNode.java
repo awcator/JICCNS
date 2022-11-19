@@ -40,7 +40,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
-                changePowerConsumptionBy(i+1);
+                changePowerConsumptionBy(i + 1);
                 return cacheMemory[i][1];
             }
         }
@@ -54,7 +54,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 onHDDHit();
-                changePowerConsumptionBy(i+1);
+                changePowerConsumptionBy(i + 1);
                 return localMemory[i][1];
             }
         }
@@ -116,11 +116,16 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public void addToPayloadMemory(String key, String value) {
-        localMemory[localMemory_seekPointer][0] = key;
-        localMemory[localMemory_seekPointer][1] = value;
-        localMemory_seekPointer++;
+    public boolean addToPayloadMemory(String key, String value) {
+        if (localMemory_seekPointer < getMaxLocalPayloadSize()) {
+            localMemory[localMemory_seekPointer][0] = key;
+            localMemory[localMemory_seekPointer][1] = value;
+            localMemory_seekPointer++;
+            changePowerConsumptionBy(1);
+            return true;
+        }
         changePowerConsumptionBy(1);
+        return false;
     }
 
     @Override
@@ -152,8 +157,7 @@ public class SimpleNode extends jicnsNodeImpl {
             localcache_seekPointer++;
             onAddedToCache();
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;

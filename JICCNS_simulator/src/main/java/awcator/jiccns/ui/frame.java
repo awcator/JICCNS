@@ -17,6 +17,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -125,10 +126,12 @@ public class frame extends JFrame implements ActionListener {
         dragListener mia = null;
         if (!reset_ui_positons) mia = new dragListener(centerpanel);
         popupMenu menu = new popupMenu();
+        HashSet<String> setOfDataInCacheAndMemory = new HashSet<>();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
             if (!reset_ui_positons) {
                 String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
+                System.out.println("----------------------------\nWorking on " + prefix + i);
                 if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
@@ -184,7 +187,12 @@ public class frame extends JFrame implements ActionListener {
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("payload")) {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("payload").keys(); it.hasNext(); ) {
                             String str = it.next();
-                            jicnsnodes[i].addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str));
+                            if (!jicnsnodes[i].addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str))) {
+                                System.err.println("Failed to add into cache PayloadMemory");
+                            } else {
+                                System.out.println("Loaded Data into PayloadMemory");
+                                setOfDataInCacheAndMemory.add(str);
+                            }
                         }
                     }
                     /**
@@ -196,13 +204,14 @@ public class frame extends JFrame implements ActionListener {
                             System.out.println(str + " <-----This entry should be added to cache");
                             if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str))) {
                                 System.err.println("Failed to add into cache ");
+                            } else {
+                                System.out.println("Loaded Cache into CacheMemory ");
+                                //add the keys into the wordlist
+                                setOfDataInCacheAndMemory.add(str);
                             }
                         }
                     }
                     nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
-                    /**
-                     * Background color based on EDGE Server
-                     */
                     try {
                         String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
                         if (DEVICE_TYPE != null) {
@@ -219,7 +228,7 @@ public class frame extends JFrame implements ActionListener {
                         }
                     } catch (Exception e) {
                         //e.printStackTrace();
-                        System.err.println("Skipping Graphics Icon, unkown device_type");
+                        System.err.println("Skipping Graphics Icon, unkown device_type for " + prefix + i);
                     }
                 }
             }
@@ -230,7 +239,19 @@ public class frame extends JFrame implements ActionListener {
                 nodes[i].addMouseMotionListener(mia);
                 nodes[i].setComponentPopupMenu(menu);
                 nodes[i].setName(Integer.toString(i));
+
             }
+        }
+        System.out.println("Writing datasets at ");
+        try {
+            FileWriter filewriter = new FileWriter(System.getProperty("java.io.tmpdir") + "/datasets.txt");
+            for (String line : setOfDataInCacheAndMemory) {
+                filewriter.write(line + System.lineSeparator());
+            }
+            filewriter.close();
+        } catch (Exception e) {
+            System.err.println("Failed to write DataSets");
+            e.printStackTrace();
         }
         System.out.println("\tDone");
     }

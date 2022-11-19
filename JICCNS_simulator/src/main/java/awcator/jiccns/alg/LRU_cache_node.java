@@ -27,6 +27,7 @@ public class LRU_cache_node extends jicnsNodeImpl {
     int id = 0;
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
+
     public LRU_cache_node(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
@@ -119,11 +120,16 @@ public class LRU_cache_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void addToPayloadMemory(String key, String value) {
-        localMemory[localMemory_seekPointer][0] = key;
-        localMemory[localMemory_seekPointer][1] = value;
-        localMemory_seekPointer++;
+    public boolean addToPayloadMemory(String key, String value) {
+        if (localcache_seekPointer < getMaxLocalPayloadSize()) {
+            localMemory[localMemory_seekPointer][0] = key;
+            localMemory[localMemory_seekPointer][1] = value;
+            localMemory_seekPointer++;
+            changePowerConsumptionBy(1);
+            return true;
+        }
         changePowerConsumptionBy(1);
+        return false;
     }
 
     @Override
