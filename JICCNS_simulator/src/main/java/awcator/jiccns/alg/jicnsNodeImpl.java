@@ -55,8 +55,9 @@ public abstract class jicnsNodeImpl {
      * Some Implementable ideas:
      *      I dont own this data, i'll forward to others
      *      I own this Data, Should I have to make any change to Cahce? By thinking of improtance in future
+     * param: data: It is the dataquery other nodes requested this node
      */
-    public abstract void onIncomingReqData();
+    public abstract void onIncomingReqData(String data);
 
     /***
      * A node implementable function
@@ -121,7 +122,7 @@ public abstract class jicnsNodeImpl {
     /**
      * What to do when data is recving from the node who knows the data
      */
-    public abstract void onRespIncomingData();
+    public abstract void onRespIncomingData(String data);
 
     public abstract void onRespOutGoingData();
 

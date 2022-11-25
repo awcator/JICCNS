@@ -34,8 +34,8 @@ public class LRU_cache_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void onIncomingReqData() {
-        //System.out.println("Packet Reached Node" + getNodeID());
+    public void onIncomingReqData(String data) {
+
     }
 
     @Override
@@ -88,8 +88,8 @@ public class LRU_cache_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void onRespIncomingData() {
-
+    public void onRespIncomingData(String data) {
+        //System.out.println("NODE"+getNodeID()+" recived as response"+data);
     }
 
     @Override

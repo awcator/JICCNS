@@ -21,7 +21,7 @@
   "cached": {
    "fastestcar": "koinseg agera"
   },
-  "type": "lru_cache_node",
+  "type": "simplenode",
   "egress": {
    "node1": "5ms",
    "node2": "1ms"

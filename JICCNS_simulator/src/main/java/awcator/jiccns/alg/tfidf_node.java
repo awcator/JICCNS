@@ -12,6 +12,10 @@ import java.util.Arrays;
 
 public class tfidf_node extends jicnsNodeImpl {
     /**
+     * TF_IDF specific: To store history of requests in that porticular node
+     */
+    String historyOfRequests="";
+    /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
      */
@@ -31,7 +35,7 @@ public class tfidf_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void onIncomingReqData() {
+    public void onIncomingReqData(String data) {
         //System.out.println("Packet Reached Node" + getNodeID());
     }
 
@@ -84,7 +88,7 @@ public class tfidf_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void onRespIncomingData() {
+    public void onRespIncomingData(String data) {
 
     }
 
@@ -205,6 +209,9 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public String nodeType() {
-        return "SimpleNode";
+        return "tfidf_node";
+    }
+    class TFIDF_Calulator{
+
     }
 }

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class TFIDFCalculator {
+public class TFIDFCalculatorDemoDummy {
     public static void main(String[] args) {
         /*
         List<String> doc1 = Arrays.asList("the best italian restaurant enjoy the best pasta".split(" "));
@@ -21,7 +21,7 @@ public class TFIDFCalculator {
         List<String> doc4 = Arrays.asList("temparature of s4".split(" "));
         List<String> queryHistory = Arrays.asList("temparature of s1 temparature of s1 temparature of s1".split(" "));
         List<List<String>> documents = Arrays.asList(doc1, doc2, doc3, doc4,queryHistory);
-        TFIDFCalculator calculator = new TFIDFCalculator();
+        TFIDFCalculatorDemoDummy calculator = new TFIDFCalculatorDemoDummy();
 
 
         //double tfidf = calculator.tfIdf(doc1, documents, "enjoy");

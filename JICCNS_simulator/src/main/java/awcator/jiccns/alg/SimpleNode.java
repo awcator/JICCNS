@@ -31,12 +31,14 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public void onIncomingReqData() {
+    public void onIncomingReqData(String data) {
         //System.out.println("Packet Reached Node" + getNodeID());
+        //System.out.println("Recived query_answer from other nodes" + data);
     }
 
     @Override
     public String cacheLookUp(String queryKey) {
+        System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
@@ -84,8 +86,9 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public void onRespIncomingData() {
-
+    public void onRespIncomingData(String data) {
+        //System.out.println("NODE"+getNodeID()+" recived as response"+data);
+        //data recived by the node as response to quyert
     }
 
     @Override
