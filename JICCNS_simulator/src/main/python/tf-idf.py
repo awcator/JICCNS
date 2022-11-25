@@ -5,7 +5,7 @@ import tempfile
 from sklearn.metrics.pairwise import linear_kernel
 from nltk import word_tokenize          
 from nltk.stem import WordNetLemmatizer
-import nltk
+#import nltk
 import tempfile
 from nltk.corpus import stopwords
 import sys, os
@@ -17,7 +17,7 @@ cache_history_location=sys.argv[1]
 #sys.stdout= devnull
 
 # Download stopwords list
-nltk.download('punkt',quiet=True)
+#nltk.download('punkt',quiet=True)
 #nltk.download('wordnet',quiet=True)
 #nltk.download('stopwords',quiet=True)
 #nltk.download('omw-1.4',quiet=True)

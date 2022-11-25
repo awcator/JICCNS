@@ -239,10 +239,9 @@ public class frame extends JFrame implements ActionListener {
                 nodes[i].addMouseMotionListener(mia);
                 nodes[i].setComponentPopupMenu(menu);
                 nodes[i].setName(Integer.toString(i));
-
             }
         }
-        System.out.println("Writing datasets at ");
+        System.out.println("Writing datasets at "+System.getProperty("java.io.tmpdir") + "/datasets.txt");
         try {
             FileWriter filewriter = new FileWriter(System.getProperty("java.io.tmpdir") + "/datasets.txt");
             for (String line : setOfDataInCacheAndMemory) {
