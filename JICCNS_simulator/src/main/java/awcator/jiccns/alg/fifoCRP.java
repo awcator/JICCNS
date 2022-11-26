@@ -53,7 +53,7 @@ public class fifoCRP extends jicnsNodeImpl {
         }
 
         if (immunity_power_consumption == false) {
-            changePowerConsumptionBy(localcache_seekPointer % getMaxLocalCacheSize());
+            changePowerConsumptionBy(Math.min(localcache_seekPointer, getMaxLocalCacheSize()));
             onCacheMiss();
         }
         return null;

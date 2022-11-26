@@ -1,24 +1,20 @@
 package awcator.jiccns.alg;
 
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.Random;
 
 /**
- * Node Summary:
+ * Node Summary: Random Cache Replacemnt Policy Node
+ * <p>
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
+ * Replacemnt Type: Random
  * <p>
- * CacheStrategy: Nope
+ * CacheStrategy: Random CRP
+ * Extra Memoty: Nope
  */
 
-public class tfidf_node extends jicnsNodeImpl {
-    static Set<String> bagofwords_dataset = new HashSet<>();
-    /**
-     * TF_IDF specific: To store history of requests in that porticular node
-     */
-    String historyOfRequests;
+public class tfidfCRP extends jicnsNodeImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -33,39 +29,34 @@ public class tfidf_node extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public tfidf_node(int nodeid, int egressSize) {
+    public tfidfCRP(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
-
-    }
-
-    /**
-     * Converts string into spaced String
-     *
-     * @param str eg: hello_world-car
-     * @return will return 'hello world car'
-     */
-    private String makeSpacedData(String str) {
-        return str.trim().replaceAll("_", " ").replaceAll("-", " ").trim();
     }
 
     @Override
     public void onIncomingReqData(String data) {
         //System.out.println("Packet Reached Node" + getNodeID());
-        historyOfRequests += makeSpacedData(data) + " ";
+        //System.out.println("Recived query_answer from other nodes" + data);
     }
 
     @Override
     public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
+        //System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
-                onCacheHit();
-                changePowerConsumptionBy(i + 1);
+                if (immunity_power_consumption == false) {
+                    onCacheHit();
+                    changePowerConsumptionBy(i + 1);
+                }
                 return cacheMemory[i][1];
             }
         }
-        onCacheMiss();
-        changePowerConsumptionBy(localcache_seekPointer);
+
+        if (immunity_power_consumption == false) {
+            changePowerConsumptionBy(localcache_seekPointer);
+            onCacheMiss();
+        }
         return null;
     }
 
@@ -73,53 +64,72 @@ public class tfidf_node extends jicnsNodeImpl {
     public String hddLookUp(String query_key, boolean immunity_power_consumption) {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
-                onHDDHit();
-                changePowerConsumptionBy(i + 1);
+                if (immunity_power_consumption == false) {
+                    onHDDHit();
+                    changePowerConsumptionBy(i + 1);
+                }
                 return localMemory[i][1];
             }
         }
-        changePowerConsumptionBy(localMemory_seekPointer);
-        onHDDMiss();
+        if (immunity_power_consumption == false) {
+            changePowerConsumptionBy(localMemory_seekPointer);
+            onHDDMiss();
+        }
         return null;
     }
 
     @Override
     public boolean shouldICacheOrNot(String key, String value) {
+        String haveICachedBefore = cacheLookUp(key, true);
+        if (haveICachedBefore == null) {
+            haveICachedBefore = hddLookUp(key, true);
+        }
+        if (haveICachedBefore == null) {
+            return true;
+        }
         return false;
     }
 
     @Override
     public void onAddedToCache(String key, String value) {
+        System.out.println("Cache was Added to cacheMeomry for the key and values : " + key + " : " + value);
         changePowerConsumptionBy(1);
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
-
+        System.err.println(nodeType() + " Node" + getNodeID() + "Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
+        changePowerConsumptionBy(1);
     }
 
     @Override
     public void onReqOutGoingData(String... data) {
-
+        System.out.println("NODE" + getNodeID() + " Is forwarding requests to its neibhour node node" + data[0] + " with curent path " + data[1]);
     }
 
     @Override
     public void onRespIncomingData(String... data) {
-
+        System.out.println("NODE" + getNodeID() + " recived as response KEY. Will try to cache if required" + data[0]);
+        //data recived by the node as response to quyert
+        if (shouldICacheOrNot(data[0], data[1])) {
+            addToCacheMemory(data[0], data[1]);
+        }
     }
 
     @Override
     public void onRespOutGoingData() {
-
+        System.out.println("Node" + getNodeID() + " Forwarding answer to Query its original requester in a path");
     }
 
     @Override
     public void onCacheHit() {
         cache_hits = cache_hits + 1;
+        //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
     public void onHDDHit() {
+        //System.out.println("HDD HIT");
         hdd_hits++;
     }
 
@@ -135,7 +145,7 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public boolean addToPayloadMemory(String key, String value) {
-        if (localcache_seekPointer < getMaxLocalPayloadSize()) {
+        if (localMemory_seekPointer < getMaxLocalPayloadSize()) {
             localMemory[localMemory_seekPointer][0] = key;
             localMemory[localMemory_seekPointer][1] = value;
             localMemory_seekPointer++;
@@ -143,6 +153,7 @@ public class tfidf_node extends jicnsNodeImpl {
             return true;
         }
         changePowerConsumptionBy(1);
+        System.err.println(nodeType() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
         return false;
     }
 
@@ -168,12 +179,25 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public boolean addToCacheMemory(String key, String value) {
-        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize());
+        System.out.println(nodeType() + " Node" + getNodeID() + " Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize() + "   " + localcache_seekPointer);
         try {
-            cacheMemory[localcache_seekPointer][0] = key;
-            cacheMemory[localcache_seekPointer][1] = value;
-            localcache_seekPointer++;
-            onAddedToCache(key, value);
+            if (localcache_seekPointer < getMaxLocalCacheSize()) {
+                cacheMemory[localcache_seekPointer][0] = key;
+                cacheMemory[localcache_seekPointer][1] = value;
+                localcache_seekPointer++;
+                onAddedToCache(key, value);
+            } else {
+                //Random Replacment Strategy
+                Random r = new Random();
+                int randInt = r.nextInt(getMaxLocalCacheSize());
+                //System.out.println("Node"+getNodeID()+" is ready to replace cache content from "+cacheMemory[randInt][0]+" with "+key);
+                String cache_key_removed = cacheMemory[randInt][0]; //Cache key that is being removed
+                String cache_value_removed = cacheMemory[randInt][1]; //Cache value that is being removed
+                cacheMemory[randInt][0] = key;
+                cacheMemory[randInt][1] = value;
+                onRemovedFromCache(cache_key_removed, cache_value_removed);
+                onAddedToCache(key, value);
+            }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -225,51 +249,6 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public String nodeType() {
-        return "tfidf_node";
-    }
-
-    class TFIDF_Calulator {
-        public double tf(List<String> doc, String term) {
-            double result = 0;
-            for (String word : doc) {
-                if (term.equalsIgnoreCase(word))
-                    result++;
-            }
-            return result / doc.size();
-        }
-
-        public double idf(List<List<String>> docs, String term) {
-            double n = 0;
-            for (List<String> doc : docs) {
-                for (String word : doc) {
-                    if (term.equalsIgnoreCase(word)) {
-                        n++;
-                        break;
-                    }
-                }
-            }
-            return Math.log10((double) docs.size() / (double) n);
-        }
-
-        public double tfIdf(List<String> doc, List<List<String>> docs, String term) {
-            return tf(doc, term) * idf(docs, term);
-        }
-
-        public double cosineSimlarityTFIDF(List<List<String>> docs, List<String> docA, List<String> docB, Set<String> bagofwords) {
-            double numerator = 0;
-            double denominator = 0;
-            double tfidf_A = 0;
-            double tfidf_B = 0;
-            double totaltfidf_A = 0;
-            double totaltfidf_B = 0;
-            for (String word : bagofwords) {
-                tfidf_A = tfIdf(docA, docs, word);
-                tfidf_B = tfIdf(docB, docs, word);
-                numerator += (tfidf_A * tfidf_B);
-                totaltfidf_A += Math.pow(tfidf_A, 2);
-                totaltfidf_B += Math.pow(tfidf_B, 2);
-            }
-            return numerator / (Math.sqrt(totaltfidf_A) * Math.sqrt(totaltfidf_B));
-        }
+        return "RandomCRP";
     }
 }
