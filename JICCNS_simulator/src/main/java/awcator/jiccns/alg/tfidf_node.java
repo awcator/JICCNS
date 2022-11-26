@@ -1,6 +1,9 @@
 package awcator.jiccns.alg;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Node Summary:
@@ -11,10 +14,11 @@ import java.util.Arrays;
  */
 
 public class tfidf_node extends jicnsNodeImpl {
+    static Set<String> bagofwords_dataset = new HashSet<>();
     /**
      * TF_IDF specific: To store history of requests in that porticular node
      */
-    String historyOfRequests="";
+    String historyOfRequests;
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -32,15 +36,27 @@ public class tfidf_node extends jicnsNodeImpl {
     public tfidf_node(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
+
+    }
+
+    /**
+     * Converts string into spaced String
+     *
+     * @param str eg: hello_world-car
+     * @return will return 'hello world car'
+     */
+    private String makeSpacedData(String str) {
+        return str.trim().replaceAll("_", " ").replaceAll("-", " ").trim();
     }
 
     @Override
     public void onIncomingReqData(String data) {
         //System.out.println("Packet Reached Node" + getNodeID());
+        historyOfRequests += makeSpacedData(data) + " ";
     }
 
     @Override
-    public String cacheLookUp(String queryKey) {
+    public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 onCacheHit();
@@ -54,7 +70,7 @@ public class tfidf_node extends jicnsNodeImpl {
     }
 
     @Override
-    public String hddLookUp(String query_key) {
+    public String hddLookUp(String query_key, boolean immunity_power_consumption) {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 onHDDHit();
@@ -68,27 +84,27 @@ public class tfidf_node extends jicnsNodeImpl {
     }
 
     @Override
-    public void shouldICacheOrNot() {
-
+    public boolean shouldICacheOrNot(String key, String value) {
+        return false;
     }
 
     @Override
-    public void onAddedToCache() {
+    public void onAddedToCache(String key, String value) {
         changePowerConsumptionBy(1);
     }
 
     @Override
-    public void onRemovedFromCache() {
+    public void onRemovedFromCache(String key, String value) {
 
     }
 
     @Override
-    public void onReqOutGoingData() {
+    public void onReqOutGoingData(String... data) {
 
     }
 
     @Override
-    public void onRespIncomingData(String data) {
+    public void onRespIncomingData(String... data) {
 
     }
 
@@ -152,12 +168,12 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public boolean addToCacheMemory(String key, String value) {
-        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocaCacheSize());
+        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize());
         try {
             cacheMemory[localcache_seekPointer][0] = key;
             cacheMemory[localcache_seekPointer][1] = value;
             localcache_seekPointer++;
-            onAddedToCache();
+            onAddedToCache(key, value);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
@@ -167,11 +183,11 @@ public class tfidf_node extends jicnsNodeImpl {
 
     @Override
     public void allocateCacheMemorySize() {
-        cacheMemory = new String[getMaxLocaCacheSize()][2];
+        cacheMemory = new String[getMaxLocalCacheSize()][2];
     }
 
     @Override
-    public int getMaxLocaCacheSize() {
+    public int getMaxLocalCacheSize() {
         return cacheMemorySize;
     }
 
@@ -211,7 +227,49 @@ public class tfidf_node extends jicnsNodeImpl {
     public String nodeType() {
         return "tfidf_node";
     }
-    class TFIDF_Calulator{
 
+    class TFIDF_Calulator {
+        public double tf(List<String> doc, String term) {
+            double result = 0;
+            for (String word : doc) {
+                if (term.equalsIgnoreCase(word))
+                    result++;
+            }
+            return result / doc.size();
+        }
+
+        public double idf(List<List<String>> docs, String term) {
+            double n = 0;
+            for (List<String> doc : docs) {
+                for (String word : doc) {
+                    if (term.equalsIgnoreCase(word)) {
+                        n++;
+                        break;
+                    }
+                }
+            }
+            return Math.log10((double) docs.size() / (double) n);
+        }
+
+        public double tfIdf(List<String> doc, List<List<String>> docs, String term) {
+            return tf(doc, term) * idf(docs, term);
+        }
+
+        public double cosineSimlarityTFIDF(List<List<String>> docs, List<String> docA, List<String> docB, Set<String> bagofwords) {
+            double numerator = 0;
+            double denominator = 0;
+            double tfidf_A = 0;
+            double tfidf_B = 0;
+            double totaltfidf_A = 0;
+            double totaltfidf_B = 0;
+            for (String word : bagofwords) {
+                tfidf_A = tfIdf(docA, docs, word);
+                tfidf_B = tfIdf(docB, docs, word);
+                numerator += (tfidf_A * tfidf_B);
+                totaltfidf_A += Math.pow(tfidf_A, 2);
+                totaltfidf_B += Math.pow(tfidf_B, 2);
+            }
+            return numerator / (Math.sqrt(totaltfidf_A) * Math.sqrt(totaltfidf_B));
+        }
     }
 }

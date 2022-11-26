@@ -1,7 +1,11 @@
 package awcator.jiccns;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
 
 public final class meta {
     public static final String JICNS_version = "JICNS_202209";
@@ -17,5 +21,24 @@ public final class meta {
     public static String loadBluePrintFromFile(String path) throws Exception {
         System.out.println("Loading Blueprint from " + path);
         return Files.readString(Path.of(path));
+    }
+
+    public static String getDataSetLocation() {
+        return System.getProperty("java.io.tmpdir") + "/datasets.txt";
+    }
+
+    public Set<String> getDataSets() {
+        try {
+            Set<String> bagofwords_dataset = new HashSet<>();
+            Scanner scanner = new Scanner(new File(meta.getDataSetLocation()));
+            while (scanner.hasNextLine()) {
+                bagofwords_dataset.add(scanner.nextLine());
+            }
+            return bagofwords_dataset;
+        } catch (Exception e) {
+            System.err.println("Failed to load up bagofwords dataset");
+            e.printStackTrace();
+        }
+        return null;
     }
 }

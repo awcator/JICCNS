@@ -1,18 +1,20 @@
 package awcator.jiccns.alg;
 
 import java.util.Arrays;
+import java.util.Random;
 
 /**
- * Node Summary:
+ * Node Summary: Random Cache Replacemnt Policy Node
+ * <p>
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
- * Replacemnt Type: No replacments. OneTime Hardcoded cache and memory
- * <p>
- * CacheStrategy: Nope
+ * Replacemnt Type: Random
+ *
+ * CacheStrategy: Random CRP
  * Extra Memoty: Nope
  */
 
-public class SimpleNode extends jicnsNodeImpl {
+public class RandomCRP extends jicnsNodeImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -27,7 +29,7 @@ public class SimpleNode extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public SimpleNode(int nodeid, int egressSize) {
+    public RandomCRP(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
     }
@@ -44,15 +46,16 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
-                    changePowerConsumptionBy(i + 1);
                     onCacheHit();
+                    changePowerConsumptionBy(i + 1);
                 }
                 return cacheMemory[i][1];
             }
         }
+
         if (immunity_power_consumption == false) {
-            onCacheMiss();
             changePowerConsumptionBy(localcache_seekPointer);
+            onCacheMiss();
         }
         return null;
     }
@@ -61,14 +64,14 @@ public class SimpleNode extends jicnsNodeImpl {
     public String hddLookUp(String query_key, boolean immunity_power_consumption) {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
-                if(immunity_power_consumption==false) {
+                if (immunity_power_consumption == false) {
                     onHDDHit();
                     changePowerConsumptionBy(i + 1);
                 }
                 return localMemory[i][1];
             }
         }
-        if(immunity_power_consumption==false) {
+        if (immunity_power_consumption == false) {
             changePowerConsumptionBy(localMemory_seekPointer);
             onHDDMiss();
         }
@@ -77,19 +80,26 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public boolean shouldICacheOrNot(String key, String value) {
-        //Always dont cacheIT
-        //FORCE no cache
+        String haveICachedBefore = cacheLookUp(key, true);
+        if (haveICachedBefore == null) {
+            haveICachedBefore = hddLookUp(key, true);
+        }
+        if(haveICachedBefore==null){
+            return true;
+        }
         return false;
     }
 
     @Override
     public void onAddedToCache(String key, String value) {
+        System.out.println("Cache was Added to cacheMeomry for the key and values : " + key + " : " + value);
         changePowerConsumptionBy(1);
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
-
+        System.out.println("Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
+        changePowerConsumptionBy(1);
     }
 
     @Override
@@ -100,10 +110,10 @@ public class SimpleNode extends jicnsNodeImpl {
     @Override
     public void onRespIncomingData(String... data) {
         System.out.println("NODE" + getNodeID() + " recived as response KEY" + data[0]);
+        //data recived by the node as response to quyert
         if (shouldICacheOrNot(data[0], data[1])) {
             addToCacheMemory(data[0], data[1]);
         }
-        //data recived by the node as response to quyert
     }
 
     @Override
@@ -119,7 +129,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onHDDHit() {
-        System.out.println("HDD HIT");
+        //System.out.println("HDD HIT");
         hdd_hits++;
     }
 
@@ -170,17 +180,24 @@ public class SimpleNode extends jicnsNodeImpl {
     public boolean addToCacheMemory(String key, String value) {
         System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize());
         try {
-            if (localcache_seekPointer <= getMaxLocalCacheSize()) {
+            if (localMemory_seekPointer < getMaxLocalCacheSize()) {
                 cacheMemory[localcache_seekPointer][0] = key;
                 cacheMemory[localcache_seekPointer][1] = value;
                 localcache_seekPointer++;
                 onAddedToCache(key, value);
-                return true;
             } else {
-                changePowerConsumptionBy(1);
-                System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID());
-                // TODO: 11/26/22 Cache Overflow metrics? may be in future
+                //Random Replacment Strategy
+                Random r = new Random();
+                int randInt = r.nextInt(getMaxLocalCacheSize());
+                //System.out.println("Node"+getNodeID()+" is ready to replace cache content from "+cacheMemory[randInt][0]+" with "+key);
+                String cache_key_removed = cacheMemory[randInt][0]; //Cache key that is being removed
+                String cache_value_removed = cacheMemory[randInt][0]; //Cache value that is being removed
+                cacheMemory[randInt][0] = key;
+                cacheMemory[randInt][1] = value;
+                onRemovedFromCache(cache_key_removed, cache_value_removed);
+                onAddedToCache(key, value);
             }
+            return true;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -231,6 +248,6 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public String nodeType() {
-        return "SimpleNode";
+        return "RandomCRP";
     }
 }

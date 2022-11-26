@@ -65,14 +65,24 @@ public abstract class jicnsNodeImpl {
      * Some Implementable ideas:
      *      How to lookup in cache? Should I have to lookup linearly or byIndexOf or recentFirst or Search from old data?
      *      Make sure to increses operationcount by modifiing powerConsumption varaible. To get more accury of the algorithm which node was implemted with
+     *
+     * Pram:
+     * query_key:  A string key that is used to lookup inits cacheMemory
+     * immune_to_powerconsumption: a boolean type to increse powerconsumption or not.
+     *     SomeTimes you may need to query your lookuptable for processing data, you may dont want to effect its internal powerconumption param
      */
-    abstract public String cacheLookUp(String query_key);
+    abstract public String cacheLookUp(String query_key, boolean immunity_power_consumption);
 
     /***
      * A node implementable function
      * It symbolizes what to be done to lookUp data in its internal Memory
+     *
+     * Pram:
+     * query_key:  A string key that is used to lookup inits HDD
+     * immune_to_powerconsumption: a boolean type to increse powerconsumption or not.
+     *     SomeTimes you may need to query your lookuptable for processing data, you may dont want to effect its internal powerconumption param
      */
-    abstract public String hddLookUp(String query_key);
+    abstract public String hddLookUp(String query_key, boolean immunity_power_consumption);
 
     /***
      * A node implementable function
@@ -83,8 +93,9 @@ public abstract class jicnsNodeImpl {
      *      Since data dsnt exsist in cache, is it worth to cache this data?
      *      if decided yes. Whoam Should i remove from the cache if cache is full?
      *      if cache is not full, what order should i put it? timeOrder? frequency? populatirity? OldFirst? recently used First? BigSize data first?
+     * @return
      */
-    public abstract void shouldICacheOrNot();
+    public abstract boolean shouldICacheOrNot(String key, String value);
 
     /***
      * A node implementable function
@@ -93,7 +104,7 @@ public abstract class jicnsNodeImpl {
      * Which data from cahce should I remvoe to add keep this data?
      * Should I have to forward the same data to others even If i have the same data?
      */
-    public abstract void onAddedToCache();
+    public abstract void onAddedToCache(String key, String value);
 
     /***
      * A node implementable function
@@ -105,7 +116,7 @@ public abstract class jicnsNodeImpl {
      * Or should I have to ask others to stop caching this, since I alredy cached it?
      * Or since I know this is least impornt data. should i tell others to stop cachec this data?
      */
-    public abstract void onRemovedFromCache();
+    public abstract void onRemovedFromCache(String key, String value);
 
     /**
      * A node implementable function
@@ -115,14 +126,20 @@ public abstract class jicnsNodeImpl {
      * Decide which direction to pass info. return the answer? or forward request? any other strategy?
      * Decide if to broadcast next paretnts? or send one by one? or any other strategy?
      * whom to forward? shall I decide based on latency? shall I decide on Hops? or battery consumption? or more strategy?
+     * <p>
+     * data[0]: reciving nodeID
+     * data[1]: currentPath so far from the sourceNode
      */
 
-    public abstract void onReqOutGoingData();
+    public abstract void onReqOutGoingData(String... data);
 
     /**
      * What to do when data is recving from the node who knows the data
+     * <p>
+     * data[0]=key
+     * data[1]=value
      */
-    public abstract void onRespIncomingData(String data);
+    public abstract void onRespIncomingData(String... data);
 
     public abstract void onRespOutGoingData();
 
@@ -155,7 +172,7 @@ public abstract class jicnsNodeImpl {
 
     abstract public void allocateCacheMemorySize();
 
-    abstract public int getMaxLocaCacheSize();
+    abstract public int getMaxLocalCacheSize();
 
     abstract public String[][] getCacheContents();
 

@@ -20,7 +20,7 @@ public class TFIDFCalculatorDemoDummy {
         List<String> doc3 = Arrays.asList("temparature of s3".split(" "));
         List<String> doc4 = Arrays.asList("temparature of s4".split(" "));
         List<String> queryHistory = Arrays.asList("temparature of s1 temparature of s1 temparature of s1".split(" "));
-        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3, doc4,queryHistory);
+        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3, doc4, queryHistory);
         TFIDFCalculatorDemoDummy calculator = new TFIDFCalculatorDemoDummy();
 
 
@@ -33,10 +33,10 @@ public class TFIDFCalculatorDemoDummy {
                 myset.add(word);
             }
         }
-        System.out.println(calculator.cosineSimlarityTFIDF(documents,doc2,doc4,myset));
+        System.out.println(calculator.cosineSimlarityTFIDF(documents, doc2, doc4, myset));
         System.out.println("----cosine simlairy WRT searchTerm-----");
         for (List<String> doc : documents) {
-            System.out.println(calculator.cosineSimlarityTFIDF(documents,doc,queryHistory,myset));
+            System.out.println(calculator.cosineSimlarityTFIDF(documents, doc, queryHistory, myset));
         }
     }
 
@@ -55,23 +55,24 @@ public class TFIDFCalculatorDemoDummy {
 
         return result / doc.size();
     }
-    public double cosineSimlarityTFIDF(List<List<String>> docs,List<String> docA,List<String> docB,Set<String> bagofwords){
-        double numerator=0;
-        double denominator=0;
-        double tfidf_A=0;
-        double tfidf_B =0;
-        double totaltfidf_A=0;
-        double totaltfidf_B=0;
-        for(String word:bagofwords){
-            tfidf_A=tfIdf(docA,docs,word);
-            tfidf_B=tfIdf(docB,docs,word);
 
-            numerator+=(tfidf_A*tfidf_B);
-            totaltfidf_A+=Math.pow(tfidf_A,2);
-            totaltfidf_B+=Math.pow(tfidf_B,2);
+    public double cosineSimlarityTFIDF(List<List<String>> docs, List<String> docA, List<String> docB, Set<String> bagofwords) {
+        double numerator = 0;
+        double denominator = 0;
+        double tfidf_A = 0;
+        double tfidf_B = 0;
+        double totaltfidf_A = 0;
+        double totaltfidf_B = 0;
+        for (String word : bagofwords) {
+            tfidf_A = tfIdf(docA, docs, word);
+            tfidf_B = tfIdf(docB, docs, word);
+
+            numerator += (tfidf_A * tfidf_B);
+            totaltfidf_A += Math.pow(tfidf_A, 2);
+            totaltfidf_B += Math.pow(tfidf_B, 2);
         }
 
-        return numerator/(Math.sqrt(totaltfidf_A)*Math.sqrt(totaltfidf_B));
+        return numerator / (Math.sqrt(totaltfidf_A) * Math.sqrt(totaltfidf_B));
     }
 
     /**
