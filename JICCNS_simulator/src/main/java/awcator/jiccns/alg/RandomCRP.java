@@ -112,7 +112,7 @@ public class RandomCRP extends jicnsNodeImpl {
         System.out.println("NODE" + getNodeID() + " recived as response KEY. Will try to cache if required" + data[0]);
         //data recived by the node as response to quyert
         if (shouldICacheOrNot(data[0], data[1])) {
-            addToCacheMemory(data[0], data[1]);
+            addToCacheMemory(data[0], data[1], false);
         }
     }
 
@@ -178,7 +178,7 @@ public class RandomCRP extends jicnsNodeImpl {
     }
 
     @Override
-    public boolean addToCacheMemory(String key, String value) {
+    public boolean addToCacheMemory(String key, String value, boolean softload) {
         System.out.println(nodeType() + " Node" + getNodeID() + " Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize() + "   " + localcache_seekPointer);
         try {
             if (localcache_seekPointer < getMaxLocalCacheSize()) {
@@ -250,5 +250,10 @@ public class RandomCRP extends jicnsNodeImpl {
     @Override
     public String nodeType() {
         return "RandomCRP";
+    }
+
+    @Override
+    public void onBeginSession(String... data) {
+
     }
 }

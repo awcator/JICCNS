@@ -168,7 +168,7 @@ public abstract class jicnsNodeImpl {
 
     abstract public String[][] getPayloadContents();
 
-    abstract public boolean addToCacheMemory(String key, String value);
+    abstract public boolean addToCacheMemory(String key, String value, boolean softload);
 
     abstract public void allocateCacheMemorySize();
 
@@ -213,4 +213,9 @@ public abstract class jicnsNodeImpl {
      * @return must return somehing , not null
      */
     abstract public String nodeType();
+
+    /**
+     * use this function to bootup your nodes. This function will be called when node begins first broadcast intitaies
+     */
+    abstract public void onBeginSession(String... data);
 }

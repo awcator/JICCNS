@@ -13,29 +13,26 @@ public class TFIDFCalculatorDemoDummy {
         List<String> doc3 = Arrays.asList("korean restaurant enjoy the best bibi".split(" "));
         List<String> doc4 = Arrays.asList("the best the best american restaurant".split(" "));
         List<List<String>> documents = Arrays.asList(doc1, doc2, doc3, doc4);
-        TFIDFCalculator calculator = new TFIDFCalculator();
-        */
-        List<String> doc1 = Arrays.asList("temparature of s1".split(" "));
-        List<String> doc2 = Arrays.asList("temparature of s2".split(" "));
-        List<String> doc3 = Arrays.asList("temparature of s3".split(" "));
-        List<String> doc4 = Arrays.asList("temparature of s4".split(" "));
-        List<String> queryHistory = Arrays.asList("temparature of s1 temparature of s1 temparature of s1".split(" "));
-        List<List<String>> documents = Arrays.asList(doc1, doc2, doc3, doc4, queryHistory);
         TFIDFCalculatorDemoDummy calculator = new TFIDFCalculatorDemoDummy();
-
-
+        */
+        List<String> empty_doc = Arrays.asList("".split(" "));
+        List<String> doc1 = Arrays.asList("largest scrapper in the world".split(" "));
+        List<String> doc2 = Arrays.asList("smallest, country".split(" "));
+        List<String> queryHistory = Arrays.asList("apple".split(" "));
+        List<List<String>> documents = Arrays.asList(empty_doc,doc1,queryHistory);
+        TFIDFCalculatorDemoDummy calculator = new TFIDFCalculatorDemoDummy();
         //double tfidf = calculator.tfIdf(doc1, documents, "enjoy");
         //System.out.print(tfidf);
-
         Set<String> myset = new HashSet<>();
         for (List<String> doc : documents) {
             for (String word : doc) {
                 myset.add(word);
             }
         }
-        System.out.println(calculator.cosineSimlarityTFIDF(documents, doc2, doc4, myset));
+        System.out.println(calculator.cosineSimlarityTFIDF(documents, doc1, queryHistory, myset));
         System.out.println("----cosine simlairy WRT searchTerm-----");
         for (List<String> doc : documents) {
+            System.out.println(doc);
             System.out.println(calculator.cosineSimlarityTFIDF(documents, doc, queryHistory, myset));
         }
     }
@@ -70,6 +67,8 @@ public class TFIDFCalculatorDemoDummy {
             numerator += (tfidf_A * tfidf_B);
             totaltfidf_A += Math.pow(tfidf_A, 2);
             totaltfidf_B += Math.pow(tfidf_B, 2);
+
+            //System.out.println(word+ " "+tfidf_A+"  "+tfidf_B+"   "+numerator+"   "+totaltfidf_A+"   "+totaltfidf_B);
         }
 
         return numerator / (Math.sqrt(totaltfidf_A) * Math.sqrt(totaltfidf_B));

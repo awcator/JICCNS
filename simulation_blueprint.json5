@@ -13,40 +13,40 @@
     "max_cache_size": "4",
     "max_payload_size": "100",
     "payload": {
-      "temprature_at_bangalore": "25c",
+      "temprature at bangalore": "25c",
       "pm": "modi",
       "cm": "bommai",
       "avenger": "hulk"
     },
     "cached": {
-      "fastestcar": "koinseg agera",
-      "richesht_man": "elon musk",
-      "second_richest_company": "amazon"
+      "fastestcar in the world": "koinseg agera",
+      "richesht man": "elon musk",
+      "second richest company in the world": "amazon"
     },
-    "type": "Random_CRP",
+    "type": "SimpleNode",
     "egress": {
       "node1": "5ms",
       "node2": "1ms"
     }
   },
   "node1": {
-    "max_cache_size": "3",
+    "max_cache_size": "6",
     "max_payload_size": "100",
-    "type": "Random_CRP",
+    "type": "tfidfCRP",
     "egress": {
       "node3": "1ms"
     },
     "payload": {
-      "pm": "modi",
-      "cm": "bommai",
-      "avenger": "hulk"
+      "pm of india": "modi",
+      "cm of karnataka": "bommai",
+      "green avenger": "hulk"
     },
     "cached": {
-      "temprature_at_bangalore": "10c",
-      "great_wall_of_chaina": "chaina",
-      "largest_scrapper": "burj kalifa",
-      "largest_country": "russia",
-      "smallest_country": "veticoncity"
+      "temprature at bangalore": "10c",
+      "great wall of chaina located at": "chaina",
+      "largest scrapper in the world": "burj kalifa",
+      "largest country on earth": "russia",
+      "smallest country": "veticoncity"
     }
   },
   "node3": {
@@ -54,6 +54,9 @@
     "max_cache_size": "3",
     "egress": {
       "node0": "1ms"
+    },
+    "payload":{
+    	"tesla": "car";
     }
   },
   "node4": {
@@ -61,27 +64,27 @@
     "max_cache_size": "2",
     "max_payload_size": "10",
     "payload": {
-      "lamborgini": "gallardo",
-      "video_game": "gta",
-      "CJ": "GTA vice city",
-      "ubisoft_game": "far cry"
+      "lamborgini car used by akon in beautiful song": "gallardo",
+      "video game shortend for grand theft auto": "gta",
+      "cj": "GTA vice city",
+      "ubisoft game where player put into the jungle": "far cry"
     },
     "egress": {
       "node0": "4ms",
       "node3": "2ms"
     },
     "cached": {
-      "lamborgini": "gallardo",
+      "lamborgini car used by akon in beautiful song": "gallardo",
       "bugati": "veryon"
     }
   },
   "node2": {
     "cached": {
-      "health_of_node5": "85/100",
+      "health of node5": "85/100",
       "bugati": "veryon",
-      "uvce_location": "bangalore",
+      "uvce location": "bangalore",
       "ping": "pong",
-      "king_opposite": "queen"
+      "king opposite": "queen"
     },
     "type": "Random_CRP",
     "egress": {

@@ -1,9 +1,6 @@
 package awcator.jiccns.ui;
 
-import awcator.jiccns.alg.RandomCRP;
-import awcator.jiccns.alg.SimpleNode;
-import awcator.jiccns.alg.fifoCRP;
-import awcator.jiccns.alg.jicnsNodeImpl;
+import awcator.jiccns.alg.*;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
 
@@ -148,6 +145,8 @@ public class frame extends JFrame implements ActionListener {
                         jicnsnodes[i] = new RandomCRP(i, egressSize);
                     } else if (NODE_TYPE.equalsIgnoreCase("fifoCRP")) {
                         jicnsnodes[i] = new fifoCRP(i, egressSize);
+                    } else if (NODE_TYPE.equalsIgnoreCase("tfidfCRP")) {
+                        jicnsnodes[i] = new tfidfCRP(i, egressSize);
                     } else {
                         jicnsnodes[i] = new SimpleNode(i, egressSize);
                     }
@@ -205,7 +204,7 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("cached").keys(); it.hasNext(); ) {
                             String str = it.next();
                             System.out.println(str + " <-----This entry should be added to cache");
-                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str))) {
+                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str),true )) {
                                 System.err.println("Failed to add into cache ");
                             } else {
                                 System.out.println("Loaded Cache into CacheMemory ");
@@ -423,6 +422,7 @@ public class frame extends JFrame implements ActionListener {
                             int sourceNode = Integer.parseInt(sourceNodeTextArea.getText());
                             int endNode = 0;
                             path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), -1, null, true, QUERY_FROM_USER, null); //start from sourcenOde with inital timeout of 0ms
+                            nodes[rootparent.focusedNode].jicnsNode.onBeginSession(QUERY_FROM_USER);
                             class path_sorter implements Comparator<path> {
                                 @Override
                                 public int compare(path s1, path s2) {
@@ -819,4 +819,5 @@ public class frame extends JFrame implements ActionListener {
  * // TODO: 10/21/22 Need imporve animation speed by skipping unwanteed node animations if it is out of screen
  * // Need to implement https://gist.github.com/cmcfarlen/7ca5cbb3f228c6996233
  * // Time Based Frame animation for good animation speed
+ * // TODO: 11/26/22 Sessions based brodcasting to avoid rebrodcast from node if we know we alredy brodcasted from there before 
  */
