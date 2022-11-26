@@ -2,6 +2,7 @@ package awcator.jiccns.ui;
 
 import awcator.jiccns.alg.RandomCRP;
 import awcator.jiccns.alg.SimpleNode;
+import awcator.jiccns.alg.fifoCRP;
 import awcator.jiccns.alg.jicnsNodeImpl;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
@@ -145,6 +146,8 @@ public class frame extends JFrame implements ActionListener {
                     String NODE_TYPE = jsondata.getJSONObject(prefix + i).get("type").toString();
                     if (NODE_TYPE.equalsIgnoreCase("Random_CRP")) {
                         jicnsnodes[i] = new RandomCRP(i, egressSize);
+                    } else if (NODE_TYPE.equalsIgnoreCase("fifoCRP")) {
+                        jicnsnodes[i] = new fifoCRP(i, egressSize);
                     } else {
                         jicnsnodes[i] = new SimpleNode(i, egressSize);
                     }
@@ -477,7 +480,7 @@ public class frame extends JFrame implements ActionListener {
                                 temp_query_answer = nodes[temppath.focusedNode].jicnsNode.cacheLookUp(temppath.actual_query, false);
                                 //System.out.println(temp_query_answer);
                                 if (temp_query_answer == null) {
-                                    temp_query_answer = nodes[temppath.focusedNode].jicnsNode.hddLookUp(temppath.actual_query,false );
+                                    temp_query_answer = nodes[temppath.focusedNode].jicnsNode.hddLookUp(temppath.actual_query, false);
                                 }
                                 LOOKUP_FOR_QUERY = temp_query_answer;
                                 if ((temppath.destinationNode == -1 && (LOOKUP_FOR_QUERY != null)) || (foucusedNode == temppath.destinationNode)) {

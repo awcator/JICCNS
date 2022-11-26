@@ -1,20 +1,19 @@
 package awcator.jiccns.alg;
 
 import java.util.Arrays;
-import java.util.Random;
 
 /**
- * Node Summary: Random Cache Replacemnt Policy Node
+ * Node Summary: First In First Out Replacemnt Policy Node
  * <p>
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
- * Replacemnt Type: Random
+ * Replacemnt Type: oldest first
  * <p>
- * CacheStrategy: Random CRP
+ * CacheStrategy: FIFO/Oldest First
  * Extra Memoty: Nope
  */
 
-public class RandomCRP extends jicnsNodeImpl {
+public class fifoCRP extends jicnsNodeImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -29,7 +28,7 @@ public class RandomCRP extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public RandomCRP(int nodeid, int egressSize) {
+    public fifoCRP(int nodeid, int egressSize) {
         id = nodeid;
         egress = new int[egressSize][2];
     }
@@ -43,7 +42,7 @@ public class RandomCRP extends jicnsNodeImpl {
     @Override
     public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
         //System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
-        for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
+        for (int i = 0; i < Math.min(localcache_seekPointer, getMaxLocalCacheSize()) && i < cacheMemorySize; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
                     onCacheHit();
@@ -54,7 +53,7 @@ public class RandomCRP extends jicnsNodeImpl {
         }
 
         if (immunity_power_consumption == false) {
-            changePowerConsumptionBy(localcache_seekPointer);
+            changePowerConsumptionBy(localcache_seekPointer % getMaxLocalCacheSize());
             onCacheMiss();
         }
         return null;
@@ -188,8 +187,7 @@ public class RandomCRP extends jicnsNodeImpl {
                 onAddedToCache(key, value);
             } else {
                 //Random Replacment Strategy
-                Random r = new Random();
-                int randInt = r.nextInt(getMaxLocalCacheSize());
+                int randInt = localcache_seekPointer % getMaxLocalCacheSize();
                 //System.out.println("Node"+getNodeID()+" is ready to replace cache content from "+cacheMemory[randInt][0]+" with "+key);
                 String cache_key_removed = cacheMemory[randInt][0]; //Cache key that is being removed
                 String cache_value_removed = cacheMemory[randInt][1]; //Cache value that is being removed
@@ -197,6 +195,7 @@ public class RandomCRP extends jicnsNodeImpl {
                 cacheMemory[randInt][1] = value;
                 onRemovedFromCache(cache_key_removed, cache_value_removed);
                 onAddedToCache(key, value);
+                localcache_seekPointer++;
             }
             return true;
         } catch (Exception e) {
@@ -217,7 +216,8 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public String[][] getCacheContents() {
-        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, localcache_seekPointer);
+        System.out.println(localcache_seekPointer + "   " + getMaxLocalCacheSize());
+        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, Math.min(localcache_seekPointer, getMaxLocalCacheSize()));
     }
 
     @Override
@@ -249,6 +249,6 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public String nodeType() {
-        return "RandomCRP";
+        return "fifoCRP";
     }
 }

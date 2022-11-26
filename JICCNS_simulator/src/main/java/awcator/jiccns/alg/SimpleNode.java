@@ -61,14 +61,14 @@ public class SimpleNode extends jicnsNodeImpl {
     public String hddLookUp(String query_key, boolean immunity_power_consumption) {
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
-                if(immunity_power_consumption==false) {
+                if (immunity_power_consumption == false) {
                     onHDDHit();
                     changePowerConsumptionBy(i + 1);
                 }
                 return localMemory[i][1];
             }
         }
-        if(immunity_power_consumption==false) {
+        if (immunity_power_consumption == false) {
             changePowerConsumptionBy(localMemory_seekPointer);
             onHDDMiss();
         }
@@ -142,6 +142,7 @@ public class SimpleNode extends jicnsNodeImpl {
             changePowerConsumptionBy(1);
             return true;
         }
+        System.err.println(nodeType() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
         changePowerConsumptionBy(1);
         return false;
     }
@@ -178,7 +179,7 @@ public class SimpleNode extends jicnsNodeImpl {
                 return true;
             } else {
                 changePowerConsumptionBy(1);
-                System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID()+"  for data "+key);
+                System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID() + "  for data " + key);
                 // TODO: 11/26/22 Cache Overflow metrics? may be in future
             }
         } catch (Exception e) {
