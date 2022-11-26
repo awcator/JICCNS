@@ -98,7 +98,7 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public void onRemovedFromCache(String key, String value) {
-        System.out.println("Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
+        System.err.println(nodeType()+" Node"+getNodeID()+"Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
         changePowerConsumptionBy(1);
     }
 
@@ -109,7 +109,7 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public void onRespIncomingData(String... data) {
-        System.out.println("NODE" + getNodeID() + " recived as response KEY" + data[0]);
+        System.out.println("NODE" + getNodeID() + " recived as response KEY. Will try to cache if required" + data[0]);
         //data recived by the node as response to quyert
         if (shouldICacheOrNot(data[0], data[1])) {
             addToCacheMemory(data[0], data[1]);
@@ -178,9 +178,9 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public boolean addToCacheMemory(String key, String value) {
-        System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize());
+        System.out.println(nodeType()+" Node"+getNodeID()+" Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize()+"   "+localcache_seekPointer);
         try {
-            if (localMemory_seekPointer < getMaxLocalCacheSize()) {
+            if (localcache_seekPointer < getMaxLocalCacheSize()) {
                 cacheMemory[localcache_seekPointer][0] = key;
                 cacheMemory[localcache_seekPointer][1] = value;
                 localcache_seekPointer++;
@@ -191,7 +191,7 @@ public class RandomCRP extends jicnsNodeImpl {
                 int randInt = r.nextInt(getMaxLocalCacheSize());
                 //System.out.println("Node"+getNodeID()+" is ready to replace cache content from "+cacheMemory[randInt][0]+" with "+key);
                 String cache_key_removed = cacheMemory[randInt][0]; //Cache key that is being removed
-                String cache_value_removed = cacheMemory[randInt][0]; //Cache value that is being removed
+                String cache_value_removed = cacheMemory[randInt][1]; //Cache value that is being removed
                 cacheMemory[randInt][0] = key;
                 cacheMemory[randInt][1] = value;
                 onRemovedFromCache(cache_key_removed, cache_value_removed);

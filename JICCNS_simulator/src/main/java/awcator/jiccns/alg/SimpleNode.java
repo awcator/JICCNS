@@ -170,7 +170,7 @@ public class SimpleNode extends jicnsNodeImpl {
     public boolean addToCacheMemory(String key, String value) {
         System.out.println("Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize());
         try {
-            if (localcache_seekPointer <= getMaxLocalCacheSize()) {
+            if (localcache_seekPointer < getMaxLocalCacheSize()) {
                 cacheMemory[localcache_seekPointer][0] = key;
                 cacheMemory[localcache_seekPointer][1] = value;
                 localcache_seekPointer++;
@@ -178,7 +178,7 @@ public class SimpleNode extends jicnsNodeImpl {
                 return true;
             } else {
                 changePowerConsumptionBy(1);
-                System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID());
+                System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID()+"  for data "+key);
                 // TODO: 11/26/22 Cache Overflow metrics? may be in future
             }
         } catch (Exception e) {
