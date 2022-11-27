@@ -16,6 +16,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Line2D;
 import java.io.File;
 import java.io.FileWriter;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.time.Instant;
 import java.util.*;
 
 import static java.lang.Thread.sleep;
@@ -31,6 +36,8 @@ public class frame extends JFrame implements ActionListener {
     JButton reset; //reset Button
     JButton broadCastTo;//Dummy button for testing broadcasting
     JButton randomize_nodes; //node positons randomizer
+    JButton writeMetrics;// A button to write metrics into database
+    JButton exit;//A button to quit simulation
     JTextField searchNodes;// A simple textbox to search nodes in UI
 
     JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
@@ -47,16 +54,20 @@ public class frame extends JFrame implements ActionListener {
 
         //load up buttons
         reset = new JButton("reset");
+        writeMetrics = new JButton("Write Metrics into database");
         randomize_nodes = new JButton("randomize_nodes");
         sourceNodeTextArea = new JTextArea();
         sourceNodeTextArea.setText("Enter the Node Number (int) to query from");
         destNodeTextArea = new JTextArea();
         destNodeTextArea.setText("What do you query?");
         broadCastTo = new JButton("Query");
+        exit = new JButton("Exit");
 
         reset.addActionListener(this);
+        writeMetrics.addActionListener(this);
         randomize_nodes.addActionListener(this);
         broadCastTo.addActionListener(this);
+        exit.addActionListener(this);
 
         //Borderlayout to place buttons
         BorderLayout bl = new BorderLayout();
@@ -71,12 +82,14 @@ public class frame extends JFrame implements ActionListener {
         searchNodes = new JTextField("search Nodes");
         searchNodes.addActionListener(this);
         southpanel.setPreferredSize(new Dimension(getWidth(), (int) screenSize.getHeight() / 20));
+        southpanel.add(writeMetrics);
         southpanel.add(reset);
         southpanel.add(randomize_nodes);
         southpanel.add(searchNodes);
         southpanel.add(sourceNodeTextArea);
         southpanel.add(destNodeTextArea);
         southpanel.add(broadCastTo);
+        southpanel.add(exit);
         southpanel.setBackground(Color.darkGray);
         add(southpanel, BorderLayout.SOUTH);
 
@@ -161,8 +174,8 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
                             String str = it.next();
                             int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
-                            jicnsnodes[i].egress[k][0] = Integer.parseInt(str.replace(prefix, ""));
-                            jicnsnodes[i].egress[k][1] = latency;
+                            jicnsnodes[i].EGRESS[k][0] = Integer.parseInt(str.replace(prefix, ""));
+                            jicnsnodes[i].EGRESS[k][1] = latency;
                             k++;
                         }
                     }
@@ -170,14 +183,14 @@ public class frame extends JFrame implements ActionListener {
                      * node memory settings
                      */
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_cache_size")) {
-                        jicnsnodes[i].cacheMemorySize = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
+                        jicnsnodes[i].CACHE_MEMORY_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
                         jicnsnodes[i].allocateCacheMemorySize();
                     } else {
                         //allocate default size
                         jicnsnodes[i].allocateCacheMemorySize();
                     }
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
-                        jicnsnodes[i].LocalPayloadSize = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
+                        jicnsnodes[i].LOCAL_PAYLOAD_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
                         jicnsnodes[i].allocatePayloadMemorySize();
                     } else {
                         //allocate default size
@@ -204,7 +217,7 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("cached").keys(); it.hasNext(); ) {
                             String str = it.next();
                             System.out.println(str + " <-----This entry should be added to cache");
-                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str),true )) {
+                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str), true)) {
                                 System.err.println("Failed to add into cache ");
                             } else {
                                 System.out.println("Loaded Cache into CacheMemory ");
@@ -484,6 +497,7 @@ public class frame extends JFrame implements ActionListener {
                                 }
                                 LOOKUP_FOR_QUERY = temp_query_answer;
                                 if ((temppath.destinationNode == -1 && (LOOKUP_FOR_QUERY != null)) || (foucusedNode == temppath.destinationNode)) {
+                                    nodes[temppath.focusedNode].jicnsNode.onRequestAnsweredByMe();
                                     query_answered = true;
                                     Timer blinkTimer = new Timer(500, new ActionListener() {
                                         private final int maxCount = 4;
@@ -587,6 +601,12 @@ public class frame extends JFrame implements ActionListener {
                 });
                 rlMF.start();
             }
+            if (actionEvent.getSource() == exit) {
+                System.exit(0);
+            }
+            if (actionEvent.getSource() == writeMetrics) {
+                metricsWriter mw = new metricsWriter();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -643,7 +663,6 @@ public class frame extends JFrame implements ActionListener {
 
     static class RightPanel extends JPanel {
         static JTextArea title;
-        static JButton apply;
         static JTable table, table2;
         static DefaultTableModel payloadTableModel;
         static DefaultTableModel cacheTableModel;
@@ -769,8 +788,8 @@ public class frame extends JFrame implements ActionListener {
                 r1 = c[i].getBounds();
                 x1 = r1.getCenterX();
                 y1 = r1.getCenterY();
-                for (int j = 0; j < c[i].jicnsNode.egress.length; j++) {
-                    r2 = c[c[i].jicnsNode.egress[j][0]].getBounds();
+                for (int j = 0; j < c[i].jicnsNode.EGRESS.length; j++) {
+                    r2 = c[c[i].jicnsNode.EGRESS[j][0]].getBounds();
                     x2 = r2.getCenterX();
                     y2 = r2.getCenterY();
                     g2.draw(new Line2D.Double(x1, y1, x2, y2));
@@ -813,11 +832,147 @@ public class frame extends JFrame implements ActionListener {
             setText(x);
         }
     }
+
+    class metricsWriter {
+        Connection db_connection;
+        String expirment_name;
+        long expiremt_epoch_time = 0;
+
+        public metricsWriter() {
+            if (getExpirment_name() == null) {
+                setExpirment_name("DummyJICCNEXP");
+                expiremt_epoch_time = Instant.now().getEpochSecond();
+            }
+            loadDatabase();
+            writeExpiremntEntry();
+            System.out.println("Expirent ID " + getExpiremntID());
+            writeNodeSummary();
+        }
+
+        public long getExpiremt_epoch_time() {
+            return expiremt_epoch_time;
+        }
+
+        public void setExpiremt_epoch_time(long expiremt_epoch_time) {
+            this.expiremt_epoch_time = expiremt_epoch_time;
+        }
+
+        public String getExpirment_name() {
+            return expirment_name;
+        }
+
+        public void setExpirment_name(String expirment_name) {
+            this.expirment_name = expirment_name;
+        }
+
+        /**
+         * Load the database
+         */
+        private void loadDatabase() {
+            try {
+                final String USER_NAME = "root";
+                final String USER_PASSWORD = "dev";
+                Class.forName("org.mariadb.jdbc.Driver");// I run mariadb server so i use its. And make sure maridb  java lib is ints class path
+                //check https://wiki.archlinux.org/title/JDBC_and_MySQL
+                // https://aur.archlinux.org/packages/mariadb-jdbc for more info
+                System.out.println("MYSQL Driver loaded");
+                db_connection = DriverManager.getConnection("jdbc:mariadb://localhost/jiccns", USER_NAME, USER_PASSWORD);
+                System.out.println("Database_Connected");
+            } catch (Exception e) {
+                System.err.println(meta.JICNS_version + " couldnot able to connect to the database ");
+                e.printStackTrace();
+            }
+        }
+
+        private boolean writeNodeSummary() {
+            long node_epoch_time = Instant.now().getEpochSecond();
+            try {
+                //jicnsNodeImpl[] jicnsnodes; //this is the same as variable declared in statically and globally in superclass frame.java
+                for (jicnsNodeImpl tempnode : jicnsnodes) {
+                    String query = "insert into nodesummary (" +
+                            "nodename," +
+                            "nodetype," +
+                            "exp_id," +
+                            "numberofrequestshandled," +
+                            "numberofrequestsansweredBYME," +
+                            "numberofrequestsforwarded," +
+                            "numberofcachehits," +
+                            "numberofcachemiss," +
+                            "numberofcachelookups," +
+                            "numberofhddhits," +
+                            "numberofhddmiss," +
+                            "numberofhddlookups," +
+                            "cache_enq_count," +
+                            "cache_dq_count," +
+                            "req_answer_forwarded_count," +
+                            "pc," +
+                            "epochtime)" +
+
+                            "value (" +
+                            "\"" + "NODE" + tempnode.getNodeID() + "\"," +
+                            "\"" + tempnode.nodeType() + "\"," +
+                            getExpiremntID() + "," +
+                            tempnode.getNumberOfRequestsHandled() + "," +
+                            tempnode.getNumberOfRequestsAnsweredBYME() + "," +
+                            tempnode.getNumberOfRequestsForwarded() + "," +
+                            tempnode.getNumberOfCacheHits() + "," +
+                            tempnode.getNumberOfCacheMiss() + "," +
+                            tempnode.getNumberOfTimesCachelookups() + "," +
+                            tempnode.getNumberOfHDDHits() + "," +
+                            tempnode.getNumberOfHDDMiss() + "," +
+                            tempnode.getNumberOfTimesHDDlookups() + "," +
+                            tempnode.getNumberOfCacheEnque() + "," +
+                            tempnode.getNumberOfCacheDeque() + "," +
+                            tempnode.getNumberOfRequestesAnswereForwardedCount() + "," +
+                            tempnode.POWER_CONSUMPTION + "," +
+                            node_epoch_time + ")";
+                    Statement st = db_connection.createStatement();
+                    System.out.println("Insert into expiremnt status: =" + st.executeQuery(query));
+                    System.out.println(query);
+                }
+                return true;
+            } catch (Exception e) {
+                System.err.println("failed ot write node summary into db");
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        private boolean writeExpiremntEntry() {
+            int exp_id = getExpiremntID();
+            try {
+                String query = "insert into experiments (hashed,epochtime) values (\"" + getExpirment_name() + "\"," + getExpiremt_epoch_time() + ")";
+                Statement st = db_connection.createStatement();
+                System.out.println("Insert into expiremnt status: =" + st.executeQuery(query));
+                return true;
+            } catch (Exception e) {
+                System.out.println("Failed to write expiremnt entry");
+                e.printStackTrace();
+            }
+            return false;
+        }
+
+        private int getExpiremntID() {
+            try {
+                String query = "select id from experiments where hashed =\"" + getExpirment_name() + "\"";
+                Statement st = db_connection.createStatement();
+                ResultSet rs = st.executeQuery(query);
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+            } catch (Exception e) {
+                System.out.println("Failed to write expiremnt entry");
+                e.printStackTrace();
+            }
+            return -1;
+        }
+
+    }
 }
 
 /**
  * // TODO: 10/21/22 Need imporve animation speed by skipping unwanteed node animations if it is out of screen
  * // Need to implement https://gist.github.com/cmcfarlen/7ca5cbb3f228c6996233
  * // Time Based Frame animation for good animation speed
- * // TODO: 11/26/22 Sessions based brodcasting to avoid rebrodcast from node if we know we alredy brodcasted from there before 
+ * // TODO: 11/26/22 Sessions based brodcasting to avoid rebrodcast from node if we know we alredy brodcasted from there before
  */

@@ -29,19 +29,21 @@ public class SimpleNode extends jicnsNodeImpl {
 
     public SimpleNode(int nodeid, int egressSize) {
         id = nodeid;
-        egress = new int[egressSize][2];
+        EGRESS = new int[egressSize][2];
     }
 
     @Override
     public void onIncomingReqData(String data) {
         //System.out.println("Packet Reached Node" + getNodeID());
         //System.out.println("Recived query_answer from other nodes" + data);
+        REQUEST_COUNT++;
     }
 
     @Override
     public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
+        if (immunity_power_consumption == false) CACHE_LOOKUP_COUNT++;
         //System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
-        for (int i = 0; i < localcache_seekPointer && i < cacheMemorySize; i++) {
+        for (int i = 0; i < localcache_seekPointer && i < CACHE_MEMORY_SIZE; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
                     changePowerConsumptionBy(i + 1);
@@ -59,6 +61,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public String hddLookUp(String query_key, boolean immunity_power_consumption) {
+        if (immunity_power_consumption == false) HDD_LOOKUP_COUNT++;
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 if (immunity_power_consumption == false) {
@@ -85,20 +88,25 @@ public class SimpleNode extends jicnsNodeImpl {
     @Override
     public void onAddedToCache(String key, String value) {
         changePowerConsumptionBy(1);
+        CACHE_ENQUE_COUNT++;
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
-
+        CACHE_DEQUE_COUNT++;
+        changePowerConsumptionBy(1);
     }
 
     @Override
     public void onReqOutGoingData(String... data) {
+        REQUEST_FORWARDED_COUNT++;
+        REQUEST_COUNT++;
         System.out.println("NODE" + getNodeID() + " Is forwarding requests to its neibhour node node" + data[0] + " with curent path " + data[1]);
     }
 
     @Override
     public void onRespIncomingData(String... data) {
+        REQUEST_COUNT++;
         System.out.println("NODE" + getNodeID() + " recived as response KEY" + data[0]);
         if (shouldICacheOrNot(data[0], data[1])) {
             addToCacheMemory(data[0], data[1], false);
@@ -108,29 +116,31 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onRespOutGoingData() {
+        REQUEST_COUNT++;
+        REQUEST_ANSWER_FORWARDED_COUNT++;
         System.out.println("Node" + getNodeID() + " Forwarding answer to Query its original requester in a path");
     }
 
     @Override
     public void onCacheHit() {
-        cache_hits = cache_hits + 1;
+        CACHE_HITS_COUNT++;
         //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
     public void onHDDHit() {
-        System.out.println("HDD HIT");
-        hdd_hits++;
+        //System.out.println("HDD HIT");
+        HDD_HITS_COUNT++;
     }
 
     @Override
     public void onCacheMiss() {
-        cache_misses = cache_misses + 1;
+        CACHE_MISS_COUNT++;
     }
 
     @Override
     public void onHDDMiss() {
-        hdd_misses++;
+        HDD_MISS_COUNT++;
     }
 
     @Override
@@ -154,12 +164,12 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public int getMaxLocalPayloadSize() {
-        return LocalPayloadSize;
+        return LOCAL_PAYLOAD_SIZE;
     }
 
     @Override
     public void changePowerConsumptionBy(float changeBy) {
-        powerConsumption += changeBy;
+        POWER_CONSUMPTION += changeBy;
     }
 
     @Override
@@ -195,7 +205,7 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public int getMaxLocalCacheSize() {
-        return cacheMemorySize;
+        return CACHE_MEMORY_SIZE;
     }
 
     @Override
@@ -205,17 +215,17 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public boolean isMyNeibhour(int nodeNumber) {
-        for (int i = 0; i < egress.length; i++) {
-            if (egress[i][0] == nodeNumber) return true;
+        for (int i = 0; i < EGRESS.length; i++) {
+            if (EGRESS[i][0] == nodeNumber) return true;
         }
         return false;
     }
 
     @Override
     public int getMsToReachNode(int nodeNumber) {
-        for (int i = 0; i < egress.length; i++) {
-            if (egress[i][0] == nodeNumber)
-                return egress[i][1]; // refer egress datastructre for more info , how values  are stored
+        for (int i = 0; i < EGRESS.length; i++) {
+            if (EGRESS[i][0] == nodeNumber)
+                return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
         }
         return -1;
     }
@@ -237,6 +247,71 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onBeginSession(String... data) {
+        System.out.println(nodeType() + " Node" + getNodeID() + " started requesing " + data[0]);
+    }
 
+    @Override
+    public int getNumberOfRequestsHandled() {
+        return REQUEST_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestsAnsweredBYME() {
+        return REQUEST_ANSWERED_BY_ME_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestsForwarded() {
+        return REQUEST_FORWARDED_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheHits() {
+        return CACHE_HITS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheMiss() {
+        return CACHE_MISS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfTimesCachelookups() {
+        return CACHE_LOOKUP_COUNT;
+    }
+
+    @Override
+    public int getNumberOfHDDHits() {
+        return HDD_HITS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfHDDMiss() {
+        return HDD_MISS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfTimesHDDlookups() {
+        return HDD_LOOKUP_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheEnque() {
+        return CACHE_ENQUE_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheDeque() {
+        return CACHE_DEQUE_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestesAnswereForwardedCount() {
+        return REQUEST_ANSWER_FORWARDED_COUNT;
+    }
+
+    @Override
+    public void onRequestAnsweredByMe() {
+        REQUEST_ANSWERED_BY_ME_COUNT++;
     }
 }

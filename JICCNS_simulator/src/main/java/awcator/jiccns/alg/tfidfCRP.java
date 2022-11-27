@@ -5,8 +5,8 @@ import java.util.*;
 /**
  * Node Summary: Tf-IDF based Cache replacment Policy Node
  * <p>
- * Payload Storage type: Arrays[][]
- * Payload add type: Linear additon to array
+ * Payload Storage type: Custom priority queue based on popularity
+ * Payload add type: worstcase O(n) bestcase o(1) direct addition
  * Replacemnt Type: Popularity based cache repalcemnt
  * <p>
  * CacheStrategy: CosineSimilarity with older data it was vistied with
@@ -36,7 +36,7 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     public tfidfCRP(int nodeid, int egressSize) {
         id = nodeid;
-        egress = new int[egressSize][2];
+        EGRESS = new int[egressSize][2];
     }
 
     @Override
@@ -44,14 +44,16 @@ public class tfidfCRP extends jicnsNodeImpl {
         //System.out.println("Packet Reached Node" + getNodeID());
         //System.out.println("Recived query_answer from other nodes" + data);
         requestHistory += data + " ";
+        REQUEST_COUNT++;
     }
 
     @Override
     public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
         //System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
-        int i=0;
+        if (immunity_power_consumption == false) CACHE_LOOKUP_COUNT++;
+        int i = 0;
         // TODO: 11/26/22 Poll way itteration to get correct counts
-        for (tfdif_array tf: cacheMemory) {
+        for (tfdif_array tf : cacheMemory) {
             i++;
             if (tf.key.equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
@@ -71,6 +73,7 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public String hddLookUp(String query_key, boolean immunity_power_consumption) {
+        if (immunity_power_consumption == false) HDD_LOOKUP_COUNT++;
         for (int i = 0; i < localMemory_seekPointer && i < getMaxLocalPayloadSize(); i++) {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 if (immunity_power_consumption == false) {
@@ -103,21 +106,26 @@ public class tfidfCRP extends jicnsNodeImpl {
     public void onAddedToCache(String key, String value) {
         System.out.println("Cache was Added to cacheMeomry for the key and values : " + key + " : " + value);
         changePowerConsumptionBy(1);
+        CACHE_ENQUE_COUNT++;
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
         System.err.println(nodeType() + " Node" + getNodeID() + "Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
         changePowerConsumptionBy(1);
+        CACHE_DEQUE_COUNT++;
     }
 
     @Override
     public void onReqOutGoingData(String... data) {
+        REQUEST_FORWARDED_COUNT++;
+        REQUEST_COUNT++;
         System.out.println("NODE" + getNodeID() + " Is forwarding requests to its neibhour node node" + data[0] + " with curent path " + data[1]);
     }
 
     @Override
     public void onRespIncomingData(String... data) {
+        REQUEST_COUNT++;
         System.out.println("NODE" + getNodeID() + " recived as response KEY. Will try to cache if required" + data[0]);
         //data recived by the node as response to quyert
         if (shouldICacheOrNot(data[0], data[1])) {
@@ -127,29 +135,31 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public void onRespOutGoingData() {
+        REQUEST_COUNT++;
+        REQUEST_ANSWER_FORWARDED_COUNT++;
         System.out.println("Node" + getNodeID() + " Forwarding answer to Query its original requester in a path");
     }
 
     @Override
     public void onCacheHit() {
-        cache_hits = cache_hits + 1;
+        CACHE_HITS_COUNT++;
         //System.out.println("node"+ getNodeID()+" : Cache Hit");
     }
 
     @Override
     public void onHDDHit() {
         //System.out.println("HDD HIT");
-        hdd_hits++;
+        HDD_HITS_COUNT++;
     }
 
     @Override
     public void onCacheMiss() {
-        cache_misses = cache_misses + 1;
+        CACHE_MISS_COUNT++;
     }
 
     @Override
     public void onHDDMiss() {
-        hdd_misses++;
+        HDD_MISS_COUNT++;
     }
 
     @Override
@@ -173,12 +183,12 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public int getMaxLocalPayloadSize() {
-        return LocalPayloadSize;
+        return LOCAL_PAYLOAD_SIZE;
     }
 
     @Override
     public void changePowerConsumptionBy(float changeBy) {
-        powerConsumption += changeBy;
+        POWER_CONSUMPTION += changeBy;
     }
 
     @Override
@@ -190,7 +200,7 @@ public class tfidfCRP extends jicnsNodeImpl {
     public boolean addToCacheMemory(String key, String value, boolean softload) {
         try {
             System.out.println(nodeType() + " Node" + getNodeID() + " Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize() + "   " + localcache_seekPointer);
-            if(softload==true)requestHistory += key + " ";
+            if (softload == true) requestHistory += key + " ";
             List<String> queryHistory = Arrays.asList(requestHistory.trim().split(" "));
             List<List<String>> documents = new ArrayList<>();
             TFIDF_Calulator calculator = new TFIDF_Calulator();
@@ -198,7 +208,7 @@ public class tfidfCRP extends jicnsNodeImpl {
             List<String> empty_doc = Arrays.asList("".split(" "));
             documents.add(empty_doc);
             documents.add(queryHistory);
-            for(tfdif_array tf:cacheMemory){
+            for (tfdif_array tf : cacheMemory) {
                 documents.add(Arrays.asList(tf.key.trim().split(" ")));
             }
             Set<String> myset = new HashSet<>(); // A set thtat contains every possible words
@@ -207,12 +217,12 @@ public class tfidfCRP extends jicnsNodeImpl {
                     myset.add(word);
                 }
             }
-            System.out.println(documents+"  ********** "+doc+" **********  "+queryHistory);
+            System.out.println(documents + "  ********** " + doc + " **********  " + queryHistory);
             double cos = calculator.cosineSimlarityTFIDF(documents, doc, queryHistory, myset);
-            System.out.println("---->"+doc+"  "+cos);
+            System.out.println("---->" + doc + "  " + cos);
 
             cacheMemory.add(new tfdif_array(key, value, cos));
-            onAddedToCache(key,value);
+            onAddedToCache(key, value);
             //Now reclulate all tf-idf due to new  entry
             PriorityQueue<tfdif_array> cacheMemory2 = new PriorityQueue<>((a, b) -> Double.compare(a.cos_sim, b.cos_sim));
             System.out.println("------NEW TIDF cache table----");
@@ -220,7 +230,7 @@ public class tfidfCRP extends jicnsNodeImpl {
                 tfdif_array temp_tf = cacheMemory.poll();
                 List<String> temp_doc = Arrays.asList(temp_tf.key.trim().split(" "));
                 double temp_cos = calculator.cosineSimlarityTFIDF(documents, temp_doc, queryHistory, myset);
-                System.out.println(temp_doc+"   "+temp_cos);
+                System.out.println(temp_doc + "   " + temp_cos);
                 temp_tf.cos_sim = temp_cos;
                 cacheMemory2.add(temp_tf);
             }
@@ -232,9 +242,9 @@ public class tfidfCRP extends jicnsNodeImpl {
                 onRemovedFromCache(removedCacheData.key, removedCacheData.value);
             }
             System.gc();
+            localcache_seekPointer = cacheMemory.size();
             return true;
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -247,16 +257,16 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public int getMaxLocalCacheSize() {
-        return cacheMemorySize;
+        return CACHE_MEMORY_SIZE;
     }
 
     @Override
     public String[][] getCacheContents() {
-        String x[][]=new String[cacheMemory.size()][2];
-        int i=0;
-        for(tfdif_array tf:cacheMemory){
-            x[i][0]=tf.key;
-            x[i][1]=tf.value;
+        String x[][] = new String[cacheMemory.size()][2];
+        int i = 0;
+        for (tfdif_array tf : cacheMemory) {
+            x[i][0] = tf.key;
+            x[i][1] = tf.value;
             i++;
         }
         System.gc();
@@ -265,17 +275,17 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public boolean isMyNeibhour(int nodeNumber) {
-        for (int i = 0; i < egress.length; i++) {
-            if (egress[i][0] == nodeNumber) return true;
+        for (int i = 0; i < EGRESS.length; i++) {
+            if (EGRESS[i][0] == nodeNumber) return true;
         }
         return false;
     }
 
     @Override
     public int getMsToReachNode(int nodeNumber) {
-        for (int i = 0; i < egress.length; i++) {
-            if (egress[i][0] == nodeNumber)
-                return egress[i][1]; // refer egress datastructre for more info , how values  are stored
+        for (int i = 0; i < EGRESS.length; i++) {
+            if (EGRESS[i][0] == nodeNumber)
+                return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
         }
         return -1;
     }
@@ -297,7 +307,73 @@ public class tfidfCRP extends jicnsNodeImpl {
 
     @Override
     public void onBeginSession(String... data) {
-        requestHistory+=data[0]+" ";
+        requestHistory += data[0] + " ";
+        System.out.println(nodeType() + " Node" + getNodeID() + " started requesing " + data[0]);
+    }
+
+    @Override
+    public int getNumberOfRequestsHandled() {
+        return REQUEST_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestsAnsweredBYME() {
+        return REQUEST_ANSWERED_BY_ME_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestsForwarded() {
+        return REQUEST_FORWARDED_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheHits() {
+        return CACHE_HITS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheMiss() {
+        return CACHE_MISS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfTimesCachelookups() {
+        return CACHE_LOOKUP_COUNT;
+    }
+
+    @Override
+    public int getNumberOfHDDHits() {
+        return HDD_HITS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfHDDMiss() {
+        return HDD_MISS_COUNT;
+    }
+
+    @Override
+    public int getNumberOfTimesHDDlookups() {
+        return HDD_LOOKUP_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheEnque() {
+        return CACHE_ENQUE_COUNT;
+    }
+
+    @Override
+    public int getNumberOfCacheDeque() {
+        return CACHE_DEQUE_COUNT;
+    }
+
+    @Override
+    public int getNumberOfRequestesAnswereForwardedCount() {
+        return REQUEST_ANSWER_FORWARDED_COUNT;
+    }
+
+    @Override
+    public void onRequestAnsweredByMe() {
+        REQUEST_ANSWERED_BY_ME_COUNT++;
     }
 
     class TFIDF_Calulator {
@@ -383,7 +459,7 @@ public class tfidfCRP extends jicnsNodeImpl {
 
         @Override
         public String toString() {
-            return key + ":"+value;
+            return key + ":" + value;
         }
     }
 }

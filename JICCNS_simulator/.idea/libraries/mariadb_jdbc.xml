@@ -1,0 +1,10 @@
+<component name="libraryTable">
+  <library name="mariadb-jdbc">
+    <CLASSES>
+      <root url="file:///usr/share/java/mariadb-jdbc" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file:///usr/share/java/mariadb-jdbc" recursive="false" />
+  </library>
+</component>

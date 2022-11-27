@@ -1,0 +1,794 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 9,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "id": 10,
+      "panels": [],
+      "repeat": "exp",
+      "repeatDirection": "h",
+      "title": "Node Spefic details",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "description": "It is toatlCacheHits/TotalCacheLookups",
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "orange",
+                "value": 70
+              },
+              {
+                "color": "red",
+                "value": 85
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 1
+      },
+      "id": 8,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as value from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Chances of cacheHit per request",
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "description": "These are the nodes took part in the epiremnt ",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "displayMode": "auto",
+            "inspect": false
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "nodename"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 128
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "id": 6,
+      "options": {
+        "footer": {
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select nodename,nodetype  from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Nodes participated in experiment",
+      "type": "table"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "description": "It is toatlCacheHits/TotalCacheLookups",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-reds"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 69,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "id": 13,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 1,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "vertical",
+        "showValue": "always",
+        "stacking": "percent",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as cacheHits,numberofcachemiss/numberofcachelookups as cacheMiss from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "CacheMiss vs CacheHits",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 2,
+      "options": {
+        "displayMode": "lcd",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [],
+          "fields": "",
+          "values": true
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "name",
+          "rawQuery": true,
+          "rawSql": "select nodename as metric, numberofrequestshandled as value  from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "runs_scored"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "table": "runs",
+          "timeColumn": "now()",
+          "where": []
+        }
+      ],
+      "title": "Number of requests handled by nodes",
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 9
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "SELECT\n  UNIX_TIMESTAMP() AS time_sec,\n  username AS metric,\n  total as value\nFROM exampledb.simple_table\nORDER BY id",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Panel Title",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "description": "Number of Req Answered vs Forwarded",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-purples"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 77,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 2,
+            "scaleDistribution": {
+              "type": "linear"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 12,
+        "y": 9
+      },
+      "id": 15,
+      "options": {
+        "barRadius": 0.25,
+        "barWidth": 0.94,
+        "groupWidth": 0.71,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select nodename as metric,numberofcachehits as cacheHits,numberofhddhits as hddHits from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "cacheHit vs HDD HIT",
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "description": "Number of Req Answered vs Forwarded",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 77,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 2,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 9
+      },
+      "id": 14,
+      "options": {
+        "barRadius": 0.25,
+        "barWidth": 0.94,
+        "groupWidth": 0.71,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "horizontal",
+        "showValue": "never",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "multi",
+          "sort": "asc"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "table",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select nodename as metric,numberofrequestsansweredBYME as answeredByNode,numberofrequestsforwarded as forwardedByNode from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "Number of Req Answered vs Forwarded",
+      "type": "barchart"
+    }
+  ],
+  "refresh": false,
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "DummyJICCNEXP",
+          "value": "DummyJICCNEXP"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "9gHFS3dVk"
+        },
+        "definition": "select hashed as metrics from experiments;",
+        "description": "Choose the expiremnt to get details",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Choose the experiment",
+        "multi": false,
+        "name": "exp",
+        "options": [],
+        "query": "select hashed as metrics from experiments;",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s"
+    ]
+  },
+  "timezone": "",
+  "title": "NodeInfo by Experiments",
+  "uid": "0NELDqOVz",
+  "version": 15,
+  "weekStart": ""
+}

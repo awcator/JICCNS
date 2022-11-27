@@ -5,49 +5,86 @@ public abstract class jicnsNodeImpl {
      * Number of times data existed in cache.
      * DummyImplementation: if(data.exisitIN(cache)) then hits++
      */
-    public static int cache_hits = 0;
+    public int CACHE_HITS_COUNT = 0;
     /**
      * Number of times data existed in HDD (internal storage/payload).
      * DummyImplementation: if(data.exisitIN(HDD)) then hits++
      */
-    public static int hdd_hits = 0;
-    /**
-     * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
-     * PowerConsumption completely depends on IO operations/CPU cycle
-     */
-    public float powerConsumption = 0;
+    public int HDD_HITS_COUNT = 0;
     /**
      * Number of times data were not existed in cache.
      * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
      */
-    public int cache_misses = 0;
-
+    public int CACHE_MISS_COUNT = 0;
     /**
      * Number of times data were not existed in HDD. NOTE LOOKUP first happens in Cache then HDD
      * DummyImplementation: if(data.doesnotexisitIN(cache)) then misses++
      */
-    public int hdd_misses = 0;
+    public int HDD_MISS_COUNT = 0;
+    /**
+     * Number of times data node lookedup its cachetable
+     */
+    public int CACHE_LOOKUP_COUNT = 0;
+    /**
+     * Number of times data node lookedup its hddtable
+     */
+    public int HDD_LOOKUP_COUNT = 0;
 
+    /**
+     * Number of requests made on the node
+     */
+    public int REQUEST_COUNT = 0;
+
+    /**
+     * Number of requests answered on the node
+     */
+    public int REQUEST_ANSWERED_BY_ME_COUNT = 0;
+
+    /**
+     * Number of requests forwrded from the node
+     */
+    public int REQUEST_FORWARDED_COUNT = 0;
+
+    /**
+     * Number of requests forwrded from the node
+     */
+    public int REQUEST_ANSWER_FORWARDED_COUNT = 0;
+
+    /**
+     * powerConsumption= Number of operations Node performed so far (including IO operation+Data processing Operation)
+     * PowerConsumption completely depends on IO operations/CPU cycle
+     */
+    public float POWER_CONSUMPTION = 0;
     /**
      * Egress rules:
      * egress[4][0]=5 implies, there exist a 4th route from curennt node to node5
      * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
      */
-    public int[][] egress;
+    public int[][] EGRESS;
 
     /**
      * Number of items node can keep in its memory
      * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
      * Override if requrred to set appropirate size
      */
-    public int LocalPayloadSize = 100;
+    public int LOCAL_PAYLOAD_SIZE = 100;
 
     /**
      * Number of cahcable items node can keep in its memory
      * A rule to keep data or to remove data
      * In Reality: This variable represents NOdes's memory size (HDD) to store its server contents
      */
-    public int cacheMemorySize = 10;
+    public int CACHE_MEMORY_SIZE = 10;
+
+    /**
+     * Number of times node Cached the data
+     */
+    public int CACHE_ENQUE_COUNT = 0;
+
+    /**
+     * Number of times node removed Cache data
+     */
+    public int CACHE_DEQUE_COUNT = 0;
 
     /***
      * A node implementable fucntion
@@ -218,4 +255,96 @@ public abstract class jicnsNodeImpl {
      * use this function to bootup your nodes. This function will be called when node begins first broadcast intitaies
      */
     abstract public void onBeginSession(String... data);
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of requests the node handled so far (incomming_req+outgoing req)
+     */
+    abstract public int getNumberOfRequestsHandled();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of requests the node sucesfully answered by itself without forwarding
+     */
+    abstract public int getNumberOfRequestsAnsweredBYME();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of requests the node forwarded to others
+     */
+    abstract public int getNumberOfRequestsForwarded();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of cacheHits
+     */
+    abstract public int getNumberOfCacheHits();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of cacheMiss
+     */
+    abstract public int getNumberOfCacheMiss();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of cacheLookups
+     */
+    abstract public int getNumberOfTimesCachelookups();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of HDDHits
+     */
+    abstract public int getNumberOfHDDHits();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of HDD Miss
+     */
+    abstract public int getNumberOfHDDMiss();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of HDDLookups
+     */
+    abstract public int getNumberOfTimesHDDlookups();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of times node cached the data
+     */
+    abstract public int getNumberOfCacheEnque();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of times node dequed the cached data
+     */
+    abstract public int getNumberOfCacheDeque();
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should return an int showing number of times node forwarded answer from its parent to childs
+     */
+    abstract public int getNumberOfRequestesAnswereForwardedCount();
+
+
+    /**
+     * for graffana metrics
+     *
+     * @return it should do what to do when request is answered by the node
+     */
+    abstract public void onRequestAnsweredByMe();
 }
