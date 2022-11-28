@@ -30,6 +30,14 @@ public class frame extends JFrame implements ActionListener {
     public static int NODE_POSITION = 0;
     public static JPanel centerPanel;
     public static RightPanel rightpanel;
+    /**
+     * metric variables
+     */
+    public static int total_network_time = 0;
+    public static int total_network_usage = 0;
+    public static int total_answer_first_time = 0;
+    public static int total_asks = 0;
+    public static int total_minimum_hopcount = 0;
     //Nodes
     private static NodeUI[] nodes;
     private static jicnsNodeImpl[] jicnsnodes;
@@ -39,8 +47,8 @@ public class frame extends JFrame implements ActionListener {
     JButton writeMetrics;// A button to write metrics into database
     JButton exit;//A button to quit simulation
     JTextField searchNodes;// A simple textbox to search nodes in UI
-
     JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
+    boolean checkForQuickAnswer = true;
 
     public frame() {
 
@@ -436,6 +444,8 @@ public class frame extends JFrame implements ActionListener {
                             int endNode = 0;
                             path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), -1, null, true, QUERY_FROM_USER, null); //start from sourcenOde with inital timeout of 0ms
                             nodes[rootparent.focusedNode].jicnsNode.onBeginSession(QUERY_FROM_USER);
+                            total_asks++;
+                            checkForQuickAnswer = true;
                             class path_sorter implements Comparator<path> {
                                 @Override
                                 public int compare(path s1, path s2) {
@@ -530,6 +540,11 @@ public class frame extends JFrame implements ActionListener {
                                     } else {
                                         // to help timing diagram
                                         System.out.print("[BEND]");
+                                        if (checkForQuickAnswer) {
+                                            checkForQuickAnswer = false;
+                                            total_answer_first_time += temppath.ms;
+                                            total_minimum_hopcount += temppath.pa.split("-->").length - 1;
+                                        }
                                         /*
                                         if(temppath.parent==null){
                                             System.out.println("Self Answered");
@@ -552,11 +567,13 @@ public class frame extends JFrame implements ActionListener {
                                                     nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
                                                     path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                     pq.add(newpath);
+                                                    total_network_usage++;
                                                 } else {
                                                     if (!temppath.pa.contains("node" + i)) {
                                                         nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
                                                         path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                         pq.add(newpath);
+                                                        total_network_usage++;
                                                     }
                                                 }
                                             }
@@ -570,6 +587,7 @@ public class frame extends JFrame implements ActionListener {
                                         nodes[temppath.focusedNode].jicnsNode.onRespOutGoingData();
                                         path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
                                         pq.add(newpath);
+                                        total_network_usage++;
                                     }
                                 }
                                 if (check_previous_ms) {
@@ -591,12 +609,15 @@ public class frame extends JFrame implements ActionListener {
                             }
                             if (query_answered) {
                                 System.out.println("---Done--Query Answered");
+                                total_network_time += temppath.ms;
                             } else {
                                 System.out.println("---Failed--- No node cant handle request");
+                                total_network_time += temppath.ms;
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
+                        System.out.println("##########################" + total_network_time + "   " + total_network_usage + "    " + total_answer_first_time + "   " + total_asks + "  " + total_minimum_hopcount);
                     }
                 });
                 rlMF.start();
@@ -840,7 +861,7 @@ public class frame extends JFrame implements ActionListener {
 
         public metricsWriter() {
             if (getExpirment_name() == null) {
-                setExpirment_name("DummyJICCNEXP1");
+                setExpirment_name("Tester1");
                 expiremt_epoch_time = Instant.now().getEpochSecond();
             }
             loadDatabase();
@@ -930,6 +951,17 @@ public class frame extends JFrame implements ActionListener {
                     System.out.println("Insert into expiremnt status: =" + st.executeQuery(query));
                     System.out.println(query);
                 }
+                String query = "insert into exp_summery  (total_network_time,total_network_usage,total_answer_first_time,total_asks,total_minimum_hopcount,epoch,exp_id) value ("+
+                        total_network_time+","+
+                        total_network_usage+","+
+                        total_answer_first_time+","+
+                        total_asks+","+
+                        total_minimum_hopcount+","+
+                        node_epoch_time+","+
+                        getExpiremntID()+")";
+                Statement st = db_connection.createStatement();
+                System.out.println("Insert into exp_summary: status: =" + st.executeQuery(query));
+                System.out.println(query);
                 return true;
             } catch (Exception e) {
                 System.err.println("failed ot write node summary into db");
@@ -966,7 +998,6 @@ public class frame extends JFrame implements ActionListener {
             }
             return -1;
         }
-
     }
 }
 
