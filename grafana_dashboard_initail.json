@@ -24,7 +24,7 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 9,
+  "id": 10,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -38,7 +38,7 @@
       },
       "id": 10,
       "panels": [],
-      "repeat": "exp",
+      "repeat": "epochvar",
       "repeatDirection": "h",
       "title": "Node Spefic details",
       "type": "row"
@@ -100,7 +100,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as value from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as value from nodesummary where epochtime=\"${epochvar}\"\n",
           "refId": "A",
           "select": [
             [
@@ -200,7 +200,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select nodename,nodetype  from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "rawSql": "select nodename,nodetype  from nodesummary where epochtime=\"${epochvar}\"",
           "refId": "A",
           "select": [
             [
@@ -309,7 +309,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as cacheHits,numberofcachemiss/numberofcachelookups as cacheMiss from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "rawSql": "select nodename as metric,numberofcachehits/numberofcachelookups as cacheHits,numberofcachemiss/numberofcachelookups as cacheMiss from nodesummary where epochtime=\"${epochvar}\"\n",
           "refId": "A",
           "select": [
             [
@@ -391,7 +391,7 @@
           "group": [],
           "metricColumn": "name",
           "rawQuery": true,
-          "rawSql": "select nodename as metric, numberofrequestshandled as value  from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "rawSql": "select nodename as metric, numberofrequestshandled as value  from nodesummary where  epochtime=\"${epochvar}\"",
           "refId": "A",
           "select": [
             [
@@ -410,117 +410,6 @@
       ],
       "title": "Number of requests handled by nodes",
       "type": "bargauge"
-    },
-    {
-      "datasource": {
-        "type": "mysql",
-        "uid": "9gHFS3dVk"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 9
-      },
-      "id": 4,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "mysql",
-            "uid": "9gHFS3dVk"
-          },
-          "format": "time_series",
-          "group": [],
-          "metricColumn": "none",
-          "rawQuery": true,
-          "rawSql": "SELECT\n  UNIX_TIMESTAMP() AS time_sec,\n  username AS metric,\n  total as value\nFROM exampledb.simple_table\nORDER BY id",
-          "refId": "A",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "column"
-              }
-            ]
-          ],
-          "timeColumn": "time",
-          "where": [
-            {
-              "name": "$__timeFilter",
-              "params": [],
-              "type": "macro"
-            }
-          ]
-        }
-      ],
-      "title": "Panel Title",
-      "type": "timeseries"
     },
     {
       "datasource": {
@@ -607,7 +496,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select nodename as metric,numberofcachehits as cacheHits,numberofhddhits as hddHits from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "rawSql": "select nodename as metric,numberofcachehits as cacheHits,numberofhddhits as hddHits from nodesummary where epochtime=\"${epochvar}\"\n",
           "refId": "A",
           "select": [
             [
@@ -718,7 +607,7 @@
           "group": [],
           "metricColumn": "none",
           "rawQuery": true,
-          "rawSql": "select nodename as metric,numberofrequestsansweredBYME as answeredByNode,numberofrequestsforwarded as forwardedByNode from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");\n",
+          "rawSql": "select nodename as metric,numberofrequestsansweredBYME as answeredByNode,numberofrequestsforwarded as forwardedByNode from nodesummary where epochtime=\"${epochvar}\"\n",
           "refId": "A",
           "select": [
             [
@@ -742,6 +631,384 @@
       ],
       "title": "Number of Req Answered vs Forwarded",
       "type": "barchart"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 17
+      },
+      "id": 17,
+      "panels": [],
+      "repeat": "exp",
+      "repeatDirection": "h",
+      "title": "Simulation Summary",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 8,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "Requests"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 23,
+        "x": 0,
+        "y": 18
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select epochtime as time_sec,nodename as metric,numberofrequestshandled,numberofrequestsansweredBYME,numberofrequestsforwarded from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "All trails requests and answer summary",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 8,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "Cache Count"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 23,
+        "x": 0,
+        "y": 30
+      },
+      "id": 18,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select epochtime as time_sec,nodename as metric,numberofcachehits,numberofcachemiss,numberofcachelookups from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "All trails cache info summary",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "mysql",
+        "uid": "9gHFS3dVk"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "series",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "smooth",
+            "lineStyle": {
+              "fill": "solid"
+            },
+            "lineWidth": 1,
+            "pointSize": 8,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "HDD lookup count"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 23,
+        "x": 0,
+        "y": 42
+      },
+      "id": 19,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "mysql",
+            "uid": "9gHFS3dVk"
+          },
+          "format": "time_series",
+          "group": [],
+          "metricColumn": "none",
+          "rawQuery": true,
+          "rawSql": "select epochtime as time_sec,nodename as metric,numberofhddhits,numberofhddmiss,numberofhddlookups from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+          "refId": "A",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "column"
+              }
+            ]
+          ],
+          "timeColumn": "time",
+          "where": [
+            {
+              "name": "$__timeFilter",
+              "params": [],
+              "type": "macro"
+            }
+          ]
+        }
+      ],
+      "title": "All trails HDD info summary",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 54
+      },
+      "id": 21,
+      "panels": [],
+      "repeat": "exp",
+      "repeatDirection": "h",
+      "title": "Simulation Results ",
+      "type": "row"
     }
   ],
   "refresh": false,
@@ -752,7 +1019,7 @@
     "list": [
       {
         "current": {
-          "selected": false,
+          "selected": true,
           "text": "DummyJICCNEXP",
           "value": "DummyJICCNEXP"
         },
@@ -761,10 +1028,10 @@
           "uid": "9gHFS3dVk"
         },
         "definition": "select hashed as metrics from experiments;",
-        "description": "Choose the expiremnt to get details",
+        "description": "Choose the Simulation to get details",
         "hide": 0,
         "includeAll": false,
-        "label": "Choose the experiment",
+        "label": "Simulation Title",
         "multi": false,
         "name": "exp",
         "options": [],
@@ -774,21 +1041,46 @@
         "skipUrlSync": false,
         "sort": 0,
         "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "1669556334",
+          "value": "1669556334"
+        },
+        "datasource": {
+          "type": "mysql",
+          "uid": "9gHFS3dVk"
+        },
+        "definition": "select unique(epochtime) from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+        "description": "Choose the epch to get details",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Choose the trails",
+        "multi": false,
+        "name": "epochvar",
+        "options": [],
+        "query": "select unique(epochtime) from nodesummary where exp_id=(select id from experiments where hashed = \"${exp}\");",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
       }
     ]
   },
   "time": {
-    "from": "now-5m",
-    "to": "now"
+    "from": "2022-11-27T13:38:54.000Z",
+    "to": "2022-11-28T03:57:13.000Z"
   },
   "timepicker": {
     "refresh_intervals": [
-      "5s"
+      "1m"
     ]
   },
   "timezone": "",
-  "title": "NodeInfo by Experiments",
-  "uid": "0NELDqOVz",
-  "version": 15,
+  "title": "NodeInfo by Experiments Copy",
+  "uid": "SBJk9gK4k",
+  "version": 10,
   "weekStart": ""
 }

@@ -840,7 +840,7 @@ public class frame extends JFrame implements ActionListener {
 
         public metricsWriter() {
             if (getExpirment_name() == null) {
-                setExpirment_name("DummyJICCNEXP");
+                setExpirment_name("DummyJICCNEXP1");
                 expiremt_epoch_time = Instant.now().getEpochSecond();
             }
             loadDatabase();
