@@ -4,6 +4,8 @@ Java Information-centric Cache Network Simulator
 ![image](https://user-images.githubusercontent.com/54628909/204142890-fb0ea0dd-e825-4865-b099-26c525bbfa3d.png)
 # Dashboards
 ![image](https://user-images.githubusercontent.com/54628909/204142824-8d5ca4e2-449f-47c9-af5d-946d082485dc.png)
+![image](https://user-images.githubusercontent.com/54628909/204203183-58581b48-0f8e-4c3b-979f-23f7fd981999.png)
+
 # Cureent avialbel features
 | Feature                        | Status    |
 |--------------------------------|-----------|
