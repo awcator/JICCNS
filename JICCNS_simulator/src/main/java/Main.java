@@ -22,6 +22,9 @@ public class Main {
     }
 }
 /**
+ * // TODO: 12/10/22
+ *  * FIFO CRP node is missing
+ *
  * // TODO: 11/5/22  Features
  * Save Architecture and reload option ---PRIORITY LOWEST
  * LRU NODE  PRIORITY Medium
@@ -48,5 +51,6 @@ public class Main {
  * // TODO: 11/6/22 Algorithm validation
  * run 2 times with unkown data query
  * query from all node with random query
+ *
  */
 

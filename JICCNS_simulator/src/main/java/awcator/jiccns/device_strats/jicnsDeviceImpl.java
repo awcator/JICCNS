@@ -3,6 +3,7 @@ package awcator.jiccns.device_strats;
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
 
 public abstract class jicnsDeviceImpl {
+    public String nodedomain;
     public jicnsCacheImpl nodechacestrtegy;
     /**
      * Number of requests made on the node
@@ -31,6 +32,10 @@ public abstract class jicnsDeviceImpl {
      * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
      */
     public int[][] EGRESS;
+
+    public abstract String getNodeDomain();
+
+    public abstract void setNodeDomain(String domain);
 
     abstract public jicnsCacheImpl getCacheStrategy();
 
@@ -156,4 +161,6 @@ public abstract class jicnsDeviceImpl {
      * @return it should return an int showing number of requests the node forwarded to others
      */
     abstract public int getNumberOfRequestsForwarded();
+
+
 }

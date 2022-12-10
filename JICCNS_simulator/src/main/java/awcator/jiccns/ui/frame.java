@@ -1,9 +1,6 @@
 package awcator.jiccns.ui;
 
-import awcator.jiccns.cache_strats.RandomCRP;
-import awcator.jiccns.cache_strats.fifoCRP;
-import awcator.jiccns.cache_strats.noncacheable;
-import awcator.jiccns.cache_strats.tfidfCRP;
+import awcator.jiccns.cache_strats.*;
 import awcator.jiccns.device_strats.consumer;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
 import awcator.jiccns.meta;
@@ -153,10 +150,11 @@ public class frame extends JFrame implements ActionListener {
         HashSet<String> setOfDataInCacheAndMemory = new HashSet<>();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
+            String prefix ="";
             if (!reset_ui_positons) {
-                String prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
+                prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
                 System.out.println("----------------------------\nWorking on " + prefix + i);
-                if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("type").equals("TODO")) {
+                if (!jsondata.isNull(prefix + i) && jsondata.getJSONObject(prefix + i).get("device_type").equals("TODO")) {
                     // TODO: 9/9/22
                 } else {
                     int egressSize = 0;
@@ -164,19 +162,36 @@ public class frame extends JFrame implements ActionListener {
                         System.out.println("Found no egres etry for " + prefix + i);
                         egressSize = 0;
                     } else {
+                        // TODO: 12/10/22 Egress size.length? is it working really? 
                         egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
                     }
-                    String NODE_TYPE = jsondata.getJSONObject(prefix + i).get("type").toString();
-                    if (NODE_TYPE.equalsIgnoreCase("Random_CRP")) {
-                        jicnsDevices[i] = new consumer(i, egressSize, new RandomCRP(i));
-                    } else if (NODE_TYPE.equalsIgnoreCase("fifoCRP")) {
-                        jicnsDevices[i] = new consumer(i, egressSize, new fifoCRP(i));
-                    } else if (NODE_TYPE.equalsIgnoreCase("tfidfCRP")) {
-                        jicnsDevices[i] = new consumer(i, egressSize, new tfidfCRP(i));
-                    } else {
-                        jicnsDevices[i] = new consumer(i, egressSize, new noncacheable(i));
+                    String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
+                    String CACHE_TYPE = jsondata.getJSONObject(prefix + i).get("cache_type").toString();
+                    jicnsCacheImpl cache_strtegy=null;
+                    if(CACHE_TYPE.equalsIgnoreCase("Random_CRP")){
+                        cache_strtegy=new RandomCRP(i);
+                    }
+                    else if(CACHE_TYPE.equalsIgnoreCase("fifoCRP")){
+                        cache_strtegy=new RandomCRP(i);
+                    }
+                    else if(CACHE_TYPE.equalsIgnoreCase("tfidfCRP")){
+                        cache_strtegy=new RandomCRP(i);
+                    }
+                    else if(CACHE_TYPE.equalsIgnoreCase("noncacheable")){
+                        cache_strtegy=new noncacheable(i);
+                    }
+                    else {
+                        System.out.println("Did not understand CACHE_TYPE default to NoCahceType");
+                        cache_strtegy=new noncacheable(i);
                     }
 
+                    if(DEVICE_TYPE.equalsIgnoreCase("CONSUMER")){
+                        jicnsDevices[i] = new consumer(i, egressSize, cache_strtegy);
+                    }
+                    else {
+                        System.err.println("COuldnt not undertstand the device_type"+DEVICE_TYPE);
+                        System.exit(0);
+                    }
                     /**
                      * Egress Rules
                      */
@@ -243,26 +258,35 @@ public class frame extends JFrame implements ActionListener {
                     }
                     nodes[i] = new NodeUI(prefix + i, jicnsDevices[i]);
                     try {
-                        String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
                         if (DEVICE_TYPE != null) {
-                            nodes[i].setOpaque(false);
-                            nodes[i].setContentAreaFilled(false);
-                            nodes[i].setBorderPainted(false);
-                            if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
-                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/edge_64.png"))));
-                            } else if (DEVICE_TYPE.equalsIgnoreCase("source")) {
-                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/source_100.png"))));
-                            } else if (DEVICE_TYPE.equalsIgnoreCase("producer")) {
-                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File("res/producer_100.png"))));
+                            if(!jsondata.getJSONObject(prefix + i).isNull("icon")) {
+                                nodes[i].setOpaque(false);
+                                nodes[i].setContentAreaFilled(false);
+                                nodes[i].setBorderPainted(false);
+                                nodes[i].setIcon(new ImageIcon(ImageIO.read(new File((String) jsondata.getJSONObject(prefix + i).get("icon")))));
+                            }
+                            else {
+                                System.err.println("No icons specified for "+prefix+i+" skipping");
                             }
                         }
                     } catch (Exception e) {
                         //e.printStackTrace();
-                        System.err.println("Skipping Graphics Icon, unkown device_type for " + prefix + i);
+                        System.err.println("Error loading icon for " + prefix + i);
                     }
                 }
             }
-            nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
+            if(reset_ui_positons==true)
+                nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
+            else
+            {
+                if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("X")  && !jsondata.getJSONObject(prefix + i).isNull("Y")) {
+                    nodes[i].setBounds(Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("X")),Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("Y")),node_UI_width,node_UI_height);
+                }
+                else {
+                    System.err.println(prefix+i+": Did not found both coridnates for nodes. using random");
+                    nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
+                }
+            }
             if (!reset_ui_positons) centerpanel.add(nodes[i]);
             if (!reset_ui_positons) {
                 nodes[i].addMouseListener(mia);
@@ -731,6 +755,7 @@ public class frame extends JFrame implements ActionListener {
         public static void applayChanges() {
             title.setText("Node ID : " + NODE_POSITION);
             title.setText(title.getText() + "\nDeviceType: " + jicnsDevices[NODE_POSITION].getDeviceType());
+            title.setText(title.getText() + "\nCacheType: " + jicnsDevices[NODE_POSITION].getCacheStrategy().getCacheType()+"\npostion: "+nodes[NODE_POSITION].getX()+","+nodes[NODE_POSITION].getY()+" \n");
             payloadTableModel.setRowCount(0);
 
             String[][] x = jicnsDevices[NODE_POSITION].getCacheStrategy().getPayloadContents();

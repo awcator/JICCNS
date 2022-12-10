@@ -12,6 +12,16 @@ public class consumer extends jicnsDeviceImpl {
     }
 
     @Override
+    public String getNodeDomain() {
+        return nodedomain;
+    }
+
+    @Override
+    public void setNodeDomain(String domain) {
+        nodedomain = domain;
+    }
+
+    @Override
     public jicnsCacheImpl getCacheStrategy() {
         return nodechacestrtegy;
     }

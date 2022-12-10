@@ -1,0 +1,53 @@
+{
+  "nodes_blueprint": {
+    "node_count": "1",
+    "node_prefix": "node",
+    "node_ui_width": "100",
+    "node_ui_height": "50"
+  },
+  "frame_blueprint": {
+    "width": "1000",
+    "height": "2000"
+  },
+  "node0": {
+    "X": "64",
+    "Y": "620",
+    "icon": "res/source_100.png",
+    "max_cache_size": "4",
+    "max_payload_size": "100",
+    "payload": {
+      "temprature at bangalore": "25c",
+      "pm": "modi",
+      "cm": "bommai",
+      "avenger": "hulk"
+    },
+    "cached": {
+      "fastestcar in the world": "koinseg agera",
+      "richesht man": "elon musk",
+      "second richest company in the world": "amazon"
+    },
+    "cache_type": "noncacheable",
+    "device_type": "consumer"
+  },
+  "node1": {
+    "X": "64",
+    "dns_like_id" : "car",
+    "Y": "620",
+    "icon": "res/source_100.png",
+    "max_cache_size": "4",
+    "max_payload_size": "100",
+    "payload": {
+      "temprature at bangalore": "25c",
+      "pm": "modi",
+      "cm": "bommai",
+      "avenger": "hulk"
+    },
+    "cached": {
+      "fastestcar in the world": "koinseg agera",
+      "richesht man": "elon musk",
+      "second richest company in the world": "amazon"
+    },
+    "cache_type": "noncacheable",
+    "device_type": "producer"
+  }
+}
