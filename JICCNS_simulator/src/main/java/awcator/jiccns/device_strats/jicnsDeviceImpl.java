@@ -32,6 +32,8 @@ public abstract class jicnsDeviceImpl {
      * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
      */
     public int[][] EGRESS;
+    abstract public void setDeviceDescription(String str);
+    abstract public String getDeviceDescription();
 
     public abstract String getNodeDomain();
 

@@ -1,6 +1,6 @@
 {
   "nodes_blueprint": {
-    "node_count": "1",
+    "node_count": "2",
     "node_prefix": "node",
     "node_ui_width": "100",
     "node_ui_height": "50"
@@ -12,7 +12,7 @@
   "node0": {
     "X": "64",
     "Y": "620",
-    "icon": "res/source_100.png",
+    "icon": "JICCNS_simulator/res/source_100.png",
     "max_cache_size": "4",
     "max_payload_size": "100",
     "payload": {
@@ -31,9 +31,10 @@
   },
   "node1": {
     "X": "64",
+    "Y": "20",
+    "description" : "Car Sensor",
     "dns_like_id" : "car",
-    "Y": "620",
-    "icon": "res/source_100.png",
+    "icon": "JICCNS_simulator/res/source_100.png",
     "max_cache_size": "4",
     "max_payload_size": "100",
     "payload": {

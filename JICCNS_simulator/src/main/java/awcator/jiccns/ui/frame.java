@@ -1,7 +1,7 @@
 package awcator.jiccns.ui;
 
 import awcator.jiccns.cache_strats.*;
-import awcator.jiccns.device_strats.consumer;
+import awcator.jiccns.device_strats.gpnode;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
@@ -186,11 +186,24 @@ public class frame extends JFrame implements ActionListener {
                     }
 
                     if(DEVICE_TYPE.equalsIgnoreCase("CONSUMER")){
-                        jicnsDevices[i] = new consumer(i, egressSize, cache_strtegy);
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                    }
+                    else if(DEVICE_TYPE.equalsIgnoreCase("PRODUCER")){
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
                     }
                     else {
                         System.err.println("COuldnt not undertstand the device_type"+DEVICE_TYPE);
                         System.exit(0);
+                    }
+                    if(!jsondata.getJSONObject(prefix + i).isNull("description")) {
+                        String device_descritpion = jsondata.getJSONObject(prefix + i).get("description").toString();
+                        if (device_descritpion != null) {
+                            jicnsDevices[i].setDeviceDescription(device_descritpion);
+                        }
+                    }
+                    else {
+                        System.err.println("Clouldnt not load device description");
+                        jicnsDevices[i].setDeviceDescription("Unknown ");
                     }
                     /**
                      * Egress Rules
@@ -841,6 +854,8 @@ public class frame extends JFrame implements ActionListener {
                 r1 = c[i].getBounds();
                 x1 = r1.getCenterX();
                 y1 = r1.getCenterY();
+                g2.setColor(Color.BLACK);
+                g2.drawString(c[i].jicnsNode.getDeviceDescription(),(int)r1.getMinX()-15,(int)r1.getMaxY()+15);
                 for (int j = 0; j < c[i].jicnsNode.EGRESS.length; j++) {
                     r2 = c[c[i].jicnsNode.EGRESS[j][0]].getBounds();
                     x2 = r2.getCenterX();

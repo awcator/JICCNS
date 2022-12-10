@@ -2,13 +2,23 @@ package awcator.jiccns.device_strats;
 
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
 
-public class consumer extends jicnsDeviceImpl {
+public class gpnode extends jicnsDeviceImpl {
     int id = 0;
-
-    public consumer(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
+    String device_desc="awcatornode";
+    public gpnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         id = nodeid;
         EGRESS = new int[egressSize][2];
         setCacheStrategy(strtegy);
+    }
+
+    @Override
+    public void setDeviceDescription(String str) {
+        device_desc=str;
+    }
+
+    @Override
+    public String getDeviceDescription() {
+        return device_desc;
     }
 
     @Override
