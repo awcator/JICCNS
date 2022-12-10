@@ -19,7 +19,7 @@ public class TFIDFCalculatorDemoDummy {
         List<String> doc1 = Arrays.asList("largest scrapper in the world".split(" "));
         List<String> doc2 = Arrays.asList("smallest, country".split(" "));
         List<String> queryHistory = Arrays.asList("apple".split(" "));
-        List<List<String>> documents = Arrays.asList(empty_doc,doc1,queryHistory);
+        List<List<String>> documents = Arrays.asList(empty_doc, doc1, queryHistory);
         TFIDFCalculatorDemoDummy calculator = new TFIDFCalculatorDemoDummy();
         //double tfidf = calculator.tfIdf(doc1, documents, "enjoy");
         //System.out.print(tfidf);
@@ -93,7 +93,7 @@ public class TFIDFCalculatorDemoDummy {
         //System.out.println(docs.size()+" "+n);
 
         //return Math.log(docs.size() / n);
-        return Math.log10((double) docs.size() / (double) n);
+        return Math.log10((double) docs.size() / n);
     }
 
     /**

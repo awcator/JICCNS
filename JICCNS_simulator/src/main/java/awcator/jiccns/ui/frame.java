@@ -1,6 +1,11 @@
 package awcator.jiccns.ui;
 
-import awcator.jiccns.alg.*;
+import awcator.jiccns.cache_strats.RandomCRP;
+import awcator.jiccns.cache_strats.fifoCRP;
+import awcator.jiccns.cache_strats.noncacheable;
+import awcator.jiccns.cache_strats.tfidfCRP;
+import awcator.jiccns.device_strats.consumer;
+import awcator.jiccns.device_strats.jicnsDeviceImpl;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
 
@@ -40,7 +45,7 @@ public class frame extends JFrame implements ActionListener {
     public static int total_minimum_hopcount = 0;
     //Nodes
     private static NodeUI[] nodes;
-    private static jicnsNodeImpl[] jicnsnodes;
+    private static jicnsDeviceImpl[] jicnsDevices;
     JButton reset; //reset Button
     JButton broadCastTo;//Dummy button for testing broadcasting
     JButton randomize_nodes; //node positons randomizer
@@ -140,7 +145,7 @@ public class frame extends JFrame implements ActionListener {
         int node_UI_height = Integer.parseInt((String) jsondata.getJSONObject("nodes_blueprint").get("node_ui_height"));
         if (!reset_ui_positons) {
             nodes = new NodeUI[node_count];
-            jicnsnodes = new jicnsNodeImpl[node_count];
+            jicnsDevices = new jicnsDeviceImpl[node_count];
         }
         dragListener mia = null;
         if (!reset_ui_positons) mia = new dragListener(centerpanel);
@@ -163,13 +168,13 @@ public class frame extends JFrame implements ActionListener {
                     }
                     String NODE_TYPE = jsondata.getJSONObject(prefix + i).get("type").toString();
                     if (NODE_TYPE.equalsIgnoreCase("Random_CRP")) {
-                        jicnsnodes[i] = new RandomCRP(i, egressSize);
+                        jicnsDevices[i] = new consumer(i, egressSize, new RandomCRP(i));
                     } else if (NODE_TYPE.equalsIgnoreCase("fifoCRP")) {
-                        jicnsnodes[i] = new fifoCRP(i, egressSize);
+                        jicnsDevices[i] = new consumer(i, egressSize, new fifoCRP(i));
                     } else if (NODE_TYPE.equalsIgnoreCase("tfidfCRP")) {
-                        jicnsnodes[i] = new tfidfCRP(i, egressSize);
+                        jicnsDevices[i] = new consumer(i, egressSize, new tfidfCRP(i));
                     } else {
-                        jicnsnodes[i] = new SimpleNode(i, egressSize);
+                        jicnsDevices[i] = new consumer(i, egressSize, new noncacheable(i));
                     }
 
                     /**
@@ -182,8 +187,8 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("egress").keys(); it.hasNext(); ) {
                             String str = it.next();
                             int latency = Integer.parseInt(jsondata.getJSONObject(prefix + i).getJSONObject("egress").get(str).toString().replace("ms", ""));
-                            jicnsnodes[i].EGRESS[k][0] = Integer.parseInt(str.replace(prefix, ""));
-                            jicnsnodes[i].EGRESS[k][1] = latency;
+                            jicnsDevices[i].EGRESS[k][0] = Integer.parseInt(str.replace(prefix, ""));
+                            jicnsDevices[i].EGRESS[k][1] = latency;
                             k++;
                         }
                     }
@@ -191,18 +196,20 @@ public class frame extends JFrame implements ActionListener {
                      * node memory settings
                      */
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_cache_size")) {
-                        jicnsnodes[i].CACHE_MEMORY_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
-                        jicnsnodes[i].allocateCacheMemorySize();
+                        System.out.println("AWCATOR " + prefix + i + "  " + Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size")));
+                        jicnsDevices[i].getCacheStrategy().CACHE_MEMORY_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_cache_size"));
+
+                        jicnsDevices[i].getCacheStrategy().allocateCacheMemorySize();
                     } else {
                         //allocate default size
-                        jicnsnodes[i].allocateCacheMemorySize();
+                        jicnsDevices[i].getCacheStrategy().allocateCacheMemorySize();
                     }
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("max_payload_size")) {
-                        jicnsnodes[i].LOCAL_PAYLOAD_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
-                        jicnsnodes[i].allocatePayloadMemorySize();
+                        jicnsDevices[i].getCacheStrategy().LOCAL_PAYLOAD_SIZE = Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("max_payload_size"));
+                        jicnsDevices[i].getCacheStrategy().allocatePayloadMemorySize();
                     } else {
                         //allocate default size
-                        jicnsnodes[i].allocatePayloadMemorySize();
+                        jicnsDevices[i].getCacheStrategy().allocatePayloadMemorySize();
                     }
                     /**
                      * Load up node memory from blueprint if specified
@@ -210,7 +217,7 @@ public class frame extends JFrame implements ActionListener {
                     if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("payload")) {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("payload").keys(); it.hasNext(); ) {
                             String str = it.next();
-                            if (!jicnsnodes[i].addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str))) {
+                            if (!jicnsDevices[i].getCacheStrategy().addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str))) {
                                 System.err.println("Failed to add into cache PayloadMemory");
                             } else {
                                 System.out.println("Loaded Data into PayloadMemory");
@@ -225,7 +232,7 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("cached").keys(); it.hasNext(); ) {
                             String str = it.next();
                             System.out.println(str + " <-----This entry should be added to cache");
-                            if (!jicnsnodes[i].addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str), true)) {
+                            if (!jicnsDevices[i].getCacheStrategy().addToCacheMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("cached").get(str), true)) {
                                 System.err.println("Failed to add into cache ");
                             } else {
                                 System.out.println("Loaded Cache into CacheMemory ");
@@ -234,7 +241,7 @@ public class frame extends JFrame implements ActionListener {
                             }
                         }
                     }
-                    nodes[i] = new NodeUI(prefix + i, jicnsnodes[i]);
+                    nodes[i] = new NodeUI(prefix + i, jicnsDevices[i]);
                     try {
                         String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
                         if (DEVICE_TYPE != null) {
@@ -500,10 +507,10 @@ public class frame extends JFrame implements ActionListener {
                                 }
                                 String LOOKUP_FOR_QUERY = null;
                                 String temp_query_answer = null;
-                                temp_query_answer = nodes[temppath.focusedNode].jicnsNode.cacheLookUp(temppath.actual_query, false);
+                                temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().cacheLookUp(temppath.actual_query, false);
                                 //System.out.println(temp_query_answer);
                                 if (temp_query_answer == null) {
-                                    temp_query_answer = nodes[temppath.focusedNode].jicnsNode.hddLookUp(temppath.actual_query, false);
+                                    temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().hddLookUp(temppath.actual_query, false);
                                 }
                                 LOOKUP_FOR_QUERY = temp_query_answer;
                                 if ((temppath.destinationNode == -1 && (LOOKUP_FOR_QUERY != null)) || (foucusedNode == temppath.destinationNode)) {
@@ -723,17 +730,17 @@ public class frame extends JFrame implements ActionListener {
 
         public static void applayChanges() {
             title.setText("Node ID : " + NODE_POSITION);
-            title.setText(title.getText() + "\nNodeType: " + jicnsnodes[NODE_POSITION].nodeType());
+            title.setText(title.getText() + "\nDeviceType: " + jicnsDevices[NODE_POSITION].getDeviceType());
             payloadTableModel.setRowCount(0);
 
-            String[][] x = jicnsnodes[NODE_POSITION].getPayloadContents();
+            String[][] x = jicnsDevices[NODE_POSITION].getCacheStrategy().getPayloadContents();
             if (x != null) {
                 for (int i = 0; i < x.length; i++) {
                     payloadTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
                 }
             }
             cacheTableModel.setRowCount(0);
-            x = jicnsnodes[NODE_POSITION].getCacheContents();
+            x = jicnsDevices[NODE_POSITION].getCacheStrategy().getCacheContents();
             if (x != null) {
                 for (int i = 0; i < x.length; i++) {
                     cacheTableModel.addRow(new Object[]{i, x[i][0], x[i][1]});
@@ -846,9 +853,9 @@ public class frame extends JFrame implements ActionListener {
     }
 
     class NodeUI extends JButton {
-        jicnsNodeImpl jicnsNode;
+        jicnsDeviceImpl jicnsNode;
 
-        public NodeUI(String x, jicnsNodeImpl jicnsNode) {
+        public NodeUI(String x, jicnsDeviceImpl jicnsNode) {
             this.jicnsNode = jicnsNode;
             setText(x);
         }
@@ -908,8 +915,8 @@ public class frame extends JFrame implements ActionListener {
         private boolean writeNodeSummary() {
             long node_epoch_time = Instant.now().getEpochSecond();
             try {
-                //jicnsNodeImpl[] jicnsnodes; //this is the same as variable declared in statically and globally in superclass frame.java
-                for (jicnsNodeImpl tempnode : jicnsnodes) {
+                //jicnsCacheImpl[] jicnsnodes; //this is the same as variable declared in statically and globally in superclass frame.java
+                for (jicnsDeviceImpl tempnode : jicnsDevices) {
                     String query = "insert into nodesummary (" +
                             "nodename," +
                             "nodetype," +
@@ -931,34 +938,34 @@ public class frame extends JFrame implements ActionListener {
 
                             "value (" +
                             "\"" + "NODE" + tempnode.getNodeID() + "\"," +
-                            "\"" + tempnode.nodeType() + "\"," +
+                            "\"" + tempnode.getDeviceType() + "\"," +
                             getExpiremntID() + "," +
                             tempnode.getNumberOfRequestsHandled() + "," +
                             tempnode.getNumberOfRequestsAnsweredBYME() + "," +
                             tempnode.getNumberOfRequestsForwarded() + "," +
-                            tempnode.getNumberOfCacheHits() + "," +
-                            tempnode.getNumberOfCacheMiss() + "," +
-                            tempnode.getNumberOfTimesCachelookups() + "," +
-                            tempnode.getNumberOfHDDHits() + "," +
-                            tempnode.getNumberOfHDDMiss() + "," +
-                            tempnode.getNumberOfTimesHDDlookups() + "," +
-                            tempnode.getNumberOfCacheEnque() + "," +
-                            tempnode.getNumberOfCacheDeque() + "," +
+                            tempnode.getCacheStrategy().getNumberOfCacheHits() + "," +
+                            tempnode.getCacheStrategy().getNumberOfCacheMiss() + "," +
+                            tempnode.getCacheStrategy().getNumberOfTimesCachelookups() + "," +
+                            tempnode.getCacheStrategy().getNumberOfHDDHits() + "," +
+                            tempnode.getCacheStrategy().getNumberOfHDDMiss() + "," +
+                            tempnode.getCacheStrategy().getNumberOfTimesHDDlookups() + "," +
+                            tempnode.getCacheStrategy().getNumberOfCacheEnque() + "," +
+                            tempnode.getCacheStrategy().getNumberOfCacheDeque() + "," +
                             tempnode.getNumberOfRequestesAnswereForwardedCount() + "," +
-                            tempnode.POWER_CONSUMPTION + "," +
+                            tempnode.getCacheStrategy().CACHE_POWER_CONSUMPTION + "," +
                             node_epoch_time + ")";
                     Statement st = db_connection.createStatement();
                     System.out.println("Insert into expiremnt status: =" + st.executeQuery(query));
                     System.out.println(query);
                 }
-                String query = "insert into exp_summery  (total_network_time,total_network_usage,total_answer_first_time,total_asks,total_minimum_hopcount,epoch,exp_id) value ("+
-                        total_network_time+","+
-                        total_network_usage+","+
-                        total_answer_first_time+","+
-                        total_asks+","+
-                        total_minimum_hopcount+","+
-                        node_epoch_time+","+
-                        getExpiremntID()+")";
+                String query = "insert into exp_summery  (total_network_time,total_network_usage,total_answer_first_time,total_asks,total_minimum_hopcount,epoch,exp_id) value (" +
+                        total_network_time + "," +
+                        total_network_usage + "," +
+                        total_answer_first_time + "," +
+                        total_asks + "," +
+                        total_minimum_hopcount + "," +
+                        node_epoch_time + "," +
+                        getExpiremntID() + ")";
                 Statement st = db_connection.createStatement();
                 System.out.println("Insert into exp_summary: status: =" + st.executeQuery(query));
                 System.out.println(query);

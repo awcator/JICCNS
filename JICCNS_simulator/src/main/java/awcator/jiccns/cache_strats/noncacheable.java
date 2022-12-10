@@ -1,4 +1,4 @@
-package awcator.jiccns.alg;
+package awcator.jiccns.cache_strats;
 
 import java.util.Arrays;
 
@@ -12,7 +12,7 @@ import java.util.Arrays;
  * Extra Memoty: Nope
  */
 
-public class SimpleNode extends jicnsNodeImpl {
+public class noncacheable extends jicnsCacheImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -27,16 +27,8 @@ public class SimpleNode extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public SimpleNode(int nodeid, int egressSize) {
+    public noncacheable(int nodeid) {
         id = nodeid;
-        EGRESS = new int[egressSize][2];
-    }
-
-    @Override
-    public void onIncomingReqData(String data) {
-        //System.out.println("Packet Reached Node" + getNodeID());
-        //System.out.println("Recived query_answer from other nodes" + data);
-        REQUEST_COUNT++;
     }
 
     @Override
@@ -46,7 +38,7 @@ public class SimpleNode extends jicnsNodeImpl {
         for (int i = 0; i < localcache_seekPointer && i < CACHE_MEMORY_SIZE; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
-                    changePowerConsumptionBy(i + 1);
+                    changeCachePowerConsumptionBy(i + 1);
                     onCacheHit();
                 }
                 return cacheMemory[i][1];
@@ -54,7 +46,7 @@ public class SimpleNode extends jicnsNodeImpl {
         }
         if (immunity_power_consumption == false) {
             onCacheMiss();
-            changePowerConsumptionBy(localcache_seekPointer);
+            changeCachePowerConsumptionBy(localcache_seekPointer);
         }
         return null;
     }
@@ -66,13 +58,13 @@ public class SimpleNode extends jicnsNodeImpl {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 if (immunity_power_consumption == false) {
                     onHDDHit();
-                    changePowerConsumptionBy(i + 1);
+                    changeCachePowerConsumptionBy(i + 1);
                 }
                 return localMemory[i][1];
             }
         }
         if (immunity_power_consumption == false) {
-            changePowerConsumptionBy(localMemory_seekPointer);
+            changeCachePowerConsumptionBy(localMemory_seekPointer);
             onHDDMiss();
         }
         return null;
@@ -87,38 +79,14 @@ public class SimpleNode extends jicnsNodeImpl {
 
     @Override
     public void onAddedToCache(String key, String value) {
-        changePowerConsumptionBy(1);
+        changeCachePowerConsumptionBy(1);
         CACHE_ENQUE_COUNT++;
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
         CACHE_DEQUE_COUNT++;
-        changePowerConsumptionBy(1);
-    }
-
-    @Override
-    public void onReqOutGoingData(String... data) {
-        REQUEST_FORWARDED_COUNT++;
-        REQUEST_COUNT++;
-        System.out.println("NODE" + getNodeID() + " Is forwarding requests to its neibhour node node" + data[0] + " with curent path " + data[1]);
-    }
-
-    @Override
-    public void onRespIncomingData(String... data) {
-        REQUEST_COUNT++;
-        System.out.println("NODE" + getNodeID() + " recived as response KEY" + data[0]);
-        if (shouldICacheOrNot(data[0], data[1])) {
-            addToCacheMemory(data[0], data[1], false);
-        }
-        //data recived by the node as response to quyert
-    }
-
-    @Override
-    public void onRespOutGoingData() {
-        REQUEST_COUNT++;
-        REQUEST_ANSWER_FORWARDED_COUNT++;
-        System.out.println("Node" + getNodeID() + " Forwarding answer to Query its original requester in a path");
+        changeCachePowerConsumptionBy(1);
     }
 
     @Override
@@ -149,11 +117,11 @@ public class SimpleNode extends jicnsNodeImpl {
             localMemory[localMemory_seekPointer][0] = key;
             localMemory[localMemory_seekPointer][1] = value;
             localMemory_seekPointer++;
-            changePowerConsumptionBy(1);
+            changeCachePowerConsumptionBy(1);
             return true;
         }
-        System.err.println(nodeType() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
-        changePowerConsumptionBy(1);
+        System.err.println(getCacheType() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
+        changeCachePowerConsumptionBy(1);
         return false;
     }
 
@@ -168,8 +136,8 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public void changePowerConsumptionBy(float changeBy) {
-        POWER_CONSUMPTION += changeBy;
+    public void changeCachePowerConsumptionBy(float changeBy) {
+        CACHE_POWER_CONSUMPTION += changeBy;
     }
 
     @Override
@@ -188,7 +156,7 @@ public class SimpleNode extends jicnsNodeImpl {
                 onAddedToCache(key, value);
                 return true;
             } else {
-                changePowerConsumptionBy(1);
+                changeCachePowerConsumptionBy(1);
                 System.err.println("ADD_FAIL_CACHE: Cache OverFlow at Node" + getNodeID() + "  for data " + key);
                 // TODO: 11/26/22 Cache Overflow metrics? may be in future
             }
@@ -213,27 +181,6 @@ public class SimpleNode extends jicnsNodeImpl {
         return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, localcache_seekPointer);
     }
 
-    @Override
-    public boolean isMyNeibhour(int nodeNumber) {
-        for (int i = 0; i < EGRESS.length; i++) {
-            if (EGRESS[i][0] == nodeNumber) return true;
-        }
-        return false;
-    }
-
-    @Override
-    public int getMsToReachNode(int nodeNumber) {
-        for (int i = 0; i < EGRESS.length; i++) {
-            if (EGRESS[i][0] == nodeNumber)
-                return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
-        }
-        return -1;
-    }
-
-    @Override
-    public boolean allowCycles() {
-        return false;
-    }
 
     @Override
     public int getNodeID() {
@@ -241,29 +188,10 @@ public class SimpleNode extends jicnsNodeImpl {
     }
 
     @Override
-    public String nodeType() {
-        return "SimpleNode";
+    public String getCacheType() {
+        return "NonCache";
     }
 
-    @Override
-    public void onBeginSession(String... data) {
-        System.out.println(nodeType() + " Node" + getNodeID() + " started requesing " + data[0]);
-    }
-
-    @Override
-    public int getNumberOfRequestsHandled() {
-        return REQUEST_COUNT;
-    }
-
-    @Override
-    public int getNumberOfRequestsAnsweredBYME() {
-        return REQUEST_ANSWERED_BY_ME_COUNT;
-    }
-
-    @Override
-    public int getNumberOfRequestsForwarded() {
-        return REQUEST_FORWARDED_COUNT;
-    }
 
     @Override
     public int getNumberOfCacheHits() {
@@ -305,13 +233,4 @@ public class SimpleNode extends jicnsNodeImpl {
         return CACHE_DEQUE_COUNT;
     }
 
-    @Override
-    public int getNumberOfRequestesAnswereForwardedCount() {
-        return REQUEST_ANSWER_FORWARDED_COUNT;
-    }
-
-    @Override
-    public void onRequestAnsweredByMe() {
-        REQUEST_ANSWERED_BY_ME_COUNT++;
-    }
 }

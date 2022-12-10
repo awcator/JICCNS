@@ -1,20 +1,19 @@
-package awcator.jiccns.alg;
+package awcator.jiccns.cache_strats;
 
 import java.util.Arrays;
-import java.util.Random;
 
 /**
- * Node Summary: Random Cache Replacemnt Policy Node
+ * Node Summary: First In First Out Replacemnt Policy Node
  * <p>
  * Payload Storage type: Arrays[][]
  * Payload add type: Linear additon to array
- * Replacemnt Type: Random
+ * Replacemnt Type: oldest first
  * <p>
- * CacheStrategy: Random CRP
+ * CacheStrategy: FIFO/Oldest First
  * Extra Memoty: Nope
  */
 
-public class RandomCRP extends jicnsNodeImpl {
+public class fifoCRP extends jicnsCacheImpl {
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -29,34 +28,31 @@ public class RandomCRP extends jicnsNodeImpl {
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
 
-    public RandomCRP(int nodeid, int egressSize) {
+    public fifoCRP(int nodeid) {
         id = nodeid;
-        EGRESS = new int[egressSize][2];
     }
 
     @Override
-    public void onIncomingReqData(String data) {
-        REQUEST_COUNT++;
-        //System.out.println("Packet Reached Node" + getNodeID());
-        //System.out.println("Recived query_answer from other nodes" + data);
+    public void changeCachePowerConsumptionBy(float units) {
+        CACHE_POWER_CONSUMPTION += units;
     }
 
     @Override
     public String cacheLookUp(String queryKey, boolean immunity_power_consumption) {
-        if (immunity_power_consumption == false) CACHE_LOOKUP_COUNT++;
         //System.out.println("NODE"+getNodeID()+" will lookup "+queryKey);
-        for (int i = 0; i < localcache_seekPointer && i < CACHE_MEMORY_SIZE; i++) {
+        if (immunity_power_consumption == false) CACHE_LOOKUP_COUNT++;
+        for (int i = 0; i < Math.min(localcache_seekPointer, getMaxLocalCacheSize()) && i < CACHE_MEMORY_SIZE; i++) {
             if (cacheMemory[i][0].equalsIgnoreCase(queryKey)) {
                 if (immunity_power_consumption == false) {
                     onCacheHit();
-                    changePowerConsumptionBy(i + 1);
+                    changeCachePowerConsumptionBy(i + 1);
                 }
                 return cacheMemory[i][1];
             }
         }
 
         if (immunity_power_consumption == false) {
-            changePowerConsumptionBy(localcache_seekPointer);
+            changeCachePowerConsumptionBy(Math.min(localcache_seekPointer, getMaxLocalCacheSize()));
             onCacheMiss();
         }
         return null;
@@ -69,13 +65,13 @@ public class RandomCRP extends jicnsNodeImpl {
             if (localMemory[i][0].equalsIgnoreCase(query_key)) {
                 if (immunity_power_consumption == false) {
                     onHDDHit();
-                    changePowerConsumptionBy(i + 1);
+                    changeCachePowerConsumptionBy(i + 1);
                 }
                 return localMemory[i][1];
             }
         }
         if (immunity_power_consumption == false) {
-            changePowerConsumptionBy(localMemory_seekPointer);
+            changeCachePowerConsumptionBy(localMemory_seekPointer);
             onHDDMiss();
         }
         return null;
@@ -87,48 +83,21 @@ public class RandomCRP extends jicnsNodeImpl {
         if (haveICachedBefore == null) {
             haveICachedBefore = hddLookUp(key, true);
         }
-        if (haveICachedBefore == null) {
-            return true;
-        }
-        return false;
+        return haveICachedBefore == null;
     }
 
     @Override
     public void onAddedToCache(String key, String value) {
         System.out.println("Cache was Added to cacheMeomry for the key and values : " + key + " : " + value);
-        changePowerConsumptionBy(1);
+        changeCachePowerConsumptionBy(1);
         CACHE_ENQUE_COUNT++;
     }
 
     @Override
     public void onRemovedFromCache(String key, String value) {
-        System.err.println(nodeType() + " Node" + getNodeID() + "Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
-        changePowerConsumptionBy(1);
+        System.err.println(getCacheType() + " Node" + getNodeID() + "Cache was removed from cacheMeomry for the key and values : " + key + " : " + value);
+        changeCachePowerConsumptionBy(1);
         CACHE_DEQUE_COUNT++;
-    }
-
-    @Override
-    public void onReqOutGoingData(String... data) {
-        REQUEST_FORWARDED_COUNT++;
-        REQUEST_COUNT++;
-        System.out.println("NODE" + getNodeID() + " Is forwarding requests to its neibhour node node" + data[0] + " with curent path " + data[1]);
-    }
-
-    @Override
-    public void onRespIncomingData(String... data) {
-        REQUEST_COUNT++;
-        System.out.println("NODE" + getNodeID() + " recived as response KEY. Will try to cache if required" + data[0]);
-        //data recived by the node as response to quyert
-        if (shouldICacheOrNot(data[0], data[1])) {
-            addToCacheMemory(data[0], data[1], false);
-        }
-    }
-
-    @Override
-    public void onRespOutGoingData() {
-        REQUEST_COUNT++;
-        REQUEST_ANSWER_FORWARDED_COUNT++;
-        System.out.println("Node" + getNodeID() + " Forwarding answer to Query its original requester in a path");
     }
 
     @Override
@@ -159,11 +128,11 @@ public class RandomCRP extends jicnsNodeImpl {
             localMemory[localMemory_seekPointer][0] = key;
             localMemory[localMemory_seekPointer][1] = value;
             localMemory_seekPointer++;
-            changePowerConsumptionBy(1);
+            changeCachePowerConsumptionBy(1);
             return true;
         }
-        changePowerConsumptionBy(1);
-        System.err.println(nodeType() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
+        changeCachePowerConsumptionBy(1);
+        System.err.println(getCacheContents() + " Node" + getNodeID() + " FAILED_ADD_HDD: HDD Memory exceeded");
         return false;
     }
 
@@ -177,10 +146,6 @@ public class RandomCRP extends jicnsNodeImpl {
         return LOCAL_PAYLOAD_SIZE;
     }
 
-    @Override
-    public void changePowerConsumptionBy(float changeBy) {
-        POWER_CONSUMPTION += changeBy;
-    }
 
     @Override
     public String[][] getPayloadContents() {
@@ -189,7 +154,7 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public boolean addToCacheMemory(String key, String value, boolean softload) {
-        System.out.println(nodeType() + " Node" + getNodeID() + " Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize() + "   " + localcache_seekPointer);
+        System.out.println(getCacheType() + " Node" + getNodeID() + " Addin to cahce " + key + " " + value + "  " + getMaxLocalCacheSize() + "   " + localcache_seekPointer);
         try {
             if (localcache_seekPointer < getMaxLocalCacheSize()) {
                 cacheMemory[localcache_seekPointer][0] = key;
@@ -198,8 +163,7 @@ public class RandomCRP extends jicnsNodeImpl {
                 onAddedToCache(key, value);
             } else {
                 //Random Replacment Strategy
-                Random r = new Random();
-                int randInt = r.nextInt(getMaxLocalCacheSize());
+                int randInt = localcache_seekPointer % getMaxLocalCacheSize();
                 //System.out.println("Node"+getNodeID()+" is ready to replace cache content from "+cacheMemory[randInt][0]+" with "+key);
                 String cache_key_removed = cacheMemory[randInt][0]; //Cache key that is being removed
                 String cache_value_removed = cacheMemory[randInt][1]; //Cache value that is being removed
@@ -207,6 +171,7 @@ public class RandomCRP extends jicnsNodeImpl {
                 cacheMemory[randInt][1] = value;
                 onRemovedFromCache(cache_key_removed, cache_value_removed);
                 onAddedToCache(key, value);
+                localcache_seekPointer++;
             }
             return true;
         } catch (Exception e) {
@@ -227,30 +192,10 @@ public class RandomCRP extends jicnsNodeImpl {
 
     @Override
     public String[][] getCacheContents() {
-        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, localcache_seekPointer);
+        System.out.println(localcache_seekPointer + "   " + getMaxLocalCacheSize());
+        return (cacheMemory == null) ? null : Arrays.copyOfRange(cacheMemory, 0, Math.min(localcache_seekPointer, getMaxLocalCacheSize()));
     }
 
-    @Override
-    public boolean isMyNeibhour(int nodeNumber) {
-        for (int i = 0; i < EGRESS.length; i++) {
-            if (EGRESS[i][0] == nodeNumber) return true;
-        }
-        return false;
-    }
-
-    @Override
-    public int getMsToReachNode(int nodeNumber) {
-        for (int i = 0; i < EGRESS.length; i++) {
-            if (EGRESS[i][0] == nodeNumber)
-                return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
-        }
-        return -1;
-    }
-
-    @Override
-    public boolean allowCycles() {
-        return false;
-    }
 
     @Override
     public int getNodeID() {
@@ -258,28 +203,8 @@ public class RandomCRP extends jicnsNodeImpl {
     }
 
     @Override
-    public String nodeType() {
-        return "RandomCRP";
-    }
-
-    @Override
-    public void onBeginSession(String... data) {
-        System.out.println(nodeType() + " Node" + getNodeID() + " started requesing " + data[0]);
-    }
-
-    @Override
-    public int getNumberOfRequestsHandled() {
-        return REQUEST_COUNT;
-    }
-
-    @Override
-    public int getNumberOfRequestsAnsweredBYME() {
-        return REQUEST_ANSWERED_BY_ME_COUNT;
-    }
-
-    @Override
-    public int getNumberOfRequestsForwarded() {
-        return REQUEST_FORWARDED_COUNT;
+    public String getCacheType() {
+        return "fifoCRP";
     }
 
     @Override
@@ -320,15 +245,5 @@ public class RandomCRP extends jicnsNodeImpl {
     @Override
     public int getNumberOfCacheDeque() {
         return CACHE_DEQUE_COUNT;
-    }
-
-    @Override
-    public int getNumberOfRequestesAnswereForwardedCount() {
-        return REQUEST_ANSWER_FORWARDED_COUNT;
-    }
-
-    @Override
-    public void onRequestAnsweredByMe() {
-        REQUEST_ANSWERED_BY_ME_COUNT++;
     }
 }
