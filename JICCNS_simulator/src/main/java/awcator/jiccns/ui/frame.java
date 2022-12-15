@@ -1,6 +1,8 @@
 package awcator.jiccns.ui;
 
-import awcator.jiccns.cache_strats.*;
+import awcator.jiccns.cache_strats.RandomCRP;
+import awcator.jiccns.cache_strats.jicnsCacheImpl;
+import awcator.jiccns.cache_strats.noncacheable;
 import awcator.jiccns.device_strats.gpnode;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
 import awcator.jiccns.meta;
@@ -108,9 +110,10 @@ public class frame extends JFrame implements ActionListener {
          * Force the panel to free layout
          */
         centerPanel = new freePanel();
+        centerPanel.setPreferredSize(new Dimension(getWidth()*2,getHeight()*2));
         centerPanel.setLayout(null);
         loadNodesUI(centerPanel, getWidth(), getHeight(), false);
-        add(centerPanel, BorderLayout.CENTER);
+        add(new JScrollPane(centerPanel), BorderLayout.CENTER);
 
         /**
          * SetUP Right Panel: Node Proeprteis
@@ -150,7 +153,7 @@ public class frame extends JFrame implements ActionListener {
         HashSet<String> setOfDataInCacheAndMemory = new HashSet<>();
         Random random = new Random();
         for (int i = 0; i < node_count; i++) {
-            String prefix ="";
+            String prefix = "";
             if (!reset_ui_positons) {
                 prefix = (String) jsondata.getJSONObject("nodes_blueprint").get("node_prefix");
                 System.out.println("----------------------------\nWorking on " + prefix + i);
@@ -167,41 +170,51 @@ public class frame extends JFrame implements ActionListener {
                     }
                     String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
                     String CACHE_TYPE = jsondata.getJSONObject(prefix + i).get("cache_type").toString();
-                    jicnsCacheImpl cache_strtegy=null;
-                    if(CACHE_TYPE.equalsIgnoreCase("Random_CRP")){
-                        cache_strtegy=new RandomCRP(i);
-                    }
-                    else if(CACHE_TYPE.equalsIgnoreCase("fifoCRP")){
-                        cache_strtegy=new RandomCRP(i);
-                    }
-                    else if(CACHE_TYPE.equalsIgnoreCase("tfidfCRP")){
-                        cache_strtegy=new RandomCRP(i);
-                    }
-                    else if(CACHE_TYPE.equalsIgnoreCase("noncacheable")){
-                        cache_strtegy=new noncacheable(i);
-                    }
-                    else {
+                    jicnsCacheImpl cache_strtegy = null;
+                    if (CACHE_TYPE.equalsIgnoreCase("Random_CRP")) {
+                        cache_strtegy = new RandomCRP(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("fifoCRP")) {
+                        cache_strtegy = new RandomCRP(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("tfidfCRP")) {
+                        cache_strtegy = new RandomCRP(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("noncacheable")) {
+                        cache_strtegy = new noncacheable(i);
+                    } else {
                         System.out.println("Did not understand CACHE_TYPE default to NoCahceType");
-                        cache_strtegy=new noncacheable(i);
+                        cache_strtegy = new noncacheable(i);
                     }
 
-                    if(DEVICE_TYPE.equalsIgnoreCase("CONSUMER")){
+                    if (DEVICE_TYPE.equalsIgnoreCase("CONSUMER")) {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
-                    }
-                    else if(DEVICE_TYPE.equalsIgnoreCase("PRODUCER")){
+                        jicnsDevices[i].setDeviceType("CONSUMER");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("PRODUCER")) {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
-                    }
-                    else {
-                        System.err.println("COuldnt not undertstand the device_type"+DEVICE_TYPE);
+                        jicnsDevices[i].setDeviceType("PRODUCER");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("LOCAL_GATEWAY")) {
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("LOCAL_GATEWAY");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("INTERNET_GATEWAY")) {
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("INTERNET_GATEWAY");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("ROUTER")) {
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("ROUTER");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("ASN")) {
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("ASN");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
+                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("edge");
+                    } else {
+                        System.err.println("COuldnt not undertstand the device_type " + DEVICE_TYPE);
                         System.exit(0);
                     }
-                    if(!jsondata.getJSONObject(prefix + i).isNull("description")) {
+                    if (!jsondata.getJSONObject(prefix + i).isNull("description")) {
                         String device_descritpion = jsondata.getJSONObject(prefix + i).get("description").toString();
                         if (device_descritpion != null) {
                             jicnsDevices[i].setDeviceDescription(device_descritpion);
                         }
-                    }
-                    else {
+                    } else {
                         System.err.println("Clouldnt not load device description");
                         jicnsDevices[i].setDeviceDescription("Unknown ");
                     }
@@ -272,14 +285,13 @@ public class frame extends JFrame implements ActionListener {
                     nodes[i] = new NodeUI(prefix + i, jicnsDevices[i]);
                     try {
                         if (DEVICE_TYPE != null) {
-                            if(!jsondata.getJSONObject(prefix + i).isNull("icon")) {
+                            if (!jsondata.getJSONObject(prefix + i).isNull("icon")) {
                                 nodes[i].setOpaque(false);
                                 nodes[i].setContentAreaFilled(false);
                                 nodes[i].setBorderPainted(false);
                                 nodes[i].setIcon(new ImageIcon(ImageIO.read(new File((String) jsondata.getJSONObject(prefix + i).get("icon")))));
-                            }
-                            else {
-                                System.err.println("No icons specified for "+prefix+i+" skipping");
+                            } else {
+                                System.err.println("No icons specified for " + prefix + i + " skipping");
                             }
                         }
                     } catch (Exception e) {
@@ -288,15 +300,13 @@ public class frame extends JFrame implements ActionListener {
                     }
                 }
             }
-            if(reset_ui_positons==true)
+            if (reset_ui_positons == true)
                 nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
-            else
-            {
-                if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("X")  && !jsondata.getJSONObject(prefix + i).isNull("Y")) {
-                    nodes[i].setBounds(Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("X")),Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("Y")),node_UI_width,node_UI_height);
-                }
-                else {
-                    System.err.println(prefix+i+": Did not found both coridnates for nodes. using random");
+            else {
+                if (!jsondata.isNull(prefix + i) && !jsondata.getJSONObject(prefix + i).isNull("X") && !jsondata.getJSONObject(prefix + i).isNull("Y")) {
+                    nodes[i].setBounds(Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("X")), Integer.parseInt((String) jsondata.getJSONObject(prefix + i).get("Y")), node_UI_width, node_UI_height);
+                } else {
+                    System.err.println(prefix + i + ": Did not found both coridnates for nodes. using random");
                     nodes[i].setBounds(random.nextInt(SCREEN_WIDTH - node_UI_width - 300), random.nextInt(SCREEN_HEIGHT - node_UI_height - 100), node_UI_width, node_UI_height);
                 }
             }
@@ -609,13 +619,13 @@ public class frame extends JFrame implements ActionListener {
                                             if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
                                                 if (nodes[foucusedNode].jicnsNode.allowCycles()) {
                                                     nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i,nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                     pq.add(newpath);
                                                     total_network_usage++;
                                                 } else {
                                                     if (!temppath.pa.contains("node" + i)) {
                                                         nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i,nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                         pq.add(newpath);
                                                         total_network_usage++;
                                                     }
@@ -629,7 +639,7 @@ public class frame extends JFrame implements ActionListener {
                                         String last_node_onPATH = newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->") == -1 ? 0 : newPATHwithoutLastNode.lastIndexOf("-->") + 3);
                                         int nodeIDfromNode = Integer.parseInt(last_node_onPATH.replace("node", ""));
                                         nodes[temppath.focusedNode].jicnsNode.onRespOutGoingData();
-                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
+                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode,nodes), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
                                         pq.add(newpath);
                                         total_network_usage++;
                                     }
@@ -768,7 +778,7 @@ public class frame extends JFrame implements ActionListener {
         public static void applayChanges() {
             title.setText("Node ID : " + NODE_POSITION);
             title.setText(title.getText() + "\nDeviceType: " + jicnsDevices[NODE_POSITION].getDeviceType());
-            title.setText(title.getText() + "\nCacheType: " + jicnsDevices[NODE_POSITION].getCacheStrategy().getCacheType()+"\npostion: "+nodes[NODE_POSITION].getX()+","+nodes[NODE_POSITION].getY()+" \n");
+            title.setText(title.getText() + "\nCacheType: " + jicnsDevices[NODE_POSITION].getCacheStrategy().getCacheType() + "\npostion: " + nodes[NODE_POSITION].getX() + "," + nodes[NODE_POSITION].getY() + " \n");
             payloadTableModel.setRowCount(0);
 
             String[][] x = jicnsDevices[NODE_POSITION].getCacheStrategy().getPayloadContents();
@@ -855,7 +865,7 @@ public class frame extends JFrame implements ActionListener {
                 x1 = r1.getCenterX();
                 y1 = r1.getCenterY();
                 g2.setColor(Color.BLACK);
-                g2.drawString(c[i].jicnsNode.getDeviceDescription(),(int)r1.getMinX()-15,(int)r1.getMaxY()+15);
+                g2.drawString(c[i].jicnsNode.getDeviceDescription(), (int) r1.getMinX() - 15, (int) r1.getMaxY() + 15);
                 for (int j = 0; j < c[i].jicnsNode.EGRESS.length; j++) {
                     r2 = c[c[i].jicnsNode.EGRESS[j][0]].getBounds();
                     x2 = r2.getCenterX();
@@ -889,15 +899,6 @@ public class frame extends JFrame implements ActionListener {
 
         public Graphics2D getFreePanelGraphis() {
             return mygraphics;
-        }
-    }
-
-    class NodeUI extends JButton {
-        jicnsDeviceImpl jicnsNode;
-
-        public NodeUI(String x, jicnsDeviceImpl jicnsNode) {
-            this.jicnsNode = jicnsNode;
-            setText(x);
         }
     }
 

@@ -85,7 +85,7 @@
   },
   "type": "simplenode",
   "egress": {
-   "node5": "1ms"
+   "node1": "1ms"
   }
  }
 }

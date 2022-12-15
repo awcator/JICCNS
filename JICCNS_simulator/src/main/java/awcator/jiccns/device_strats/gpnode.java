@@ -1,19 +1,16 @@
 package awcator.jiccns.device_strats;
 
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
+import awcator.jiccns.ui.NodeUI;
 
 public class gpnode extends jicnsDeviceImpl {
     int id = 0;
-    String device_desc="awcatornode";
+    String device_desc = "awcatornode";
+
     public gpnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         id = nodeid;
         EGRESS = new int[egressSize][2];
         setCacheStrategy(strtegy);
-    }
-
-    @Override
-    public void setDeviceDescription(String str) {
-        device_desc=str;
     }
 
     @Override
@@ -22,23 +19,28 @@ public class gpnode extends jicnsDeviceImpl {
     }
 
     @Override
+    public void setDeviceDescription(String str) {
+        device_desc = str;
+    }
+
+    @Override
     public String getNodeDomain() {
-        return nodedomain;
+        return DEVICE_DOMAIN;
     }
 
     @Override
     public void setNodeDomain(String domain) {
-        nodedomain = domain;
+        DEVICE_DOMAIN = domain;
     }
 
     @Override
     public jicnsCacheImpl getCacheStrategy() {
-        return nodechacestrtegy;
+        return DEVICE_CACHE_STRATEGY;
     }
 
     @Override
     public void setCacheStrategy(jicnsCacheImpl my_cache_strategy) {
-        nodechacestrtegy = my_cache_strategy;
+        DEVICE_CACHE_STRATEGY = my_cache_strategy;
     }
 
     @Override
@@ -87,10 +89,11 @@ public class gpnode extends jicnsDeviceImpl {
     }
 
     @Override
-    public int getMsToReachNode(int nodeNumber) {
+    public int getMsToReachNode(int nodeNumber, NodeUI list[]) {
         for (int i = 0; i < EGRESS.length; i++) {
             if (EGRESS[i][0] == nodeNumber)
-                return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
+                //return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
+                return (int)Math.sqrt(Math.pow(list[nodeNumber].getX()-list[getNodeID()].getX(),2) + Math.pow(list[nodeNumber].getY()-list[getNodeID()].getY(),2));
         }
         return -1;
     }
@@ -107,7 +110,12 @@ public class gpnode extends jicnsDeviceImpl {
 
     @Override
     public String getDeviceType() {
-        return "Consumer";
+        return DEVICE_TYPE;
+    }
+
+    @Override
+    public void setDeviceType(String str) {
+        DEVICE_TYPE = str;
     }
 
     @Override
