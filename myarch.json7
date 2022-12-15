@@ -71,7 +71,7 @@
     "max_cache_size": "0",
     "max_payload_size": "0",
     "cache_type": "noncacheable",
-    "device_type": "edge",
+    "device_type": "asn",
     "egress": {
       "node3": "1ms",
       "node0": "1ms",
@@ -87,7 +87,7 @@
     "max_cache_size": "0",
     "max_payload_size": "0",
     "cache_type": "noncacheable",
-    "device_type": "edge",
+    "device_type": "asn",
     "egress": {
       "node4": "1ms",
       "node5": "1ms",
@@ -102,7 +102,7 @@
     "max_cache_size": "0",
     "max_payload_size": "0",
     "cache_type": "noncacheable",
-    "device_type": "edge",
+    "device_type": "asn",
     "egress": {
       "node3": "1ms",
       "node2": "1ms",

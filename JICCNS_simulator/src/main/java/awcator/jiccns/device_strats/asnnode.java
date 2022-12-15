@@ -1,14 +1,17 @@
 package awcator.jiccns.device_strats;
 
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
+import awcator.jiccns.nodehelpers.ASN_short_distanceFinder;
 import awcator.jiccns.ui.NodeUI;
 import awcator.jiccns.ui.path;
 
-public class gpnode extends jicnsDeviceImpl {
-    int id = -1;
-    String device_desc = "awcatornode";
+import java.util.HashSet;
 
-    public gpnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
+public class asnnode extends jicnsDeviceImpl {
+    int id = -1;
+    String device_desc = "asn";
+    HashSet<Integer> blockNodeList;
+    public asnnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         id = nodeid;
         EGRESS = new int[egressSize][2];
         setCacheStrategy(strtegy);
@@ -46,9 +49,44 @@ public class gpnode extends jicnsDeviceImpl {
 
     @Override
     public void onIncomingReqData(String data, NodeUI[] list, path path_so_far) {
+        REQUEST_COUNT++;
+        blockNodeList = null;
+        System.gc();
+        blockNodeList = new HashSet<>();
+        blockNodeList.add(getNodeID());
+        /**
+         * Always self block yourself, so that packet wont rerotue by you. incomingPackier-->ASNA node--(whom should i forward?)--Asn B,ASN C,ASN D, execpt ASN-A. becuse i'm ASnA
+         */
+
+        //ASN communications  to decide best path
+        for (int i = 0; i < EGRESS.length; i++) {
+            //check if NeibhourNode is ASN
+            NodeUI neibhourNode = list[i];
+            if (neibhourNode.jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
+                asnnode ASN_Neibhour = (asnnode) neibhourNode.jicnsNode;
+                while (true) {
+                    break;
+                }
+            }
+        }
         //System.out.println("Packet Reached Node" + getNodeID());
         //System.out.println("Recived query_answer from other nodes" + data);
-        REQUEST_COUNT++;
+    }
+
+    int searchForDominInsideASN(String key, int focus, NodeUI nodes[], int ms_so_far, int parent) {
+        //Check if Current Node has the data or not
+        String value = nodes[focus].jicnsNode.getCacheStrategy().cacheLookUp(key, true);
+        if (value == null)
+            value = nodes[focus].jicnsNode.getCacheStrategy().hddLookUp(key, true);
+
+        if (value != null) {
+            return ms_so_far + nodes[parent].jicnsNode.getMsToReachNode(focus, nodes);
+        } else {
+            for (int i = 0; i < nodes[parent].jicnsNode.EGRESS.length; i++) {
+                int childNode = nodes[parent].jicnsNode.EGRESS[i][0];
+            }
+        }
+        return 0;
     }
 
     @Override
@@ -94,7 +132,7 @@ public class gpnode extends jicnsDeviceImpl {
         for (int i = 0; i < EGRESS.length; i++) {
             if (EGRESS[i][0] == nodeNumber)
                 //return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
-                return (int)Math.sqrt(Math.pow(list[nodeNumber].getX()-list[getNodeID()].getX(),2) + Math.pow(list[nodeNumber].getY()-list[getNodeID()].getY(),2));
+                return (int) Math.sqrt(Math.pow(list[nodeNumber].getX() - list[getNodeID()].getX(), 2) + Math.pow(list[nodeNumber].getY() - list[getNodeID()].getY(), 2));
         }
         return -1;
     }
@@ -141,14 +179,7 @@ public class gpnode extends jicnsDeviceImpl {
 
     @Override
     public boolean shouldIPassThroughthisNode(int node, String extra_pathInfo) {
-        /*
-        if(node==3){
-            System.out.println(getNodeID()+" is blocked accesing "+node);
-            return false;
-        }
-        */
         return true;
-        /**Allowing true for all makes it broadcasting**/
     }
 
     @Override
@@ -159,5 +190,9 @@ public class gpnode extends jicnsDeviceImpl {
     @Override
     public void onRequestAnsweredByMe() {
         REQUEST_ANSWERED_BY_ME_COUNT++;
+    }
+
+    public ASN_short_distanceFinder getASN_short_distanceFinderInstance(){
+        return new ASN_short_distanceFinder();
     }
 }

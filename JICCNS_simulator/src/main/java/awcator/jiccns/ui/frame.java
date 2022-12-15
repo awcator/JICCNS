@@ -3,6 +3,7 @@ package awcator.jiccns.ui;
 import awcator.jiccns.cache_strats.RandomCRP;
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
 import awcator.jiccns.cache_strats.noncacheable;
+import awcator.jiccns.device_strats.asnnode;
 import awcator.jiccns.device_strats.gpnode;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
 import awcator.jiccns.meta;
@@ -110,7 +111,7 @@ public class frame extends JFrame implements ActionListener {
          * Force the panel to free layout
          */
         centerPanel = new freePanel();
-        centerPanel.setPreferredSize(new Dimension(getWidth()*2,getHeight()*2));
+        centerPanel.setPreferredSize(new Dimension(getWidth() * 2, getHeight() * 2));
         centerPanel.setLayout(null);
         loadNodesUI(centerPanel, getWidth(), getHeight(), false);
         add(new JScrollPane(centerPanel), BorderLayout.CENTER);
@@ -133,6 +134,11 @@ public class frame extends JFrame implements ActionListener {
     public static Color getRandomColor() {
         Random r = new Random();
         return new Color(r.nextInt(255), r.nextInt(255), r.nextInt(255));
+    }
+
+    private static void updateGlobalRoutingTable() {
+        System.out.println("Updating Routing Table...");
+        System.out.println("Updated sucesffully");
     }
 
     private void loadNodesUI(JPanel centerpanel, int SCREEN_WIDTH, int SCREEN_HEIGHT, boolean reset_ui_positons) {
@@ -165,7 +171,7 @@ public class frame extends JFrame implements ActionListener {
                         System.out.println("Found no egres etry for " + prefix + i);
                         egressSize = 0;
                     } else {
-                        // TODO: 12/10/22 Egress size.length? is it working really? 
+                        // TODO: 12/10/22 Egress size.length? is it working really?
                         egressSize = jsondata.getJSONObject(prefix + i).getJSONObject("egress").length();
                     }
                     String DEVICE_TYPE = jsondata.getJSONObject(prefix + i).get("device_type").toString();
@@ -200,7 +206,7 @@ public class frame extends JFrame implements ActionListener {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
                         jicnsDevices[i].setDeviceType("ROUTER");
                     } else if (DEVICE_TYPE.equalsIgnoreCase("ASN")) {
-                        jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i] = new asnnode(i, egressSize, cache_strtegy);
                         jicnsDevices[i].setDeviceType("ASN");
                     } else if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
@@ -329,6 +335,8 @@ public class frame extends JFrame implements ActionListener {
             System.err.println("Failed to write DataSets");
             e.printStackTrace();
         }
+        updateGlobalRoutingTable();
+
         System.out.println("\tDone");
     }
 
@@ -436,7 +444,7 @@ public class frame extends JFrame implements ActionListener {
                                             if (displayPath.currentDataPointY <= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
                                                     nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
                                             }
@@ -446,7 +454,7 @@ public class frame extends JFrame implements ActionListener {
                                             if (displayPath.currentDataPointY >= destinationY) {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
                                                     nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
                                             }
@@ -462,7 +470,7 @@ public class frame extends JFrame implements ActionListener {
                                             if (displayPath.currentDataPointX <= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
                                                     nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
                                             }
@@ -472,7 +480,7 @@ public class frame extends JFrame implements ActionListener {
                                             if (displayPath.currentDataPointX >= destinationX) {
                                                 pathsToDsiplayAtAtime.remove(i);
                                                 if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
                                                     nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
                                             }
@@ -518,10 +526,23 @@ public class frame extends JFrame implements ActionListener {
                             java.util.List<path> pathsToDsiplayAtAtime = new ArrayList<path>();
                             boolean drawAnime = false;
                             boolean parallelPaths = false;
+                            boolean first_asn_handshake = false;
+                            HashSet<Integer> force_these_nodes = null;
                             while (!pq.isEmpty()) {
                                 //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
                                 //System.out.println("SiZE "+pq.size());
+
                                 temppath = pq.poll();
+                                /**
+                                 * ASN HANDSHAKE
+                                 */
+                                if (first_asn_handshake == false && nodes[temppath.focusedNode].jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
+                                    first_asn_handshake = true;
+                                    asnnode ASN_HANDSHAKE_INTITATOR = (asnnode) nodes[temppath.focusedNode].jicnsNode;
+                                    System.out.println("Use the path");
+                                    force_these_nodes = ASN_HANDSHAKE_INTITATOR.getASN_short_distanceFinderInstance().getShortPath(ASN_HANDSHAKE_INTITATOR.getNodeID(), temppath.ms, QUERY_FROM_USER, -1, "", nodes).convertToset();
+                                }
+
                                 //prints time digaram
                                 System.out.print("\n" + temppath.ms + " " + temppath + "  " + temppath.actual_query + "  " + temppath.actual_query_answer);
                                 int foucusedNode = temppath.focusedNode;
@@ -615,17 +636,25 @@ public class frame extends JFrame implements ActionListener {
                                     //This means node is about to send packets to other Nodes (Broadcast)? Should I forward it or should i send it back to requested guy?
                                     if (temppath.forward) {
                                         for (int i = 0; i < nodes.length; i++) {
+                                            if (force_these_nodes != null) {
+                                                if (force_these_nodes.contains(i)) {
+                                                    //cary on forwarding
+                                                } else {
+                                                    //skip ith itteration
+                                                    continue;
+                                                }
+                                            }
                                             //broadcast into cycle?
-                                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i)) {
+                                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i) && nodes[foucusedNode].jicnsNode.shouldIPassThroughthisNode(i, null)) {
                                                 if (nodes[foucusedNode].jicnsNode.allowCycles()) {
                                                     nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i,nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                     pq.add(newpath);
                                                     total_network_usage++;
                                                 } else {
                                                     if (!temppath.pa.contains("node" + i)) {
                                                         nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i,nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                         pq.add(newpath);
                                                         total_network_usage++;
                                                     }
@@ -639,7 +668,7 @@ public class frame extends JFrame implements ActionListener {
                                         String last_node_onPATH = newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->") == -1 ? 0 : newPATHwithoutLastNode.lastIndexOf("-->") + 3);
                                         int nodeIDfromNode = Integer.parseInt(last_node_onPATH.replace("node", ""));
                                         nodes[temppath.focusedNode].jicnsNode.onRespOutGoingData();
-                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode,nodes), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
+                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode, nodes), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
                                         pq.add(newpath);
                                         total_network_usage++;
                                     }
@@ -800,44 +829,6 @@ public class frame extends JFrame implements ActionListener {
         }
     }
 
-    static class path {
-        public String pa;
-        public path parent;
-        public int ms;
-        public int focusedNode = 0;
-        public int destinationNode = -1;
-        /**
-         * currentDataPointX=-1 symbolizes data point (in Animation) is not set or it is about to travel from parent towards focusNode
-         * currentDataPointX=80 symbolizes data point currently at Xaxsis 80 and it is moving towards focusNode from parent Node
-         * <p>
-         * Similarly for Yaxsis
-         */
-        double currentDataPointX = -1;
-        double currentDataPointY = -1;
-        Color pathColor;
-        boolean forward = true;
-        String backtrack = "";
-        String actual_query = "";
-        String actual_query_answer = "";
-
-        public path(String p, int mss, path par, int fc, Color c, int des, String tracePath, boolean isForward, String q, String qa) {
-            pa = p;
-            ms = mss;
-            parent = par;
-            focusedNode = fc;
-            pathColor = c;
-            destinationNode = des;
-            backtrack = tracePath;
-            forward = isForward;
-            actual_query = q;
-            actual_query_answer = qa;
-        }
-
-        @Override
-        public String toString() {
-            return pa;
-        }
-    }
 
     class freePanel extends JPanel {
         public boolean showLines = true;

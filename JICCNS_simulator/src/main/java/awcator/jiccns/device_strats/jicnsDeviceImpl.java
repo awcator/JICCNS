@@ -1,7 +1,11 @@
 package awcator.jiccns.device_strats;
 
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
+import awcator.jiccns.exceptions.notAsnException;
 import awcator.jiccns.ui.NodeUI;
+import awcator.jiccns.ui.path;
+
+import java.util.HashSet;
 
 public abstract class jicnsDeviceImpl {
     String DEVICE_TYPE;
@@ -73,7 +77,7 @@ public abstract class jicnsDeviceImpl {
      *      I own this Data, Should I have to make any change to Cahce? By thinking of improtance in future
      * param: data: It is the dataquery other nodes requested this node
      */
-    public abstract void onIncomingReqData(String data);
+    public abstract void onIncomingReqData(String data, NodeUI[] list, path path_so_far) throws notAsnException;
 
     /**
      * A node implementable function
@@ -167,5 +171,5 @@ public abstract class jicnsDeviceImpl {
      */
     abstract public int getNumberOfRequestsForwarded();
 
-
+    abstract public boolean shouldIPassThroughthisNode(int node, String extra_pathInfo);
 }
