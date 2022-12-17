@@ -1,5 +1,5 @@
 <component name="ArtifactManager">
-  <artifact build-on-make="true" name="JICCNS:jar">
+  <artifact name="JICCNS:jar">
     <output-path>$PROJECT_DIR$/out/artifacts/JICCNS_jar</output-path>
     <root id="root">
       <element id="archive" name="JICCNS.jar">
