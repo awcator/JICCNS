@@ -15,6 +15,11 @@ import java.util.*;
 
 public class tfidfCRP extends jicnsCacheImpl {
     /**
+     * TF-IDF specific to store the history of requests recived by the node. Using this we will calulate the
+     * popularity of the data for the future using tf-idf
+     */
+    public String requestHistory = "";
+    /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
      */
@@ -27,12 +32,6 @@ public class tfidfCRP extends jicnsCacheImpl {
     int id = 0;
     private int localMemory_seekPointer = 0;
     private int localcache_seekPointer = 0;
-
-    /**
-     * TF-IDF specific to store the history of requests recived by the node. Using this we will calulate the
-     * popularity of the data for the future using tf-idf
-     */
-    private String requestHistory = "";
 
     public tfidfCRP(int nodeid) {
         id = nodeid;

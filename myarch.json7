@@ -84,9 +84,9 @@
     "Y": "442",
     "description": "edge Node",
     "dns_like_id": "",
-    "max_cache_size": "0",
-    "max_payload_size": "0",
-    "cache_type": "noncacheable",
+    "max_cache_size": "5",
+    "max_payload_size": "1",
+    "cache_type": "tfidfCRP",
     "device_type": "TF_IDF_ASN",
     "egress": {
       "node4": "1ms",

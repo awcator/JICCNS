@@ -1,8 +1,6 @@
 package awcator.jiccns.ui;
 
-import awcator.jiccns.cache_strats.RandomCRP;
-import awcator.jiccns.cache_strats.jicnsCacheImpl;
-import awcator.jiccns.cache_strats.noncacheable;
+import awcator.jiccns.cache_strats.*;
 import awcator.jiccns.device_strats.asnnode;
 import awcator.jiccns.device_strats.gpnode;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
@@ -181,9 +179,9 @@ public class frame extends JFrame implements ActionListener {
                     if (CACHE_TYPE.equalsIgnoreCase("Random_CRP")) {
                         cache_strtegy = new RandomCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("fifoCRP")) {
-                        cache_strtegy = new RandomCRP(i);
+                        cache_strtegy = new fifoCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("tfidfCRP")) {
-                        cache_strtegy = new RandomCRP(i);
+                        cache_strtegy = new tfidfCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("noncacheable")) {
                         cache_strtegy = new noncacheable(i);
                     } else {

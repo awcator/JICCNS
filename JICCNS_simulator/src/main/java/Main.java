@@ -23,8 +23,8 @@ public class Main {
 }
 /**
  * // TODO: 12/10/22
- *  * FIFO CRP node is missing
- *
+ * * FIFO CRP node is missing
+ * <p>
  * // TODO: 11/5/22  Features
  * Save Architecture and reload option ---PRIORITY LOWEST
  * LRU NODE  PRIORITY Medium
@@ -44,13 +44,12 @@ public class Main {
  * c    Implimentation BUG: if data sent by A and B reaches at C at same time what should be done? curreny two broadcast msgs from c to node D (Inefficent)
  * |
  * D
- *
+ * <p>
  * Notedown average time requred to process the query and grph it
  * Total network packets moved
- *
+ * <p>
  * // TODO: 11/6/22 Algorithm validation
  * run 2 times with unkown data query
  * query from all node with random query
- *
  */
 
