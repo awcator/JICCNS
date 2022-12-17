@@ -40,7 +40,7 @@ public class Random_hop_aware_CRP extends RandomCRP {
         newList.addAll(l2);
         int MAX_EGRESS = Integer.MIN_VALUE;
         int pos = -1;
-        // Caluate the node that has most outgoings and closer to the source, except the  node that gave answer
+        // Caluate the node that has most outgoings and closer to the source, except the  node that gave answer, so substract 1 from totalSize
         for (int i = 1; i < newList.size() - 1; i++) {
             String str = newList.get(i);
             int length = list[Integer.parseInt(str)].jicnsNode.EGRESS.length;
@@ -49,7 +49,7 @@ public class Random_hop_aware_CRP extends RandomCRP {
                 pos = Integer.parseInt(str);
             }
         }
-        //if current node has most egress and closer to the source
+        //if current node has most egress and closer to the source then we have to cache it
         if (pos == getNodeID()) {
             return true;
         }
