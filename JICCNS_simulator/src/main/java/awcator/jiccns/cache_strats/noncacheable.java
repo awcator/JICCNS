@@ -1,5 +1,8 @@
 package awcator.jiccns.cache_strats;
 
+import awcator.jiccns.ui.NodeUI;
+import awcator.jiccns.ui.path;
+
 import java.util.Arrays;
 
 /**
@@ -71,7 +74,7 @@ public class noncacheable extends jicnsCacheImpl {
     }
 
     @Override
-    public boolean shouldICacheOrNot(String key, String value) {
+    public boolean shouldICacheOrNot(String key, String value, NodeUI[] list, path current_path) {
         //Always dont cacheIT
         //FORCE no cache
         return false;

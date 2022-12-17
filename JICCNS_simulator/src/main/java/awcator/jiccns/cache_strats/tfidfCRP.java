@@ -1,5 +1,8 @@
 package awcator.jiccns.cache_strats;
 
+import awcator.jiccns.ui.NodeUI;
+import awcator.jiccns.ui.path;
+
 import java.util.*;
 
 /**
@@ -81,7 +84,7 @@ public class tfidfCRP extends jicnsCacheImpl {
     }
 
     @Override
-    public boolean shouldICacheOrNot(String key, String value) {
+    public boolean shouldICacheOrNot(String key, String value, NodeUI[] list, path current_path) {
         String haveICachedBefore = cacheLookUp(key, true);
         if (haveICachedBefore == null) {
             haveICachedBefore = hddLookUp(key, true);

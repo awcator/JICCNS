@@ -49,10 +49,10 @@ public class gpnode extends jicnsDeviceImpl {
     }
 
     @Override
-    public void onRespIncomingData(String... data) {
+    public void onRespIncomingData(NodeUI[] list, path current_path, String... data) {
         REQUEST_COUNT++;
         System.out.println("NODE" + getNodeID() + " recived as response KEY" + data[0]);
-        if (getCacheStrategy().shouldICacheOrNot(data[0], data[1])) {
+        if (getCacheStrategy().shouldICacheOrNot(data[0], data[1], list, current_path)) {
             getCacheStrategy().addToCacheMemory(data[0], data[1], false);
         }
         //data recived by the node as response to quyert

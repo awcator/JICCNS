@@ -11,7 +11,7 @@ public final class meta {
     public static final String JICNS_version = "JICNS_202209";
     public static String blueprint_map = "{}";
 
-    public static String filePath = "/home/Awcator/Documents/JICCNS/edge_cache_arch.json";
+    public static String filePath = "/home/Awcator/Documents/JICCNS/hop_base_cache.json";
 
     public static String loadBluePrint() throws Exception {
         return loadBluePrintFromFile(filePath);

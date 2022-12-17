@@ -38,9 +38,9 @@
     "X": "237",
     "Y": "290",
     "description": "router",
-    "max_cache_size": "0",
+    "max_cache_size": "2",
     "max_payload_size": "0",
-    "cache_type": "noncacheable",
+    "cache_type": "Random_hop_aware_CRP",
     "device_type": "router",
     "egress": {
       "node0": "1ms",
@@ -64,9 +64,9 @@
     "X": "450",
     "Y": "290",
     "description": "router",
-    "max_cache_size": "0",
+    "max_cache_size": "5",
     "max_payload_size": "0",
-    "cache_type": "noncacheable",
+    "cache_type": "Random_hop_aware_CRP",
     "device_type": "router",
     "egress": {
       "node1": "1ms",
@@ -103,9 +103,9 @@
     "X": "630",
     "Y": "290",
     "description": "router",
-    "max_cache_size": "0",
+    "max_cache_size": "2",
     "max_payload_size": "0",
-    "cache_type": "noncacheable",
+    "cache_type": "Random_hop_aware_CRP",
     "device_type": "asn",
     "egress": {
       "node3": "1ms",
@@ -168,9 +168,9 @@
     "X": "880",
     "Y": "290",
     "description": "producer",
-    "max_cache_size": "0",
+    "max_cache_size": "3",
     "max_payload_size": "0",
-    "cache_type": "noncacheable",
+    "cache_type": "Random_hop_aware_CRP",
     "device_type": "producer",
     "egress": {
       "node6": "1ms"

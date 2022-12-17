@@ -184,6 +184,8 @@ public class frame extends JFrame implements ActionListener {
                         cache_strtegy = new tfidfCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("tfidf_with_live_timeoutCRP")) {
                         cache_strtegy = new tfidf_with_live_timeoutCRP(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("Random_hop_aware_CRP")) {
+                        cache_strtegy = new Random_hop_aware_CRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("noncacheable")) {
                         cache_strtegy = new noncacheable(i);
                     } else {
@@ -451,7 +453,7 @@ public class frame extends JFrame implements ActionListener {
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                             }
                                         } else {
                                             displayPath.currentDataPointY += dataPointSpeed;
@@ -461,7 +463,7 @@ public class frame extends JFrame implements ActionListener {
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                             }
                                         }
                                     } else {
@@ -477,7 +479,7 @@ public class frame extends JFrame implements ActionListener {
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                             }
                                         } else {
                                             displayPath.currentDataPointX += dataPointSpeed;
@@ -487,7 +489,7 @@ public class frame extends JFrame implements ActionListener {
                                                 if (displayPath.forward)
                                                     nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
                                                 else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(displayPath.actual_query, displayPath.actual_query_answer);
+                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                             }
                                         }
                                     }
@@ -707,7 +709,7 @@ public class frame extends JFrame implements ActionListener {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        System.out.println("##########################" + total_network_time + "   " + total_network_usage + "    " + total_answer_first_time + "   " + total_asks + "  " + total_minimum_hopcount);
+                        System.out.println("Summary Metrics: " + total_network_time + "   " + total_network_usage + "    " + total_answer_first_time + "   " + total_asks + "  " + total_minimum_hopcount);
                     }
                 });
                 rlMF.start();

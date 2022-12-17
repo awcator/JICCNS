@@ -18,7 +18,7 @@ public class path {
     double currentDataPointY = -1;
     Color pathColor;
     boolean forward = true;
-    String backtrack = "";
+    public String backtrack = "";
     String actual_query = "";
     String actual_query_answer = "";
 

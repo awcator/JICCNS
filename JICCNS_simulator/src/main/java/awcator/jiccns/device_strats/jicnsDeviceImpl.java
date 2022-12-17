@@ -95,7 +95,7 @@ public abstract class jicnsDeviceImpl {
      * data[0]=key
      * data[1]=value
      */
-    public abstract void onRespIncomingData(String... data);
+    public abstract void onRespIncomingData(NodeUI[] list, path current_path, String... data);
 
     public abstract void onRespOutGoingData();
 

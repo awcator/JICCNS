@@ -1,5 +1,8 @@
 package awcator.jiccns.cache_strats;
 
+import awcator.jiccns.ui.NodeUI;
+import awcator.jiccns.ui.path;
+
 public abstract class jicnsCacheImpl {
     /**
      * Number of times data existed in cache.
@@ -90,7 +93,7 @@ public abstract class jicnsCacheImpl {
      *      if cache is not full, what order should i put it? timeOrder? frequency? populatirity? OldFirst? recently used First? BigSize data first?
      * @return
      */
-    public abstract boolean shouldICacheOrNot(String key, String value);
+    public abstract boolean shouldICacheOrNot(String key, String value, NodeUI[] list, path current_path);
 
     /***
      * A node implementable function
