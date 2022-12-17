@@ -106,7 +106,7 @@
     "max_cache_size": "0",
     "max_payload_size": "0",
     "cache_type": "noncacheable",
-    "device_type": "router",
+    "device_type": "asn",
     "egress": {
       "node3": "1ms",
       "node7": "1ms",

@@ -658,7 +658,8 @@ public class frame extends JFrame implements ActionListener {
                                                     pq.add(newpath);
                                                     total_network_usage++;
                                                 } else {
-                                                    if (!temppath.pa.contains("node" + i)) {
+                                                    //if (!temppath.pa.contains("node" + i)) {
+                                                    if (!Arrays.asList(temppath.pa.split("-->")).contains("node" + i)) {
                                                         nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
                                                         path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
                                                         pq.add(newpath);

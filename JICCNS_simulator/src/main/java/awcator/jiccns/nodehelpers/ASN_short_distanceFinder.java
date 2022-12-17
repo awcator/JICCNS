@@ -3,6 +3,8 @@ package awcator.jiccns.nodehelpers;
 import awcator.jiccns.exceptions.notAsnException;
 import awcator.jiccns.ui.NodeUI;
 
+import java.util.Arrays;
+
 public class ASN_short_distanceFinder {
     boolean shorterstDistanceFound = false;
     int shorterstDistance = Integer.MAX_VALUE;
@@ -21,8 +23,8 @@ public class ASN_short_distanceFinder {
          * Dont loop between ASN and nodes if they have cycle paths
          */
         shortestPathFromASN dummy_pathNode = new shortestPathFromASN("", Integer.MAX_VALUE);
-        if (chain.contains("-->" + from)) return dummy_pathNode;
-
+        //if (chain.contains("-->" + from)) return dummy_pathNode;
+        if (Arrays.asList(chain.split("-->")).contains(Integer.toString(from))) return dummy_pathNode;
         int MIN = Integer.MAX_VALUE;
         chain += "-->" + from;
         System.out.println(from + "\t" + time_so_far + "\t" + previous);
