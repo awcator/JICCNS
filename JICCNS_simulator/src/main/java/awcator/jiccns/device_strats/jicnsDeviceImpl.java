@@ -115,7 +115,7 @@ public abstract class jicnsDeviceImpl {
      * @param nodeNumber This is the ID of node B
      * @return int in ms if Node B is immidiate neibhour of A/curernt Node. else -1 indicating no latency info because path dsnt exsit
      */
-    abstract public int getMsToReachNode(int nodeNumber, NodeUI list[]);
+    abstract public int getMsToReachNode(int nodeNumber, NodeUI[] list);
 
     /**
      * if you want your route to pass through a node that was alredy visited return true; else false
@@ -168,4 +168,13 @@ public abstract class jicnsDeviceImpl {
     abstract public int getNumberOfRequestsForwarded();
 
     abstract public boolean shouldIPassThroughthisNode(int node, String extra_pathInfo);
+
+    /**
+     * Get DeviceName
+     *
+     * @return
+     */
+    abstract public String getCanonicalName();
+
+    abstract public boolean setCanonicalName(String str);
 }

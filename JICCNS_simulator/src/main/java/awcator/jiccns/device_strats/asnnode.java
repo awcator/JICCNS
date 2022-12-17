@@ -93,7 +93,7 @@ public class asnnode extends jicnsDeviceImpl {
     }
 
     @Override
-    public int getMsToReachNode(int nodeNumber, NodeUI list[]) {
+    public int getMsToReachNode(int nodeNumber, NodeUI[] list) {
         for (int i = 0; i < EGRESS.length; i++) {
             if (EGRESS[i][0] == nodeNumber)
                 //return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
@@ -145,6 +145,16 @@ public class asnnode extends jicnsDeviceImpl {
     @Override
     public boolean shouldIPassThroughthisNode(int node, String extra_pathInfo) {
         return true;
+    }
+
+    @Override
+    public String getCanonicalName() {
+        return getDeviceType();
+    }
+
+    @Override
+    public boolean setCanonicalName(String str) {
+        return false;
     }
 
     @Override

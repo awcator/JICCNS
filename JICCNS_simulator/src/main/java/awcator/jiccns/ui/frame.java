@@ -212,6 +212,7 @@ public class frame extends JFrame implements ActionListener {
                     } else if (DEVICE_TYPE.equalsIgnoreCase("TF_IDF_ASN")) {
                         jicnsDevices[i] = new tfidf_asnnode(i, egressSize, cache_strtegy);
                         jicnsDevices[i].setDeviceType("ASN");
+                        jicnsDevices[i].setCanonicalName("TF_IDF_ASN");
                     } else if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);
                         jicnsDevices[i].setDeviceType("edge");
@@ -810,7 +811,7 @@ public class frame extends JFrame implements ActionListener {
 
         public static void applayChanges() {
             title.setText("Node ID : " + NODE_POSITION);
-            title.setText(title.getText() + "\nDeviceType: " + jicnsDevices[NODE_POSITION].getDeviceType());
+            title.setText(title.getText() + "\nDeviceType: " + jicnsDevices[NODE_POSITION].getDeviceType() + "\nCannonName: " + jicnsDevices[NODE_POSITION].getCanonicalName());
             title.setText(title.getText() + "\nCacheType: " + jicnsDevices[NODE_POSITION].getCacheStrategy().getCacheType() + "\npostion: " + nodes[NODE_POSITION].getX() + "," + nodes[NODE_POSITION].getY() + " \n");
             payloadTableModel.setRowCount(0);
 

@@ -16,7 +16,7 @@ public class ASN_short_distanceFinder {
      * @param nodes       nodes[] to input the graph
      * @return
      */
-    private shortestPathFromASN getShortDistanceWithInAS(int from, int time_so_far, String key, int previous, String chain, NodeUI nodes[]) {
+    private shortestPathFromASN getShortDistanceWithInAS(int from, int time_so_far, String key, int previous, String chain, NodeUI[] nodes) {
         /**
          * Dont loop between ASN and nodes if they have cycle paths
          */
@@ -24,7 +24,7 @@ public class ASN_short_distanceFinder {
         if (chain.contains("-->" + from)) return dummy_pathNode;
 
         int MIN = Integer.MAX_VALUE;
-        chain += "-->" + Integer.toString(from);
+        chain += "-->" + from;
         System.out.println(from + "\t" + time_so_far + "\t" + previous);
         String Value = nodes[from].jicnsNode.getCacheStrategy().cacheLookUp(key, true);
         if (Value == null) {
@@ -58,7 +58,7 @@ public class ASN_short_distanceFinder {
         }
     }
 
-    public shortestPathFromASN getShortPath(int from, int time_so_far, String key, int previous, String chain, NodeUI nodes[]) throws notAsnException {
+    public shortestPathFromASN getShortPath(int from, int time_so_far, String key, int previous, String chain, NodeUI[] nodes) throws notAsnException {
         shorterstDistanceFound = false;
         shorterstDistance = Integer.MAX_VALUE;
         if (nodes[from].jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {

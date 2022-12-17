@@ -7,14 +7,14 @@ import awcator.jiccns.ui.path;
 import java.util.HashSet;
 
 public class tfidf_asnnode extends asnnode {
+    String CANON_NAME = "TF_IDF_ASN_NODE";
+
     public tfidf_asnnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         super(nodeid, egressSize, strtegy);
     }
 
     @Override
     public void onIncomingReqData(String data, NodeUI[] list, path path_so_far) {
-        System.out.println("JAI AWCATOR");
-        System.exit(0);
         REQUEST_COUNT++;
         blockNodeList = null;
         System.gc();
@@ -27,5 +27,16 @@ public class tfidf_asnnode extends asnnode {
         // TODO: 12/17/22 ASN communications  to decide best path
         //System.out.println("Packet Reached Node" + getNodeID());
         //System.out.println("Recived query_answer from other nodes" + data);
+    }
+
+    @Override
+    public String getCanonicalName() {
+        return CANON_NAME;
+    }
+
+    @Override
+    public boolean setCanonicalName(String str) {
+        CANON_NAME = str;
+        return true;
     }
 }

@@ -19,7 +19,7 @@ public class shortestPathFromASN {
     public HashSet<Integer> convertToset() {
         HashSet<Integer> myset = new HashSet<>();
         for (String x : Path.split("-->")) {
-            if(x.trim().length()>=1)
+            if (x.trim().length() >= 1)
                 myset.add(Integer.parseInt(x.trim()));
         }
         return myset;

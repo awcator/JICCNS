@@ -3,7 +3,7 @@ package awcator.jiccns.demo;
 import java.util.HashSet;
 
 public class bestPath {
-    public static int graph[][] = {
+    public static int[][] graph = {
             // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9,10,11
             {-1, 5, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1}, //0
             {-1, -1, -1, 1, 1, 1, -1, -1, -1, -1, -1, -1}, //1
@@ -19,7 +19,7 @@ public class bestPath {
             {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1}, //11
     };
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         HashSet<Integer> answerNode = new HashSet<>();
         //answerNode.add(6);
         //answerNode.add(8);*/
@@ -32,7 +32,7 @@ public class bestPath {
     public pathNode shortDistanceWithInAS(int from, int time_so_far, HashSet<Integer> answerNode, int previous, String chain) throws Exception {
         pathNode dummy_pathNode = new pathNode("", Integer.MAX_VALUE);
         int MIN = Integer.MAX_VALUE;
-        chain += "-->" + Integer.toString(from);
+        chain += "-->" + from;
         System.out.println(from + "\t" + time_so_far + "\t" + previous);
         if (answerNode.contains(from)) {
             System.out.println("Answer at " + time_so_far);
