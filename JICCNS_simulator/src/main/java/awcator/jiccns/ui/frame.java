@@ -6,6 +6,7 @@ import awcator.jiccns.cache_strats.noncacheable;
 import awcator.jiccns.device_strats.asnnode;
 import awcator.jiccns.device_strats.gpnode;
 import awcator.jiccns.device_strats.jicnsDeviceImpl;
+import awcator.jiccns.device_strats.tfidf_asnnode;
 import awcator.jiccns.meta;
 import org.json.JSONObject;
 
@@ -207,6 +208,9 @@ public class frame extends JFrame implements ActionListener {
                         jicnsDevices[i].setDeviceType("ROUTER");
                     } else if (DEVICE_TYPE.equalsIgnoreCase("ASN")) {
                         jicnsDevices[i] = new asnnode(i, egressSize, cache_strtegy);
+                        jicnsDevices[i].setDeviceType("ASN");
+                    } else if (DEVICE_TYPE.equalsIgnoreCase("TF_IDF_ASN")) {
+                        jicnsDevices[i] = new tfidf_asnnode(i, egressSize, cache_strtegy);
                         jicnsDevices[i].setDeviceType("ASN");
                     } else if (DEVICE_TYPE.equalsIgnoreCase("edge")) {
                         jicnsDevices[i] = new gpnode(i, egressSize, cache_strtegy);

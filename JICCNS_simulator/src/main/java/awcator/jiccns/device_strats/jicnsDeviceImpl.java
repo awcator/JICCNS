@@ -5,11 +5,7 @@ import awcator.jiccns.exceptions.notAsnException;
 import awcator.jiccns.ui.NodeUI;
 import awcator.jiccns.ui.path;
 
-import java.util.HashSet;
-
 public abstract class jicnsDeviceImpl {
-    String DEVICE_TYPE;
-    public String DEVICE_DOMAIN;
     public jicnsCacheImpl DEVICE_CACHE_STRATEGY;
     /**
      * Number of requests made on the node
@@ -38,12 +34,11 @@ public abstract class jicnsDeviceImpl {
      * egress[4][1]=2 implies,  the 4th route has a latency of 2 ms to the destination node
      */
     public int[][] EGRESS;
-    abstract public void setDeviceDescription(String str);
+    String DEVICE_TYPE;
+
     abstract public String getDeviceDescription();
 
-    public abstract String getNodeDomain();
-
-    public abstract void setNodeDomain(String domain);
+    abstract public void setDeviceDescription(String str);
 
     abstract public jicnsCacheImpl getCacheStrategy();
 
@@ -143,6 +138,7 @@ public abstract class jicnsDeviceImpl {
      * @return must return somehing , not null
      */
     abstract public String getDeviceType();
+
     abstract public void setDeviceType(String str);
 
     /**

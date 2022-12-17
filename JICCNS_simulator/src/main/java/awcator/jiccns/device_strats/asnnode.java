@@ -11,6 +11,7 @@ public class asnnode extends jicnsDeviceImpl {
     int id = -1;
     String device_desc = "asn";
     HashSet<Integer> blockNodeList;
+
     public asnnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         id = nodeid;
         EGRESS = new int[egressSize][2];
@@ -25,16 +26,6 @@ public class asnnode extends jicnsDeviceImpl {
     @Override
     public void setDeviceDescription(String str) {
         device_desc = str;
-    }
-
-    @Override
-    public String getNodeDomain() {
-        return DEVICE_DOMAIN;
-    }
-
-    @Override
-    public void setNodeDomain(String domain) {
-        DEVICE_DOMAIN = domain;
     }
 
     @Override
@@ -58,35 +49,9 @@ public class asnnode extends jicnsDeviceImpl {
          * Always self block yourself, so that packet wont rerotue by you. incomingPackier-->ASNA node--(whom should i forward?)--Asn B,ASN C,ASN D, execpt ASN-A. becuse i'm ASnA
          */
 
-        //ASN communications  to decide best path
-        for (int i = 0; i < EGRESS.length; i++) {
-            //check if NeibhourNode is ASN
-            NodeUI neibhourNode = list[i];
-            if (neibhourNode.jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
-                asnnode ASN_Neibhour = (asnnode) neibhourNode.jicnsNode;
-                while (true) {
-                    break;
-                }
-            }
-        }
+        // TODO: 12/17/22 ASN communications  to decide best path
         //System.out.println("Packet Reached Node" + getNodeID());
         //System.out.println("Recived query_answer from other nodes" + data);
-    }
-
-    int searchForDominInsideASN(String key, int focus, NodeUI nodes[], int ms_so_far, int parent) {
-        //Check if Current Node has the data or not
-        String value = nodes[focus].jicnsNode.getCacheStrategy().cacheLookUp(key, true);
-        if (value == null)
-            value = nodes[focus].jicnsNode.getCacheStrategy().hddLookUp(key, true);
-
-        if (value != null) {
-            return ms_so_far + nodes[parent].jicnsNode.getMsToReachNode(focus, nodes);
-        } else {
-            for (int i = 0; i < nodes[parent].jicnsNode.EGRESS.length; i++) {
-                int childNode = nodes[parent].jicnsNode.EGRESS[i][0];
-            }
-        }
-        return 0;
     }
 
     @Override
@@ -192,7 +157,7 @@ public class asnnode extends jicnsDeviceImpl {
         REQUEST_ANSWERED_BY_ME_COUNT++;
     }
 
-    public ASN_short_distanceFinder getASN_short_distanceFinderInstance(){
+    public ASN_short_distanceFinder getASN_short_distanceFinderInstance() {
         return new ASN_short_distanceFinder();
     }
 }

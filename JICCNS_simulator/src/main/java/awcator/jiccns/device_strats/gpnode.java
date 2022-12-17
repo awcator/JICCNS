@@ -6,7 +6,7 @@ import awcator.jiccns.ui.path;
 
 public class gpnode extends jicnsDeviceImpl {
     int id = -1;
-    String device_desc = "awcatornode";
+    String device_desc = "General_purpose_node";
 
     public gpnode(int nodeid, int egressSize, jicnsCacheImpl strtegy) {
         id = nodeid;
@@ -22,16 +22,6 @@ public class gpnode extends jicnsDeviceImpl {
     @Override
     public void setDeviceDescription(String str) {
         device_desc = str;
-    }
-
-    @Override
-    public String getNodeDomain() {
-        return DEVICE_DOMAIN;
-    }
-
-    @Override
-    public void setNodeDomain(String domain) {
-        DEVICE_DOMAIN = domain;
     }
 
     @Override
@@ -94,7 +84,7 @@ public class gpnode extends jicnsDeviceImpl {
         for (int i = 0; i < EGRESS.length; i++) {
             if (EGRESS[i][0] == nodeNumber)
                 //return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
-                return (int)Math.sqrt(Math.pow(list[nodeNumber].getX()-list[getNodeID()].getX(),2) + Math.pow(list[nodeNumber].getY()-list[getNodeID()].getY(),2));
+                return (int) Math.sqrt(Math.pow(list[nodeNumber].getX() - list[getNodeID()].getX(), 2) + Math.pow(list[nodeNumber].getY() - list[getNodeID()].getY(), 2));
         }
         return -1;
     }
