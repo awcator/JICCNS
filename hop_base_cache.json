@@ -1,0 +1,179 @@
+{
+  "nodes_blueprint": {
+    "node_count": "12",
+    "node_prefix": "node",
+    "node_ui_width": "100",
+    "node_ui_height": "50"
+  },
+  "frame_blueprint": {
+    "width": "1000",
+    "height": "2000"
+  },
+  "node0": {
+    "X": "30",
+    "Y": "290",
+    "description": "Consumer",
+    "max_cache_size": "10",
+    "max_payload_size": "100",
+    "payload": {
+      "number of bikes parked at park": "10",
+      "number of cars parked at park": "4",
+      "king": "kohli",
+      "cricket": "bat and ball"
+    },
+    "cached": {
+      "total vechicles parked at park": "14",
+      "dbz": "goku",
+      "vegeta": "planet",
+      "bro": "bruh",
+      ".": "dotwa"
+    },
+    "cache_type": "noncacheable",
+    "device_type": "consumer",
+    "egress": {
+      "node1": "1ms"
+    }
+  },
+  "node1": {
+    "X": "237",
+    "Y": "290",
+    "description": "router",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "router",
+    "egress": {
+      "node0": "1ms",
+      "node2": "1ms",
+      "node3": "1ms"
+    }
+  },
+  "node2": {
+    "X": "120",
+    "Y": "130",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node1": "1ms"
+    }
+  },
+  "node3": {
+    "X": "450",
+    "Y": "290",
+    "description": "router",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "router",
+    "egress": {
+      "node1": "1ms",
+      "node6": "1ms",
+      "node4": "1ms",
+      "node5": "1ms"
+    }
+  },
+  "node4": {
+    "X": "350",
+    "Y": "150",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node3": "1ms"
+    }
+  },
+  "node5": {
+    "X": "350",
+    "Y": "420",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node3": "1ms"
+    }
+  },
+  "node6": {
+    "X": "630",
+    "Y": "290",
+    "description": "router",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "router",
+    "egress": {
+      "node3": "1ms",
+      "node7": "1ms",
+      "node8": "1ms",
+      "node9": "1ms",
+      "node10": "1ms",
+      "node11": "1ms"
+    }
+  },
+  "node7": {
+    "X": "520",
+    "Y": "160",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms"
+    }
+  },
+  "node8": {
+    "X": "730",
+    "Y": "160",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms"
+    }
+  },
+  "node9": {
+    "X": "520",
+    "Y": "420",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms"
+    }
+  },
+  "node10": {
+    "X": "730",
+    "Y": "420",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms"
+    }
+  },
+  "node11": {
+    "X": "880",
+    "Y": "290",
+    "description": "producer",
+    "max_cache_size": "0",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms"
+    }
+  }
+}
