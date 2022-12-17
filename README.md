@@ -17,6 +17,10 @@ Java Information-centric Cache Network Simulator
 | MySQL Database support         | yes       |
 | content based brodcast         | yes       |
 | requester path answering       | yes       |
+| NONBrodcastRouting             | yes       |
+| BrodcastRouting                | yes       |
+| ShortestDistanceBasedRouting   | yes       |
+| EuclidianDistanceBasedRouting  | yes       |
 
 # Disclaimer:
 It may/maynot 100% accuret to the Information centric network proposed.
