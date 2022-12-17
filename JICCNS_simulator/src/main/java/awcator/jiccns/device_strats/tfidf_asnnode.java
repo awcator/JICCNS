@@ -2,6 +2,7 @@ package awcator.jiccns.device_strats;
 
 import awcator.jiccns.cache_strats.jicnsCacheImpl;
 import awcator.jiccns.cache_strats.tfidfCRP;
+import awcator.jiccns.cache_strats.tfidf_with_live_timeoutCRP;
 import awcator.jiccns.ui.NodeUI;
 import awcator.jiccns.ui.path;
 
@@ -14,9 +15,14 @@ public class tfidf_asnnode extends asnnode {
 
     @Override
     public void onIncomingReqData(String data, NodeUI[] list, path path_so_far) {
-        if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP")) {
-            tfidfCRP crp = (tfidfCRP) getCacheStrategy();
-            crp.requestHistory += data + " ";
+        if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP") || getCacheStrategy().getCacheType().equalsIgnoreCase("tfidf_with_live_timeoutCRP")) {
+            if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP")) {
+                tfidfCRP crp = (tfidfCRP) getCacheStrategy();
+                crp.requestHistory += data + " ";
+            } else {
+                tfidf_with_live_timeoutCRP crp = (tfidf_with_live_timeoutCRP) getCacheStrategy();
+                crp.requestHistory += data + " ";
+            }
         }
         super.onIncomingReqData(data, list, path_so_far);
     }
@@ -34,9 +40,14 @@ public class tfidf_asnnode extends asnnode {
 
     @Override
     public void onBeginSession(String... data) {
-        if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP")) {
-            tfidfCRP crp = (tfidfCRP) getCacheStrategy();
-            crp.requestHistory += data + " ";
+        if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP") || getCacheStrategy().getCacheType().equalsIgnoreCase("tfidf_with_live_timeoutCRP")) {
+            if (getCacheStrategy().getCacheType().equalsIgnoreCase("tfidfCRP")) {
+                tfidfCRP crp = (tfidfCRP) getCacheStrategy();
+                crp.requestHistory += data + " ";
+            } else {
+                tfidf_with_live_timeoutCRP crp = (tfidf_with_live_timeoutCRP) getCacheStrategy();
+                crp.requestHistory += data + " ";
+            }
         }
         super.onBeginSession(data);
     }

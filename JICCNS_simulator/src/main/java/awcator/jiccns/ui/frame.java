@@ -182,6 +182,8 @@ public class frame extends JFrame implements ActionListener {
                         cache_strtegy = new fifoCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("tfidfCRP")) {
                         cache_strtegy = new tfidfCRP(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("tfidf_with_live_timeoutCRP")) {
+                        cache_strtegy = new tfidf_with_live_timeoutCRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("noncacheable")) {
                         cache_strtegy = new noncacheable(i);
                     } else {
@@ -542,8 +544,9 @@ public class frame extends JFrame implements ActionListener {
                                 if (first_asn_handshake == false && nodes[temppath.focusedNode].jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
                                     first_asn_handshake = true;
                                     asnnode ASN_HANDSHAKE_INTITATOR = (asnnode) nodes[temppath.focusedNode].jicnsNode;
-                                    System.out.println("Use the path");
+                                    System.out.println("------------<ASN ROUTING TABLE>-------------");
                                     force_these_nodes = ASN_HANDSHAKE_INTITATOR.getASN_short_distanceFinderInstance().getShortPath(ASN_HANDSHAKE_INTITATOR.getNodeID(), temppath.ms, QUERY_FROM_USER, -1, "", nodes).convertToset();
+                                    System.out.println("------------</ASN ROUTING TABLE>-------------");
                                 }
 
                                 //prints time digaram

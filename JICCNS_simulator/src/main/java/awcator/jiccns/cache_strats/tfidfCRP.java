@@ -19,6 +19,7 @@ public class tfidfCRP extends jicnsCacheImpl {
      * popularity of the data for the future using tf-idf
      */
     public String requestHistory = "";
+    protected int localcache_seekPointer = 0;
     /**
      * This varible contains NodeServer's localMemory contents
      * In Reality: This represent Nodes HardDisk
@@ -31,7 +32,6 @@ public class tfidfCRP extends jicnsCacheImpl {
     PriorityQueue<tfdif_array> cacheMemory;
     int id = 0;
     private int localMemory_seekPointer = 0;
-    private int localcache_seekPointer = 0;
 
     public tfidfCRP(int nodeid) {
         id = nodeid;

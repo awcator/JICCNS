@@ -31,7 +31,7 @@ public class ASN_short_distanceFinder {
             Value = nodes[from].jicnsNode.getCacheStrategy().hddLookUp(key, true);
         }
         if (Value != null) {
-            System.out.println("Asnwered by node" + from + ", Chain SoFar" + chain + "TimeSoFar" + time_so_far + " value=" + Value);
+            System.out.println("Packet can be answerable by node" + from + ", Chain SoFar" + chain + "TimeSoFar" + time_so_far + " value=" + Value + "\nCheckign if more short path available or not");
             shorterstDistanceFound = true;
             shorterstDistance = Math.min(shorterstDistance, time_so_far);
             return new shortestPathFromASN(chain, time_so_far);
@@ -43,7 +43,7 @@ public class ASN_short_distanceFinder {
 
                 dummyTime += nodes[from].jicnsNode.getMsToReachNode(asn_neibhour_ui.jicnsNode.getNodeID(), nodes);
                 if (dummyTime > shorterstDistance && shorterstDistanceFound) {
-                    System.out.println("Skipping this path..As better path alerdy path by ASN; " + chain);
+                    System.out.println("Skipping this path..As a better path with a known solution alredy known by ASN; PATH=" + chain);
                     return dummy_pathNode;//max time
                 }
                 shortestPathFromASN pk = getShortDistanceWithInAS(temp, dummyTime, key, from, chain, nodes);
