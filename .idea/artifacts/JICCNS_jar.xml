@@ -3,10 +3,10 @@
     <output-path>$PROJECT_DIR$/out/artifacts/JICCNS_jar</output-path>
     <root id="root">
       <element id="archive" name="JICCNS.jar">
-        <element id="directory" name="META-INF">
-          <element id="file-copy" path="$PROJECT_DIR$/META-INF/MANIFEST.MF" />
-        </element>
+        <element id="module-output" name="jicn_simulator" />
       </element>
+      <element id="library" level="project" name="Maven: org.json:json:20210307" />
+      <element id="dir-copy" path="$PROJECT_DIR$/JICCNS_simulator" />
     </root>
   </artifact>
 </component>
