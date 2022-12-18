@@ -6,7 +6,8 @@
         <element id="module-output" name="jicn_simulator" />
       </element>
       <element id="library" level="project" name="Maven: org.json:json:20210307" />
-      <element id="dir-copy" path="$PROJECT_DIR$/JICCNS_simulator" />
+      <element id="library" level="project" name="Maven: commons-cli:commons-cli:1.5.0" />
+      <element id="library" level="project" name="Maven: org.mariadb.jdbc:mariadb-java-client:3.0.8" />
     </root>
   </artifact>
 </component>

@@ -1,5 +1,6 @@
 import awcator.jiccns.meta;
 import awcator.jiccns.ui.frame;
+import org.apache.commons.cli.*;
 
 public class Main {
     public static final String version = "JICNCS_202209";
@@ -16,6 +17,33 @@ public class Main {
     public static int ms = 0;
 
     public static void main(String[] args) throws Exception {
+        boolean support_cli = false;
+        if (support_cli) {
+            Options options = new Options();
+            Option input = new Option("i", "input", true, "input file path");
+            input.setRequired(true);
+            options.addOption(input);
+
+            Option output = new Option("o", "output", true, "Where to write metrics? default: Mariadb");
+            output.setRequired(false);
+            options.addOption(output);
+
+            CommandLineParser parser = new DefaultParser();
+            HelpFormatter formatter = new HelpFormatter();
+            CommandLine cmd = null;//not a good practice, it serves it purpose
+
+            try {
+                cmd = parser.parse(options, args);
+            } catch (ParseException e) {
+                System.out.println(e.getMessage());
+                formatter.printHelp("java -jar jicns ", options);
+                System.exit(1);
+            }
+
+            String inputFilePath = cmd.getOptionValue("input");
+            meta.filePath = inputFilePath;
+            String outputFilePath = cmd.getOptionValue("output");
+        }
         System.out.println("Loading " + version);
         meta.blueprint_map = meta.loadBluePrint();
         frame app = new frame();
