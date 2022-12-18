@@ -34,6 +34,7 @@ public class frame extends JFrame implements ActionListener {
     public static int NODE_POSITION = 0;
     public static JPanel centerPanel;
     public static RightPanel rightpanel;
+    public static boolean QUICK_ANIMATIONS = false;
     /**
      * metric variables
      */
@@ -42,6 +43,7 @@ public class frame extends JFrame implements ActionListener {
     public static int total_answer_first_time = 0;
     public static int total_asks = 0;
     public static int total_minimum_hopcount = 0;
+    public static boolean REDUCE_GRAPHICS_MODE = false;
     //Nodes
     private static NodeUI[] nodes;
     private static jicnsDeviceImpl[] jicnsDevices;
@@ -54,8 +56,9 @@ public class frame extends JFrame implements ActionListener {
     JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
     boolean checkForQuickAnswer = true;
 
-    public frame() {
-
+    public frame(boolean QUICK_ANIMS, boolean NOGUI, String preload_tasks[]) {
+        QUICK_ANIMATIONS = QUICK_ANIMS;
+        REDUCE_GRAPHICS_MODE = NOGUI;
         /**
          * Main Frame UI
          * set size of the window to parent size
@@ -128,6 +131,24 @@ public class frame extends JFrame implements ActionListener {
         setVisible(true);
         //SystemExit on frame close
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        try {
+            if (preload_tasks != null) {
+                System.out.println("Got Preload tasks... Processing ");
+                for (int i = 0; i < preload_tasks.length; i++) {
+                    System.out.println("**************************************************<TASK Node " + preload_tasks[i] + " querying for " + preload_tasks[i + 1] + ">***************************************");
+                    destNodeTextArea.setText(preload_tasks[i + 1]);
+                    sourceNodeTextArea.setText(preload_tasks[i]);
+                    startAnimation(true);
+                    if (!QUICK_ANIMS) Thread.sleep(1000);
+                    System.out.println("**************************************************</TASK>***************************************\n\n");
+                    ++i;
+                }
+                System.out.println("All tasks completed ");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println(preload_tasks.length);
+        }
     }
 
     public static Color getRandomColor() {
@@ -272,7 +293,7 @@ public class frame extends JFrame implements ActionListener {
                         for (Iterator<String> it = jsondata.getJSONObject(prefix + i).getJSONObject("payload").keys(); it.hasNext(); ) {
                             String str = it.next();
                             if (!jicnsDevices[i].getCacheStrategy().addToPayloadMemory(str, (String) jsondata.getJSONObject(prefix + i).getJSONObject("payload").get(str))) {
-                                System.err.println("Failed to add into cache PayloadMemory");
+                                System.err.println("Failed to add into PayloadMemory");
                             } else {
                                 System.out.println("Loaded Data into PayloadMemory");
                                 setOfDataInCacheAndMemory.add(str);
@@ -362,7 +383,7 @@ public class frame extends JFrame implements ActionListener {
                             /**
                              * Timer search animation to blink buttons
                              */
-                            Timer blinkTimer = new Timer(500, new ActionListener() {
+                            Timer blinkTimer = new Timer(QUICK_ANIMATIONS ? 0 : 500, new ActionListener() {
                                 private final int maxCount = 4;
                                 private int count = 0;
                                 private boolean on = false;
@@ -400,234 +421,248 @@ public class frame extends JFrame implements ActionListener {
                 //((freePanel)centerPanel).showLines=false;
                 //((freePanel)centerPanel).repaint();
 
-                Thread rlMF = new Thread(new Runnable() {
-                    double dataPointSpeed = 40;
+                startAnimation(false);
+            }
+            if (actionEvent.getSource() == exit) {
+                System.exit(0);
+            }
+            if (actionEvent.getSource() == writeMetrics) {
+                metricsWriter mw = new metricsWriter();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
-                    public void drawMultiDataPaths(java.util.List<path> pathsToDsiplayAtAtime, Graphics2D g2) throws Exception {
-                        while (!pathsToDsiplayAtAtime.isEmpty()) {
-                            //Incremnt all the nodes X axsis datapoint travel by 30 points and repaint the graphics after ploting
-                            //and then remove the datapoint from storageMermory once it reaches destination
-                            for (int i = 0; i < pathsToDsiplayAtAtime.size(); i++) {
-                                path displayPath = pathsToDsiplayAtAtime.get(i);
-                                double sourceX, sourceY, destinationX, destinationY;
-                                if (displayPath.parent == null) {
-                                    //node has no parent then dont draw graphics
-                                    pathsToDsiplayAtAtime.remove(i);
-                                    continue;
+    public void startAnimation(boolean disable_parllel) {
+        Thread rlMF = new Thread(new Runnable() {
+            double dataPointSpeed = QUICK_ANIMATIONS ? 1 : 40;
+
+            public void drawMultiDataPaths(java.util.List<path> pathsToDsiplayAtAtime, Graphics2D g2) throws Exception {
+                while (!pathsToDsiplayAtAtime.isEmpty()) {
+                    //Incremnt all the nodes X axsis datapoint travel by 30 points and repaint the graphics after ploting
+                    //and then remove the datapoint from storageMermory once it reaches destination
+                    for (int i = 0; i < pathsToDsiplayAtAtime.size(); i++) {
+                        path displayPath = pathsToDsiplayAtAtime.get(i);
+                        double sourceX, sourceY, destinationX, destinationY;
+                        if (displayPath.parent == null) {
+                            //node has no parent then dont draw graphics
+                            pathsToDsiplayAtAtime.remove(i);
+                            continue;
+                        }
+                        Rectangle r1 = nodes[displayPath.parent.focusedNode].getBounds();
+                        Rectangle r2 = nodes[displayPath.focusedNode].getBounds();
+                        sourceX = r1.getCenterX();
+                        sourceY = r1.getCenterY();
+                        destinationX = r2.getCenterX();
+                        destinationY = r2.getCenterY();
+                        double distance = Math.sqrt(Math.pow(destinationX - sourceX, 2) + Math.pow(destinationY - sourceY, 2));
+                        dataPointSpeed = distance / 30;
+                        boolean moveInYdirection = false; //data point to move animation, if false datapoint to be moved in X diff
+                        double diffX = destinationX - sourceX;
+                        if (diffX == 0)
+                            diffX = 1; //just to avoid slope tending to infity, we will avoid inifiy error by teling there is gap of 1 unit space between two points
+                        double diffY = destinationY - sourceY;
+                        if (diffY == 0) diffY = 1;
+                        double slope = diffY / diffX;
+                        moveInYdirection = Math.abs(diffY) > Math.abs(diffX);
+                        //moveInYdirection = true;
+                        try {
+                            if (displayPath.currentDataPointX == -1 && displayPath.currentDataPointY == -1) { //default case . It symbolises data point is abouut to move from node to node
+                                displayPath.currentDataPointX = sourceX; //so set datapoints animation location to source datapoint co-ordinates
+                                displayPath.currentDataPointY = sourceY;
+                            }
+                            //for (int i = (int) minX; i <= MaxX; i = i + 30) {
+                            g2.setColor(displayPath.pathColor);
+                            if (moveInYdirection) {
+                                // TODO: 11/5/22  Again this can be improved using single calcation without using many if loops.
+                                //x=(y-y1)/m+x1
+                                g2.fillOval((int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX), (int) displayPath.currentDataPointY, 10, 10);
+                                if (sourceY > destinationY) {
+                                    displayPath.currentDataPointY -= dataPointSpeed;
+                                    //dont recalc to speedUp animation
+                                    // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
+                                    displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
+                                    if (displayPath.currentDataPointY <= destinationY) {
+                                        pathsToDsiplayAtAtime.remove(i);
+                                        if (displayPath.forward)
+                                            nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
+                                        else
+                                            nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
+                                    }
+                                } else {
+                                    displayPath.currentDataPointY += dataPointSpeed;
+                                    displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
+                                    if (displayPath.currentDataPointY >= destinationY) {
+                                        pathsToDsiplayAtAtime.remove(i);
+                                        if (displayPath.forward)
+                                            nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
+                                        else
+                                            nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
+                                    }
                                 }
-                                Rectangle r1 = nodes[displayPath.parent.focusedNode].getBounds();
-                                Rectangle r2 = nodes[displayPath.focusedNode].getBounds();
-                                sourceX = r1.getCenterX();
-                                sourceY = r1.getCenterY();
-                                destinationX = r2.getCenterX();
-                                destinationY = r2.getCenterY();
-                                double distance = Math.sqrt(Math.pow(destinationX - sourceX, 2) + Math.pow(destinationY - sourceY, 2));
-                                dataPointSpeed = distance / 30;
-                                boolean moveInYdirection = false; //data point to move animation, if false datapoint to be moved in X diff
-                                double diffX = destinationX - sourceX;
-                                if (diffX == 0)
-                                    diffX = 1; //just to avoid slope tending to infity, we will avoid inifiy error by teling there is gap of 1 unit space between two points
-                                double diffY = destinationY - sourceY;
-                                if (diffY == 0) diffY = 1;
-                                double slope = diffY / diffX;
-                                moveInYdirection = Math.abs(diffY) > Math.abs(diffX);
-                                //moveInYdirection = true;
-                                try {
-                                    if (displayPath.currentDataPointX == -1 && displayPath.currentDataPointY == -1) { //default case . It symbolises data point is abouut to move from node to node
-                                        displayPath.currentDataPointX = sourceX; //so set datapoints animation location to source datapoint co-ordinates
-                                        displayPath.currentDataPointY = sourceY;
+                            } else {
+                                //y=m(x-x1)+y1
+                                g2.fillOval((int) displayPath.currentDataPointX, (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY), 10, 10);
+                                if (sourceX > destinationX) {
+                                    displayPath.currentDataPointX -= dataPointSpeed;
+                                    //dont recalc to speedUp animation
+                                    // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
+                                    displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
+                                    if (displayPath.currentDataPointX <= destinationX) {
+                                        pathsToDsiplayAtAtime.remove(i);
+                                        if (displayPath.forward)
+                                            nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
+                                        else
+                                            nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                     }
-                                    //for (int i = (int) minX; i <= MaxX; i = i + 30) {
-                                    g2.setColor(displayPath.pathColor);
-                                    if (moveInYdirection) {
-                                        // TODO: 11/5/22  Again this can be improved using single calcation without using many if loops.  
-                                        //x=(y-y1)/m+x1
-                                        g2.fillOval((int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX), (int) displayPath.currentDataPointY, 10, 10);
-                                        if (sourceY > destinationY) {
-                                            displayPath.currentDataPointY -= dataPointSpeed;
-                                            //dont recalc to speedUp animation
-                                            // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
-                                            displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
-                                            if (displayPath.currentDataPointY <= destinationY) {
-                                                pathsToDsiplayAtAtime.remove(i);
-                                                if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
-                                            }
-                                        } else {
-                                            displayPath.currentDataPointY += dataPointSpeed;
-                                            displayPath.currentDataPointX = (int) ((displayPath.currentDataPointY - sourceY) / slope + sourceX);
-                                            if (displayPath.currentDataPointY >= destinationY) {
-                                                pathsToDsiplayAtAtime.remove(i);
-                                                if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
-                                            }
-                                        }
-                                    } else {
-                                        //y=m(x-x1)+y1
-                                        g2.fillOval((int) displayPath.currentDataPointX, (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY), 10, 10);
-                                        if (sourceX > destinationX) {
-                                            displayPath.currentDataPointX -= dataPointSpeed;
-                                            //dont recalc to speedUp animation
-                                            // TODO: 11/5/22 ANIM SPEED: skip next line , no need to store y path in memoery so we can skipp calc
-                                            displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
-                                            if (displayPath.currentDataPointX <= destinationX) {
-                                                pathsToDsiplayAtAtime.remove(i);
-                                                if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
-                                            }
-                                        } else {
-                                            displayPath.currentDataPointX += dataPointSpeed;
-                                            displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
-                                            if (displayPath.currentDataPointX >= destinationX) {
-                                                pathsToDsiplayAtAtime.remove(i);
-                                                if (displayPath.forward)
-                                                    nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
-                                                else
-                                                    nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
-                                            }
-                                        }
+                                } else {
+                                    displayPath.currentDataPointX += dataPointSpeed;
+                                    displayPath.currentDataPointY = (int) (slope * (displayPath.currentDataPointX - sourceX) + sourceY);
+                                    if (displayPath.currentDataPointX >= destinationX) {
+                                        pathsToDsiplayAtAtime.remove(i);
+                                        if (displayPath.forward)
+                                            nodes[displayPath.focusedNode].jicnsNode.onIncomingReqData(displayPath.actual_query, nodes, displayPath);
+                                        else
+                                            nodes[displayPath.focusedNode].jicnsNode.onRespIncomingData(nodes, displayPath, displayPath.actual_query, displayPath.actual_query_answer);
                                     }
-                                    //}
-                                } catch (Exception e) {
-                                    e.printStackTrace();
                                 }
                             }
-                            sleep(100);
-                            //keep traces? remove repaint line
-                            centerPanel.repaint();
+                            //}
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                     }
+                    if (!QUICK_ANIMATIONS) sleep(100);
+                    //keep traces? remove repaint line
+                    centerPanel.repaint();
+                }
+            }
 
-                    public void run() {
-                        try {
-                            final String QUERY_FROM_USER = destNodeTextArea.getText();
-                            Graphics2D g2 = (Graphics2D) centerPanel.getGraphics();
-                            System.out.println("Broadcasting from node " + sourceNodeTextArea.getText());
-                            int sourceNode = Integer.parseInt(sourceNodeTextArea.getText());
-                            int endNode = 0;
-                            path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), -1, null, true, QUERY_FROM_USER, null); //start from sourcenOde with inital timeout of 0ms
-                            nodes[rootparent.focusedNode].jicnsNode.onBeginSession(QUERY_FROM_USER);
-                            total_asks++;
-                            checkForQuickAnswer = true;
-                            class path_sorter implements Comparator<path> {
-                                @Override
-                                public int compare(path s1, path s2) {
-                                    if (s1.ms > s2.ms) return 1;
-                                    else if (s1.ms < s2.ms) return -1;
-                                    return 0;
+            public void run() {
+                try {
+                    final String QUERY_FROM_USER = destNodeTextArea.getText();
+                    Graphics2D g2 = (Graphics2D) centerPanel.getGraphics();
+                    System.out.println("Broadcasting from node " + sourceNodeTextArea.getText());
+                    int sourceNode = Integer.parseInt(sourceNodeTextArea.getText());
+                    int endNode = 0;
+                    path rootparent = new path("node" + sourceNode, 0, null, sourceNode, getRandomColor(), -1, null, true, QUERY_FROM_USER, null); //start from sourcenOde with inital timeout of 0ms
+                    nodes[rootparent.focusedNode].jicnsNode.onBeginSession(QUERY_FROM_USER);
+                    total_asks++;
+                    checkForQuickAnswer = true;
+                    class path_sorter implements Comparator<path> {
+                        @Override
+                        public int compare(path s1, path s2) {
+                            if (s1.ms > s2.ms) return 1;
+                            else if (s1.ms < s2.ms) return -1;
+                            return 0;
+                        }
+                    }
+                    boolean query_answered = false;
+                    PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
+                    path temppath = rootparent;
+                    pq.add(temppath);
+                    int previous_ms = temppath.ms;
+                    boolean expectNewMs = false;
+                    boolean check_previous_ms = true;
+                    java.util.List<path> pathsToDsiplayAtAtime = new ArrayList<path>();
+                    boolean drawAnime = false;
+                    boolean parallelPaths = false;
+                    boolean first_asn_handshake = false;
+                    HashSet<Integer> force_these_nodes = null;
+                    while (!pq.isEmpty()) {
+                        //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
+                        //System.out.println("SiZE "+pq.size());
+
+                        temppath = pq.poll();
+                        /**
+                         * ASN HANDSHAKE
+                         */
+                        if (first_asn_handshake == false && nodes[temppath.focusedNode].jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
+                            first_asn_handshake = true;
+                            asnnode ASN_HANDSHAKE_INTITATOR = (asnnode) nodes[temppath.focusedNode].jicnsNode;
+                            System.out.println("------------<ASN ROUTING TABLE>-------------");
+                            force_these_nodes = ASN_HANDSHAKE_INTITATOR.getASN_short_distanceFinderInstance().getShortPath(ASN_HANDSHAKE_INTITATOR.getNodeID(), temppath.ms, QUERY_FROM_USER, -1, "", nodes).convertToset();
+                            System.out.println("------------</ASN ROUTING TABLE>-------------");
+                        }
+
+                        //prints time digaram
+                        System.out.print("\n" + temppath.ms + " " + temppath + "  " + temppath.actual_query + "  " + temppath.actual_query_answer);
+                        int foucusedNode = temppath.focusedNode;
+
+                        if (check_previous_ms) {
+                            if (temppath.ms == previous_ms) {
+                                //dontsleep
+                                pathsToDsiplayAtAtime.add(temppath);
+                                parallelPaths = true;
+                            } else {
+                                if (drawAnime && parallelPaths != false) {
+                                    //System.out.println("parallel> " + pathsToDsiplayAtAtime);
+                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                                } else if (drawAnime) {
+                                    //System.out.println("Single> " + pathsToDsiplayAtAtime);
+                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
                                 }
+                                //Thread.sleep(0);
+                                //((freePanel) centerPanel).repaint();
+                                //System.out.println();
+                                previous_ms = temppath.ms;
+                                //Clear Parllel movemnts info array
+                                // and add an path
+                                //System.out.println(pathsToDsiplayAtAtime);
+                                pathsToDsiplayAtAtime.clear();
+                                pathsToDsiplayAtAtime.add(temppath);
+                                drawAnime = true;
+                                parallelPaths = false;
                             }
-                            boolean query_answered = false;
-                            PriorityQueue<path> pq = new PriorityQueue<path>(new path_sorter());
-                            path temppath = rootparent;
-                            pq.add(temppath);
-                            int previous_ms = temppath.ms;
-                            boolean expectNewMs = false;
-                            boolean check_previous_ms = true;
-                            java.util.List<path> pathsToDsiplayAtAtime = new ArrayList<path>();
-                            boolean drawAnime = false;
-                            boolean parallelPaths = false;
-                            boolean first_asn_handshake = false;
-                            HashSet<Integer> force_these_nodes = null;
-                            while (!pq.isEmpty()) {
-                                //To see how fast the queues grows/ or the edges grows n(n-1) edges can be drawn using n vertex
-                                //System.out.println("SiZE "+pq.size());
+                        }
+                        String LOOKUP_FOR_QUERY = null;
+                        String temp_query_answer = null;
+                        temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().cacheLookUp(temppath.actual_query, false);
+                        //System.out.println(temp_query_answer);
+                        if (temp_query_answer == null) {
+                            temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().hddLookUp(temppath.actual_query, false);
+                        }
+                        LOOKUP_FOR_QUERY = temp_query_answer;
+                        if ((temppath.destinationNode == -1 && (LOOKUP_FOR_QUERY != null)) || (foucusedNode == temppath.destinationNode)) {
+                            nodes[temppath.focusedNode].jicnsNode.onRequestAnsweredByMe();
+                            query_answered = true;
+                            Timer blinkTimer = new Timer(QUICK_ANIMATIONS ? 0 : 500, new ActionListener() {
+                                private final int maxCount = 4;
+                                private int count = 0;
+                                private boolean on = false;
 
-                                temppath = pq.poll();
-                                /**
-                                 * ASN HANDSHAKE
-                                 */
-                                if (first_asn_handshake == false && nodes[temppath.focusedNode].jicnsNode.getDeviceType().equalsIgnoreCase("ASN")) {
-                                    first_asn_handshake = true;
-                                    asnnode ASN_HANDSHAKE_INTITATOR = (asnnode) nodes[temppath.focusedNode].jicnsNode;
-                                    System.out.println("------------<ASN ROUTING TABLE>-------------");
-                                    force_these_nodes = ASN_HANDSHAKE_INTITATOR.getASN_short_distanceFinderInstance().getShortPath(ASN_HANDSHAKE_INTITATOR.getNodeID(), temppath.ms, QUERY_FROM_USER, -1, "", nodes).convertToset();
-                                    System.out.println("------------</ASN ROUTING TABLE>-------------");
-                                }
-
-                                //prints time digaram
-                                System.out.print("\n" + temppath.ms + " " + temppath + "  " + temppath.actual_query + "  " + temppath.actual_query_answer);
-                                int foucusedNode = temppath.focusedNode;
-
-                                if (check_previous_ms) {
-                                    if (temppath.ms == previous_ms) {
-                                        //dontsleep
-                                        pathsToDsiplayAtAtime.add(temppath);
-                                        parallelPaths = true;
+                                public void actionPerformed(ActionEvent e) {
+                                    if (count >= maxCount) {
+                                        /**
+                                         * After animation completes stop timer and setback buttons default background
+                                         */
+                                        nodes[foucusedNode].setBackground(new JButton().getBackground());
+                                        ((Timer) e.getSource()).stop();
                                     } else {
-                                        if (drawAnime && parallelPaths != false) {
-                                            //System.out.println("parallel> " + pathsToDsiplayAtAtime);
-                                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
-                                        } else if (drawAnime) {
-                                            //System.out.println("Single> " + pathsToDsiplayAtAtime);
-                                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
-                                        }
-                                        //Thread.sleep(0);
-                                        //((freePanel) centerPanel).repaint();
-                                        //System.out.println();
-                                        previous_ms = temppath.ms;
-                                        //Clear Parllel movemnts info array
-                                        // and add an path
-                                        //System.out.println(pathsToDsiplayAtAtime);
-                                        pathsToDsiplayAtAtime.clear();
-                                        pathsToDsiplayAtAtime.add(temppath);
-                                        drawAnime = true;
-                                        parallelPaths = false;
+                                        nodes[foucusedNode].setBackground(on ? Color.GREEN : Color.YELLOW);
+                                        on = !on;
+                                        count++;
                                     }
                                 }
-                                String LOOKUP_FOR_QUERY = null;
-                                String temp_query_answer = null;
-                                temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().cacheLookUp(temppath.actual_query, false);
-                                //System.out.println(temp_query_answer);
-                                if (temp_query_answer == null) {
-                                    temp_query_answer = nodes[temppath.focusedNode].jicnsNode.getCacheStrategy().hddLookUp(temppath.actual_query, false);
+                            });
+                            blinkTimer.start();
+
+                            //System.out.println("Query Answered BY Node " + foucusedNode);
+                            if (temppath.forward) {
+                                path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, getRandomColor(), sourceNode, temppath.pa, false, temppath.actual_query, LOOKUP_FOR_QUERY);
+                                pq.add(newpath);
+                                // to help timing diagram
+                                System.out.print("[FEND]");
+                                continue;
+                            } else {
+                                // to help timing diagram
+                                System.out.print("[BEND]");
+                                if (checkForQuickAnswer) {
+                                    checkForQuickAnswer = false;
+                                    total_answer_first_time += temppath.ms;
+                                    total_minimum_hopcount += temppath.pa.split("-->").length - 1;
                                 }
-                                LOOKUP_FOR_QUERY = temp_query_answer;
-                                if ((temppath.destinationNode == -1 && (LOOKUP_FOR_QUERY != null)) || (foucusedNode == temppath.destinationNode)) {
-                                    nodes[temppath.focusedNode].jicnsNode.onRequestAnsweredByMe();
-                                    query_answered = true;
-                                    Timer blinkTimer = new Timer(500, new ActionListener() {
-                                        private final int maxCount = 4;
-                                        private int count = 0;
-                                        private boolean on = false;
-
-                                        public void actionPerformed(ActionEvent e) {
-                                            if (count >= maxCount) {
-                                                /**
-                                                 * After animation completes stop timer and setback buttons default background
-                                                 */
-                                                nodes[foucusedNode].setBackground(new JButton().getBackground());
-                                                ((Timer) e.getSource()).stop();
-                                            } else {
-                                                nodes[foucusedNode].setBackground(on ? Color.GREEN : Color.YELLOW);
-                                                on = !on;
-                                                count++;
-                                            }
-                                        }
-                                    });
-                                    blinkTimer.start();
-
-                                    //System.out.println("Query Answered BY Node " + foucusedNode);
-                                    if (temppath.forward) {
-                                        path newpath = new path("node" + temppath.focusedNode, temppath.ms, null, temppath.focusedNode, getRandomColor(), sourceNode, temppath.pa, false, temppath.actual_query, LOOKUP_FOR_QUERY);
-                                        pq.add(newpath);
-                                        // to help timing diagram
-                                        System.out.print("[FEND]");
-                                        continue;
-                                    } else {
-                                        // to help timing diagram
-                                        System.out.print("[BEND]");
-                                        if (checkForQuickAnswer) {
-                                            checkForQuickAnswer = false;
-                                            total_answer_first_time += temppath.ms;
-                                            total_minimum_hopcount += temppath.pa.split("-->").length - 1;
-                                        }
                                         /*
                                         if(temppath.parent==null){
                                             System.out.println("Self Answered");
@@ -636,89 +671,86 @@ public class frame extends JFrame implements ActionListener {
                                             System.out.println("Answered by other nodes ");
                                         }
                                         */
-                                        //Sucessfully answer packet reached to the source query packet
-                                        //nodes[temppath.focusedNode].jicnsNode.onRespIncomingData(temppath.actual_query+":"+temppath.actual_query_answer);
-                                        continue;
+                                //Sucessfully answer packet reached to the source query packet
+                                //nodes[temppath.focusedNode].jicnsNode.onRespIncomingData(temppath.actual_query+":"+temppath.actual_query_answer);
+                                continue;
+                            }
+                        } else {
+                            //This means node is about to send packets to other Nodes (Broadcast)? Should I forward it or should i send it back to requested guy?
+                            if (temppath.forward) {
+                                for (int i = 0; i < nodes.length; i++) {
+                                    if (force_these_nodes != null) {
+                                        if (force_these_nodes.contains(i)) {
+                                            //cary on forwarding
+                                        } else {
+                                            //skip ith itteration
+                                            continue;
+                                        }
                                     }
-                                } else {
-                                    //This means node is about to send packets to other Nodes (Broadcast)? Should I forward it or should i send it back to requested guy?
-                                    if (temppath.forward) {
-                                        for (int i = 0; i < nodes.length; i++) {
-                                            if (force_these_nodes != null) {
-                                                if (force_these_nodes.contains(i)) {
-                                                    //cary on forwarding
-                                                } else {
-                                                    //skip ith itteration
-                                                    continue;
-                                                }
-                                            }
-                                            //broadcast into cycle?
-                                            if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i) && nodes[foucusedNode].jicnsNode.shouldIPassThroughthisNode(i, null)) {
-                                                if (nodes[foucusedNode].jicnsNode.allowCycles()) {
-                                                    nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                    path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
-                                                    pq.add(newpath);
-                                                    total_network_usage++;
-                                                } else {
-                                                    //if (!temppath.pa.contains("node" + i)) {
-                                                    if (!Arrays.asList(temppath.pa.split("-->")).contains("node" + i)) {
-                                                        nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
-                                                        path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
-                                                        pq.add(newpath);
-                                                        total_network_usage++;
-                                                    }
-                                                }
+                                    //broadcast into cycle?
+                                    if (i != foucusedNode && nodes[foucusedNode].jicnsNode.isMyNeibhour(i) && nodes[foucusedNode].jicnsNode.shouldIPassThroughthisNode(i, null)) {
+                                        if (nodes[foucusedNode].jicnsNode.allowCycles()) {
+                                            nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
+                                            path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                            pq.add(newpath);
+                                            total_network_usage++;
+                                        } else {
+                                            //if (!temppath.pa.contains("node" + i)) {
+                                            if (!Arrays.asList(temppath.pa.split("-->")).contains("node" + i)) {
+                                                nodes[temppath.focusedNode].jicnsNode.onReqOutGoingData(Integer.toString(i), temppath.pa);
+                                                path newpath = new path(temppath.pa + "-->node" + i, temppath.ms + nodes[foucusedNode].jicnsNode.getMsToReachNode(i, nodes), temppath, i, getRandomColor(), temppath.parent == null ? -1 : temppath.parent.destinationNode, null, true, temppath.actual_query, null);
+                                                pq.add(newpath);
+                                                total_network_usage++;
                                             }
                                         }
-                                    } else {
-                                        //Reverse PATH Iteration
-                                        String PATH = temppath.backtrack;
-                                        String newPATHwithoutLastNode = PATH.substring(0, PATH.lastIndexOf("-->") == -1 ? 0 : PATH.lastIndexOf("-->"));
-                                        String last_node_onPATH = newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->") == -1 ? 0 : newPATHwithoutLastNode.lastIndexOf("-->") + 3);
-                                        int nodeIDfromNode = Integer.parseInt(last_node_onPATH.replace("node", ""));
-                                        nodes[temppath.focusedNode].jicnsNode.onRespOutGoingData();
-                                        path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode, nodes), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
-                                        pq.add(newpath);
-                                        total_network_usage++;
                                     }
                                 }
-                                if (check_previous_ms) {
-                                    previous_ms = temppath.ms;
-                                }
-                            }
-                            if (!pathsToDsiplayAtAtime.isEmpty()) {
-                                if (pathsToDsiplayAtAtime.size() >= 2) {
-                                    //System.out.println("parallel> " + pathsToDsiplayAtAtime);
-                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
-                                    pathsToDsiplayAtAtime.clear();
-                                } else {
-                                    //System.out.println("Single> " + pathsToDsiplayAtAtime);
-                                    drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
-                                    pathsToDsiplayAtAtime.clear();
-                                }
                             } else {
-                                //All data points are reached to the destination.
+                                //Reverse PATH Iteration
+                                String PATH = temppath.backtrack;
+                                String newPATHwithoutLastNode = PATH.substring(0, PATH.lastIndexOf("-->") == -1 ? 0 : PATH.lastIndexOf("-->"));
+                                String last_node_onPATH = newPATHwithoutLastNode.substring(newPATHwithoutLastNode.lastIndexOf("-->") == -1 ? 0 : newPATHwithoutLastNode.lastIndexOf("-->") + 3);
+                                int nodeIDfromNode = Integer.parseInt(last_node_onPATH.replace("node", ""));
+                                nodes[temppath.focusedNode].jicnsNode.onRespOutGoingData();
+                                path newpath = new path(temppath.pa + "-->node" + nodeIDfromNode, temppath.ms + nodes[nodeIDfromNode].jicnsNode.getMsToReachNode(foucusedNode, nodes), temppath, nodeIDfromNode, temppath.parent == null ? getRandomColor() : temppath.parent.pathColor, temppath.parent == null ? sourceNode : temppath.parent.destinationNode, newPATHwithoutLastNode, false, temppath.actual_query, temppath.actual_query_answer);
+                                pq.add(newpath);
+                                total_network_usage++;
                             }
-                            if (query_answered) {
-                                System.out.println("---Done--Query Answered");
-                                total_network_time += temppath.ms;
-                            } else {
-                                System.out.println("---Failed--- No node cant handle request");
-                                total_network_time += temppath.ms;
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
                         }
-                        System.out.println("Summary Metrics: " + total_network_time + "   " + total_network_usage + "    " + total_answer_first_time + "   " + total_asks + "  " + total_minimum_hopcount);
+                        if (check_previous_ms) {
+                            previous_ms = temppath.ms;
+                        }
                     }
-                });
-                rlMF.start();
+                    if (!pathsToDsiplayAtAtime.isEmpty()) {
+                        if (pathsToDsiplayAtAtime.size() >= 2) {
+                            //System.out.println("parallel> " + pathsToDsiplayAtAtime);
+                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                            pathsToDsiplayAtAtime.clear();
+                        } else {
+                            //System.out.println("Single> " + pathsToDsiplayAtAtime);
+                            drawMultiDataPaths(pathsToDsiplayAtAtime, g2);
+                            pathsToDsiplayAtAtime.clear();
+                        }
+                    } else {
+                        //All data points are reached to the destination.
+                    }
+                    if (query_answered) {
+                        System.out.println("---Done--Query Answered");
+                        total_network_time += temppath.ms;
+                    } else {
+                        System.out.println("---Failed--- No node cant handle request");
+                        total_network_time += temppath.ms;
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                System.out.println("Summary Metrics: " + total_network_time + "   " + total_network_usage + "    " + total_answer_first_time + "   " + total_asks + "  " + total_minimum_hopcount);
             }
-            if (actionEvent.getSource() == exit) {
-                System.exit(0);
-            }
-            if (actionEvent.getSource() == writeMetrics) {
-                metricsWriter mw = new metricsWriter();
+        });
+        rlMF.start();
+        try {
+            if (disable_parllel) {
+                rlMF.join();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -852,7 +884,7 @@ public class frame extends JFrame implements ActionListener {
             Graphics2D g2 = (Graphics2D) g;
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             //drawLineBetween(Color.RED,0,1);
-            if (showLines) drawConnectors(g2);
+            if (!REDUCE_GRAPHICS_MODE) drawConnectors(g2);
         }
 
         private void drawConnectors(Graphics2D g2) {

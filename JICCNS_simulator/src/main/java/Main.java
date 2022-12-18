@@ -17,7 +17,10 @@ public class Main {
     public static int ms = 0;
 
     public static void main(String[] args) throws Exception {
+        boolean QUICK_ANIMATION=false;
+        boolean reduce_graphics_mode=false;
         boolean support_cli = true;
+        String[] tasks=null;
         if (support_cli) {
             Options options = new Options();
             Option input = new Option("i", "input", true, "input file path");
@@ -28,25 +31,48 @@ public class Main {
             output.setRequired(false);
             options.addOption(output);
 
+            Option reduce_graphics_option = new Option("rg", "reduce_graphics_mode", false, "Should graphics/arraws be displayed? default: false");
+            reduce_graphics_option.setRequired(false);
+            options.addOption(reduce_graphics_option);
+
+            Option quickAnimation = new Option("qa", "quick-animations", false, "Should Animations to be rendered fast? default: false");
+            reduce_graphics_option.setRequired(false);
+            options.addOption(quickAnimation);
+
+            Option trail= reduce_graphics_option.builder("t")
+                    .hasArgs()
+                    .longOpt("trail")
+                    .valueSeparator('=')
+                    .desc("MUST BE USED WITH NOGUI option. Automated experiment trail you wanted to run. eg. --trail node5:king,node7:black")
+                    .build();
+
+            options.addOption(trail);
             CommandLineParser parser = new DefaultParser();
             HelpFormatter formatter = new HelpFormatter();
             CommandLine cmd = null;//not a good practice, it serves it purpose
-
             try {
                 cmd = parser.parse(options, args);
+                if(cmd.hasOption(quickAnimation)){
+                    QUICK_ANIMATION=true;
+                }
+                if(cmd.hasOption(reduce_graphics_option)){
+                    reduce_graphics_mode=true;
+                }
+                if(cmd.hasOption(trail)) {
+                    tasks = cmd.getOptionValues("trail");
+                }
             } catch (ParseException e) {
                 System.out.println(e.getMessage());
-                formatter.printHelp("java -jar jicns ", options);
+                formatter.printHelp("jiccns.sh ", options);
                 System.exit(1);
             }
-
             String inputFilePath = cmd.getOptionValue("input");
             meta.filePath = inputFilePath;
             String outputFilePath = cmd.getOptionValue("output");
         }
         System.out.println("Loading " + version);
         meta.blueprint_map = meta.loadBluePrint();
-        frame app = new frame();
+        frame app = new frame(QUICK_ANIMATION,reduce_graphics_mode,tasks);
     }
 }
 /**
