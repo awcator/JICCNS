@@ -57,10 +57,10 @@ public class frame extends JFrame implements ActionListener {
     JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
     boolean checkForQuickAnswer = true;
 
-    public frame(boolean QUICK_ANIMS, boolean NOGUI, String[] preload_tasks,String exp) {
+    public frame(boolean QUICK_ANIMS, boolean NOGUI, String[] preload_tasks, String exp) {
         QUICK_ANIMATIONS = QUICK_ANIMS;
         REDUCE_GRAPHICS_MODE = NOGUI;
-        EXPERIMENT_NAME=exp;
+        EXPERIMENT_NAME = exp;
         System.out.println(EXPERIMENT_NAME);
         /**
          * Main Frame UI
@@ -939,7 +939,7 @@ public class frame extends JFrame implements ActionListener {
 
     class metricsWriter {
         Connection db_connection;
-        String expirment_name=null;
+        String expirment_name = null;
         long expiremt_epoch_time = 0;
 
         public metricsWriter() {
