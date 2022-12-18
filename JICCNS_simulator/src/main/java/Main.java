@@ -17,7 +17,7 @@ public class Main {
     public static int ms = 0;
 
     public static void main(String[] args) throws Exception {
-        boolean support_cli = false;
+        boolean support_cli = true;
         if (support_cli) {
             Options options = new Options();
             Option input = new Option("i", "input", true, "input file path");
