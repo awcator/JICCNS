@@ -15,8 +15,9 @@ import java.util.List;
  * Payload add type: Linear additon to array
  * Replacemnt Type: Random
  * <p>
- * CacheStrategy: Random CRP
- * Extra Memoty: Nope
+ * CacheStrategy: Random CRP, but it checks which nodes is best suited for cahcing insted of caching in all
+ * based on closest to the source but it has the max egress length in the path
+ * Extra Memoty: yes to store HopCount and Path
  */
 
 public class Random_hop_aware_CRP extends RandomCRP {
@@ -51,7 +52,7 @@ public class Random_hop_aware_CRP extends RandomCRP {
         }
         //if current node has most egress and closer to the source then we have to cache it
         if (pos == getNodeID()) {
-            return true;
+            return super.shouldICacheOrNot(key, value, list, current_path);
         }
         return false;
     }

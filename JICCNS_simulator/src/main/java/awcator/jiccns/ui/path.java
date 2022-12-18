@@ -8,6 +8,7 @@ public class path {
     public int ms;
     public int focusedNode = 0;
     public int destinationNode = -1;
+    public String backtrack = "";
     /**
      * currentDataPointX=-1 symbolizes data point (in Animation) is not set or it is about to travel from parent towards focusNode
      * currentDataPointX=80 symbolizes data point currently at Xaxsis 80 and it is moving towards focusNode from parent Node
@@ -18,7 +19,6 @@ public class path {
     double currentDataPointY = -1;
     Color pathColor;
     boolean forward = true;
-    public String backtrack = "";
     String actual_query = "";
     String actual_query_answer = "";
 
