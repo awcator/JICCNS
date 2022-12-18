@@ -35,6 +35,7 @@ public class frame extends JFrame implements ActionListener {
     public static JPanel centerPanel;
     public static RightPanel rightpanel;
     public static boolean QUICK_ANIMATIONS = false;
+    public static String EXPERIMENT_NAME = "dummy";
     /**
      * metric variables
      */
@@ -56,9 +57,11 @@ public class frame extends JFrame implements ActionListener {
     JTextArea sourceNodeTextArea, destNodeTextArea; //TextBox in southPanel to query info
     boolean checkForQuickAnswer = true;
 
-    public frame(boolean QUICK_ANIMS, boolean NOGUI, String preload_tasks[]) {
+    public frame(boolean QUICK_ANIMS, boolean NOGUI, String[] preload_tasks,String exp) {
         QUICK_ANIMATIONS = QUICK_ANIMS;
         REDUCE_GRAPHICS_MODE = NOGUI;
+        EXPERIMENT_NAME=exp;
+        System.out.println(EXPERIMENT_NAME);
         /**
          * Main Frame UI
          * set size of the window to parent size
@@ -936,12 +939,12 @@ public class frame extends JFrame implements ActionListener {
 
     class metricsWriter {
         Connection db_connection;
-        String expirment_name;
+        String expirment_name=null;
         long expiremt_epoch_time = 0;
 
         public metricsWriter() {
             if (getExpirment_name() == null) {
-                setExpirment_name("Tester1");
+                setExpirment_name(EXPERIMENT_NAME);
                 expiremt_epoch_time = Instant.now().getEpochSecond();
             }
             loadDatabase();
@@ -1011,7 +1014,7 @@ public class frame extends JFrame implements ActionListener {
 
                             "value (" +
                             "\"" + "NODE" + tempnode.getNodeID() + "\"," +
-                            "\"" + tempnode.getDeviceType() + "\"," +
+                            "\"" + tempnode.getCanonicalName() + "\"," +
                             getExpiremntID() + "," +
                             tempnode.getNumberOfRequestsHandled() + "," +
                             tempnode.getNumberOfRequestsAnsweredBYME() + "," +

@@ -17,10 +17,11 @@ public class Main {
     public static int ms = 0;
 
     public static void main(String[] args) throws Exception {
-        boolean QUICK_ANIMATION=false;
-        boolean reduce_graphics_mode=false;
+        boolean QUICK_ANIMATION = false;
+        boolean reduce_graphics_mode = false;
         boolean support_cli = true;
-        String[] tasks=null;
+        String EXP = "DUMMY";
+        String[] tasks = null;
         if (support_cli) {
             Options options = new Options();
             Option input = new Option("i", "input", true, "input file path");
@@ -35,11 +36,15 @@ public class Main {
             reduce_graphics_option.setRequired(false);
             options.addOption(reduce_graphics_option);
 
+            Option exp = new Option("exp", "experiment_name", true, "Name of the experiment");
+            exp.setRequired(true);
+            options.addOption(exp);
+
             Option quickAnimation = new Option("qa", "quick-animations", false, "Should Animations to be rendered fast? default: false");
             reduce_graphics_option.setRequired(false);
             options.addOption(quickAnimation);
 
-            Option trail= reduce_graphics_option.builder("t")
+            Option trail = Option.builder("t")
                     .hasArgs()
                     .longOpt("trail")
                     .valueSeparator('=')
@@ -52,13 +57,13 @@ public class Main {
             CommandLine cmd = null;//not a good practice, it serves it purpose
             try {
                 cmd = parser.parse(options, args);
-                if(cmd.hasOption(quickAnimation)){
-                    QUICK_ANIMATION=true;
+                if (cmd.hasOption(quickAnimation)) {
+                    QUICK_ANIMATION = true;
                 }
-                if(cmd.hasOption(reduce_graphics_option)){
-                    reduce_graphics_mode=true;
+                if (cmd.hasOption(reduce_graphics_option)) {
+                    reduce_graphics_mode = true;
                 }
-                if(cmd.hasOption(trail)) {
+                if (cmd.hasOption(trail)) {
                     tasks = cmd.getOptionValues("trail");
                 }
             } catch (ParseException e) {
@@ -69,10 +74,11 @@ public class Main {
             String inputFilePath = cmd.getOptionValue("input");
             meta.filePath = inputFilePath;
             String outputFilePath = cmd.getOptionValue("output");
+            EXP = cmd.getOptionValue("experiment_name");
         }
         System.out.println("Loading " + version);
         meta.blueprint_map = meta.loadBluePrint();
-        frame app = new frame(QUICK_ANIMATION,reduce_graphics_mode,tasks);
+        frame app = new frame(QUICK_ANIMATION, reduce_graphics_mode, tasks, EXP);
     }
 }
 /**
