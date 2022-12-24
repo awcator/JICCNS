@@ -41,12 +41,22 @@ public class Random_hop_aware_CRP extends RandomCRP {
         newList.addAll(l2);
         int MAX_EGRESS = Integer.MIN_VALUE;
         int pos = -1;
+        float total_number_of_req = 0;
+        int count = 0;
+        for (int i = 1; i < newList.size() - 1; i++) {
+            String str = newList.get(i);
+            count++;
+            total_number_of_req += list[Integer.parseInt(str)].jicnsNode.getNumberOfRequestsHandled();
+        }
+        float AVG_POWERCONUMPTION = total_number_of_req / count;
+        float MIN_POWER = Integer.MAX_VALUE;
         // Caluate the node that has most outgoings and closer to the source, except the  node that gave answer, so substract 1 from totalSize
         for (int i = 1; i < newList.size() - 1; i++) {
             String str = newList.get(i);
             int length = list[Integer.parseInt(str)].jicnsNode.EGRESS.length;
-            if (length > MAX_EGRESS) {
+            if (length > MAX_EGRESS && Math.min(Math.abs(list[Integer.parseInt(str)].jicnsNode.getNumberOfRequestsHandled() - AVG_POWERCONUMPTION), MIN_POWER) != MIN_POWER) {
                 MAX_EGRESS = length;
+                MIN_POWER = Math.abs(AVG_POWERCONUMPTION - list[Integer.parseInt(str)].jicnsNode.getNumberOfRequestsHandled());
                 pos = Integer.parseInt(str);
             }
         }
@@ -56,6 +66,7 @@ public class Random_hop_aware_CRP extends RandomCRP {
         }
         return false;
     }
+
 
     @Override
     public String getCacheType() {

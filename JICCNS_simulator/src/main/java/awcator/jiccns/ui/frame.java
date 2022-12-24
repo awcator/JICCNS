@@ -138,15 +138,26 @@ public class frame extends JFrame implements ActionListener {
             if (preload_tasks != null) {
                 System.out.println("Got Preload tasks... Processing ");
                 for (int i = 0; i < preload_tasks.length; i++) {
-                    System.out.println("**************************************************<TASK Node " + preload_tasks[i] + " querying for " + preload_tasks[i + 1] + ">***************************************");
-                    destNodeTextArea.setText(preload_tasks[i + 1]);
-                    sourceNodeTextArea.setText(preload_tasks[i]);
-                    startAnimation(true);
-                    if (!QUICK_ANIMS) Thread.sleep(1000);
-                    System.out.println("**************************************************</TASK>***************************************\n\n");
-                    ++i;
+                    if (preload_tasks[i].equalsIgnoreCase("query")) {
+                        System.out.println("**************************************************<TASK Node " + preload_tasks[i] + " querying for " + preload_tasks[i + 1] + ">***************************************");
+                        destNodeTextArea.setText(preload_tasks[i + 2]);
+                        sourceNodeTextArea.setText(preload_tasks[i + 1]);
+                        startAnimation(true);
+                        if (!QUICK_ANIMS) Thread.sleep(1000);
+                        i = i + 2;
+                        System.out.println("**************************************************</TASK>***************************************\n\n");
+                    }
+                    if (preload_tasks[i].equalsIgnoreCase("move")) {
+                        System.out.println("**************************************************<TASK Node " + preload_tasks[i] + " querying for " + preload_tasks[i + 1] + ">***************************************");
+                        nodes[Integer.parseInt(preload_tasks[i + 1])].setBounds(Integer.parseInt(preload_tasks[i + 2]), Integer.parseInt(preload_tasks[i + 3]), 100, 50);
+                        if (!QUICK_ANIMS) Thread.sleep(1000);
+                        i = i + 3;
+                        System.out.println("**************************************************</TASK>***************************************\n\n");
+                    }
                 }
                 System.out.println("All tasks completed ");
+                /*metricsWriter mw = new metricsWriter();
+                System.exit(0);*/
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -1028,7 +1039,7 @@ public class frame extends JFrame implements ActionListener {
                             tempnode.getCacheStrategy().getNumberOfCacheEnque() + "," +
                             tempnode.getCacheStrategy().getNumberOfCacheDeque() + "," +
                             tempnode.getNumberOfRequestesAnswereForwardedCount() + "," +
-                            tempnode.getCacheStrategy().CACHE_POWER_CONSUMPTION + "," +
+                            tempnode.getCacheStrategy().CACHE_POWER_CONSUMPTION + tempnode.getNumberOfRequestsHandled() + "," +
                             node_epoch_time + ")";
                     Statement st = db_connection.createStatement();
                     System.out.println("Insert into expiremnt status: =" + st.executeQuery(query));

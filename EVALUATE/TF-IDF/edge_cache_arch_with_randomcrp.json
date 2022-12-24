@@ -9,6 +9,54 @@
     "width": "1000",
     "height": "2000"
   },
+  "node2": {
+    "X": "604",
+    "Y": "244",
+    "description": "Edge Node",
+    "dns_like_id": "",
+    "max_cache_size": "3",
+    "max_payload_size": "0",
+    "cache_type": "Random_CRP",
+    "device_type": "ASN",
+    "egress": {
+      "node3": "1ms",
+      "node0": "1ms",
+      "node5": "1ms",
+      "node1": "1ms"
+    }
+  },
+  "node5": {
+    "X": "757",
+    "Y": "442",
+    "description": "edge node",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "Random_CRP",
+    "device_type": "ASN",
+    "egress": {
+      "node3": "1ms",
+      "node2": "1ms",
+      "node6": "1ms",
+      "node7": "1ms"
+    }
+  },
+  "node3": {
+    "X": "457",
+    "Y": "442",
+    "description": "edge Node",
+    "dns_like_id": "",
+    "max_cache_size": "5",
+    "max_payload_size": "1",
+    "cache_type": "Random_CRP",
+    "device_type": "ASN",
+    "egress": {
+      "node4": "1ms",
+      "node5": "1ms",
+      "node2": "1ms",
+      "node8": "1ms"
+    }
+  },
   "node4": {
     "X": "344",
     "Y": "550",
@@ -70,54 +118,6 @@
       "node2": "1ms"
     }
   },
-  "node2": {
-    "X": "604",
-    "Y": "244",
-    "description": "Edge Node",
-    "dns_like_id": "",
-    "max_cache_size": "3",
-    "max_payload_size": "0",
-    "cache_type": "tfidf_with_live_timeoutCRP",
-    "device_type": "tf_idf_asn",
-    "egress": {
-      "node3": "1ms",
-      "node0": "1ms",
-      "node5": "1ms",
-      "node1": "1ms"
-    }
-  },
-  "node3": {
-    "X": "457",
-    "Y": "442",
-    "description": "edge Node",
-    "dns_like_id": "",
-    "max_cache_size": "5",
-    "max_payload_size": "1",
-    "cache_type": "tfidf_with_live_timeoutCRP",
-    "device_type": "TF_IDF_ASN",
-    "egress": {
-      "node4": "1ms",
-      "node5": "1ms",
-      "node2": "1ms",
-      "node8": "1ms"
-    }
-  },
-  "node5": {
-    "X": "757",
-    "Y": "442",
-    "description": "edge node",
-    "dns_like_id": "",
-    "max_cache_size": "4",
-    "max_payload_size": "0",
-    "cache_type": "tfidf_with_live_timeoutCRP",
-    "device_type": "tf_idf_asn",
-    "egress": {
-      "node3": "1ms",
-      "node2": "1ms",
-      "node6": "1ms",
-      "node7": "1ms"
-    }
-  },
   "node6": {
     "X": "644",
     "Y": "550",
@@ -158,11 +158,11 @@
       "number of accidents recorded by Vechicel Traffic Sensor" : "10"
     },
     "cached": {
-      "total vechicles parked at park": "14",
-      "dbz" : "goku",
-      "vegeta" : "planet",
-      "bro":"bruh",
-      ".":"dotwa"
+      "bugati": "veryon",
+      "lamborgini" : "gallardo",
+      "fastest man" : "usain",
+      "test":"tset",
+      "bommai":"cm"
     },
     "cache_type": "noncacheable",
     "device_type": "producer",

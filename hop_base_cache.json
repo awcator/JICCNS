@@ -41,7 +41,7 @@
     "max_cache_size": "2",
     "max_payload_size": "0",
     "cache_type": "Random_hop_aware_CRP",
-    "device_type": "router",
+    "device_type": "ASN",
     "egress": {
       "node0": "1ms",
       "node2": "1ms",
@@ -67,7 +67,7 @@
     "max_cache_size": "5",
     "max_payload_size": "0",
     "cache_type": "Random_hop_aware_CRP",
-    "device_type": "router",
+    "device_type": "ASN",
     "egress": {
       "node1": "1ms",
       "node6": "1ms",
