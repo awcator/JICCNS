@@ -223,6 +223,8 @@ public class frame extends JFrame implements ActionListener {
                         cache_strtegy = new Random_hop_aware_CRP(i);
                     } else if (CACHE_TYPE.equalsIgnoreCase("noncacheable")) {
                         cache_strtegy = new noncacheable(i);
+                    } else if (CACHE_TYPE.equalsIgnoreCase("lru_cache_size_aware_and_outgoings_aware")) {
+                        cache_strtegy = new lru_cache_size_aware_and_outgoings_aware(i);
                     } else {
                         System.out.println("Did not understand CACHE_TYPE default to NoCahceType");
                         cache_strtegy = new noncacheable(i);

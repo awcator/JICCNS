@@ -1,0 +1,232 @@
+{
+  "nodes_blueprint": {
+    "node_count": "15",
+    "node_prefix": "node",
+    "node_ui_width": "100",
+    "node_ui_height": "50"
+  },
+  "frame_blueprint": {
+    "width": "1000",
+    "height": "2000"
+  },
+  "node0": {
+    "X": "10",
+    "Y": "20",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "10",
+    "max_payload_size": "100",
+    "payload": {
+      "number of bikes parked at park": "10",
+      "number of cars parked at park": "4",
+      "king": "kohli",
+      "cricket": "bat and ball"
+    },
+    "cached": {
+      "total vechicles parked at park": "14",
+      "dbz": "goku",
+      "vegeta": "planet",
+      "bro": "bruh",
+      ".": "dotwa"
+    },
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node2": "1ms"
+    }
+  },
+  "node1": {
+    "X": "460",
+    "Y": "20",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node2": "1ms"
+    }
+  },
+  "node2": {
+    "X": "155",
+    "Y": "160",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node0": "1ms",
+      "node4": "1ms",
+      "node1": "1ms"
+    }
+  },
+  "node3": {
+    "X": "850",
+    "Y": "160",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "noncacheable",
+    "device_type": "producer",
+    "egress": {
+      "node1": "1ms",
+      "node5": "1ms"
+    }
+  },
+  "node4": {
+    "X": "160",
+    "Y": "280",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "asn",
+    "egress": {
+      "node2": "1ms",
+      "node6": "1ms"
+    }
+  },
+  "node5": {
+    "X": "700",
+    "Y": "280",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node3": "1ms",
+      "node7": "1ms"
+    }
+  },
+  "node6": {
+    "X": "370",
+    "Y": "370",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node4": "1ms",
+      "node8": "1ms",
+      "node10": "1ms"
+    }
+  },
+  "node7": {
+    "X": "860",
+    "Y": "360",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node5": "1ms"
+    }
+  },
+  "node8": {
+    "X": "150",
+    "Y": "450",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms",
+      "node9": "1ms"
+    }
+  },
+  "node9": {
+    "X": "250",
+    "Y": "550",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node8": "1ms",
+      "node14": "1ms"
+    }
+  },
+  "node10": {
+    "X": "684",
+    "Y": "420",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node6": "1ms",
+      "node11": "1ms",
+      "node12": "1ms"
+    }
+  },
+  "node11": {
+    "X": "518",
+    "Y": "477",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node10": "1ms",
+      "node13": "1ms"
+    }
+  },
+  "node12": {
+    "X": "840",
+    "Y": "487",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node10": "1ms"
+    }
+  },
+  "node13": {
+    "X": "690",
+    "Y": "560",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "producer",
+    "egress": {
+      "node11": "1ms"
+    }
+  },
+  "node14": {
+    "X": "407",
+    "Y": "610",
+    "description": "producer",
+    "dns_like_id": "",
+    "max_cache_size": "4",
+    "max_payload_size": "0",
+    "cache_type": "lru_cache_size_aware_and_outgoings_aware",
+    "device_type": "asn",
+    "egress": {
+      "node9": "1ms"
+    }
+  }
+}

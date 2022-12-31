@@ -95,9 +95,13 @@ public class asnnode extends jicnsDeviceImpl {
     @Override
     public int getMsToReachNode(int nodeNumber, NodeUI[] list) {
         for (int i = 0; i < EGRESS.length; i++) {
-            if (EGRESS[i][0] == nodeNumber)
+            if (EGRESS[i][0] == nodeNumber) {
                 //return EGRESS[i][1]; // refer egress datastructre for more info , how values  are stored
+                //Eculdian Distance
                 return (int) Math.sqrt(Math.pow(list[nodeNumber].getX() - list[getNodeID()].getX(), 2) + Math.pow(list[nodeNumber].getY() - list[getNodeID()].getY(), 2));
+                //Manhattan Distance
+                //return (int) Math.abs(list[nodeNumber].getX() - list[getNodeID()].getX()) + Math.abs(list[nodeNumber].getY() - list[getNodeID()].getY());
+            }
         }
         return -1;
     }
