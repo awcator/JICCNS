@@ -99,7 +99,7 @@ public class frame extends JFrame implements ActionListener {
 
         searchNodes = new JTextField("search Nodes");
         searchNodes.addActionListener(this);
-        southpanel.setPreferredSize(new Dimension(getWidth(), (int) screenSize.getHeight() / 20));
+        //southpanel.setPreferredSize(new Dimension(getWidth(), (int) screenSize.getHeight() / 20));
         southpanel.add(writeMetrics);
         southpanel.add(reset);
         southpanel.add(randomize_nodes);
