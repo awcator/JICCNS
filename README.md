@@ -10,16 +10,16 @@ Java Information-centric Cache Network Simulator
 ![image](https://user-images.githubusercontent.com/54628909/204142824-8d5ca4e2-449f-47c9-af5d-946d082485dc.png)
 ![image](https://user-images.githubusercontent.com/54628909/204203183-58581b48-0f8e-4c3b-979f-23f7fd981999.png)
 
-# Cureent avialbel features
+# Cureent available features
 | Feature                        | Status    |
 |--------------------------------|-----------|
-| Random Cache Replacment Policy | Available |
+| Random Cache Replacement Policy | Available |
 | No Cache Node                  | Available |
 | TF-IDF based Node              | Available |
-| FIFO based replacment node     | Available |
+| FIFO-based replacement node     | Available |
 | Grafana Visulization support   | yes       |
 | MySQL Database support         | yes       |
-| content based brodcast         | yes       |
+| content based broadcast         | yes       |
 | requester path answering       | yes       |
 | NONBrodcastRouting             | yes       |
 | BrodcastRouting                | yes       |
@@ -27,7 +27,7 @@ Java Information-centric Cache Network Simulator
 | EuclidianDistanceBasedRouting  | yes       |
 
 # Disclaimer:
-It may/maynot 100% accuret to the Information centric network proposed.
+It may/may not be 100% accurate to the Information centric network proposed.
 
 # Future:
 Pull requests are welcome, I may not commit more changes in the future. Only if required on demand. Feel free to contact me
